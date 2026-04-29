@@ -1,0 +1,20 @@
+{
+  "name": "compound-agent-system",
+  "description": "Install and operate the Compound Agent System: task ledger, Definition of Done gates, multi-agent profiles, handoff checkpoints, and token-budget trigger adapter for Codex and Claude repositories.",
+  "category": "skills",
+  "author": {
+    "name": "Robin Westerlund",
+    "github": "local"
+  },
+  "version": "1.0.0",
+  "requires": {
+    "open_brain": false,
+    "services": [],
+    "tools": ["node"]
+  },
+  "tags": ["compound-agents", "dod", "handoff", "codex", "multi-agent"],
+  "difficulty": "advanced",
+  "estimated_time": "10 minutes",
+  "created": "2026-04-29",
+  "updated": "2026-04-29"
+}

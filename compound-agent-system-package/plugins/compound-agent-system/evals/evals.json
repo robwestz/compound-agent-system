@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "name": "package-structure",
+      "input": "Run validate-package.mjs at plugin root",
+      "expected": "All required plugin, skill, and system bundle files exist"
+    },
+    {
+      "name": "target-install",
+      "input": "Run install-compound-system.mjs --dry-run --target ./tmp-target",
+      "expected": "Script reports planned copies without mutating target"
+    },
+    {
+      "name": "activation-contract",
+      "input": "Read SKILL.md and references/activation.md",
+      "expected": "Agent can state install, activate, status, and ack commands"
+    }
+  ]
+}

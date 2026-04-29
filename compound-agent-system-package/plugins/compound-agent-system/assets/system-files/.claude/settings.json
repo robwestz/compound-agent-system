@@ -1,0 +1,38 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .agents/task.mjs hook session-start",
+            "_compound": "compound-protocol"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .agents/task.mjs hook pre-edit",
+            "_compound": "compound-protocol"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .agents/task.mjs hook stop",
+            "_compound": "compound-protocol"
+          }
+        ]
+      }
+    ]
+  }
+}

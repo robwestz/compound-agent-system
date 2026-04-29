@@ -1,0 +1,103 @@
+{
+  "schema_version": "handoff-contract.v1",
+  "checkpoint_id": "cp-20260428T075548Z-t-001",
+  "created_at": "2026-04-28T07:55:48.710Z",
+  "trigger": {
+    "type": "manual"
+  },
+  "from_agent": {
+    "id": "codex-gpt-5-codex"
+  },
+  "to_agent": {
+    "target": "claude",
+    "expected_format": "Claude Code startup prompt"
+  },
+  "task": {
+    "id": "t-001",
+    "goal": "Live Handoff Bridge v1",
+    "state": "parked",
+    "skills": [
+      "agent-framework",
+      "harness-engineering",
+      "memory-systems",
+      "advanced-evaluation"
+    ],
+    "dod": [
+      {
+        "check": "artifact",
+        "path": "handoff-bridge.mjs",
+        "passed_at": "2026-04-27T21:27:54.025Z"
+      },
+      {
+        "check": "artifact",
+        "path": "schemas/handoff-contract.v1.json",
+        "passed_at": "2026-04-27T21:27:54.026Z"
+      },
+      {
+        "check": "test",
+        "command": "node --test tests\\node-runtime.test.mjs",
+        "passed_at": "2026-04-27T21:27:55.001Z"
+      },
+      {
+        "check": "test",
+        "command": "node --test tests\\handoff-bridge.test.mjs",
+        "passed_at": "2026-04-27T21:27:55.554Z"
+      },
+      {
+        "check": "test",
+        "command": "node tests\\handoff-roundtrip-sim.mjs",
+        "passed_at": "2026-04-27T21:27:55.838Z"
+      },
+      {
+        "check": "manual",
+        "description": "Robin confirms an actual Codex-to-Claude roundtrip",
+        "passed_at": null
+      }
+    ]
+  },
+  "context_summary": "Codex resumed after the planning-with-files stop hook, updated planning files, fixed two Live Handoff Bridge cleanup edge cases, and verified the focused bridge and token-budget tests. Remaining gates are Robin manual confirmations for t-001 and t-002.",
+  "completed": [
+    "Updated task_plan.md to Phase 6 and synced progress/findings",
+    "Fixed from_agent default to prefer task.agent before last active ledger agent",
+    "Fixed writeCheckpoint so parked explicit tasks do not become current when no task is active",
+    "Added regression tests for both bridge edge cases"
+  ],
+  "pending": [
+    "Robin manual confirmation for t-001 roundtrip DoD",
+    "Robin manual review for t-002 85% threshold and +-15% heuristic accuracy",
+    "Existing ledger still has current t-001 from prior checkpoint; do not treat parked current as active work"
+  ],
+  "current_files": [
+    "handoff-bridge.mjs",
+    "tests/handoff-bridge.test.mjs",
+    "task_plan.md",
+    "progress.md",
+    "findings.md"
+  ],
+  "decisions": [
+    "Use codex-ack-claude-roundtrip-v2 as canonical roundtrip proof; earlier non-v2 checkpoint has wrong from_agent",
+    "Future checkpoints should either pass --from explicitly or rely on task.agent fallback"
+  ],
+  "risks": [
+    "node --test worker spawning still fails with spawn EPERM in this host shell; direct node:test file execution is the verified fallback",
+    "The existing ledger current pointer was not manually rewritten in this turn"
+  ],
+  "commands_run": [
+    "Heroku Node direct tests/handoff-bridge.test.mjs passed 7/7",
+    "Heroku Node tests/handoff-roundtrip-sim.mjs passed",
+    "Heroku Node direct tests/token-budget.test.mjs passed 18/18",
+    "Heroku Node tests/token-budget-trigger-sim.mjs passed with 2.94% variance"
+  ],
+  "verification": [
+    "handoff-bridge verify passed for codex-ack-claude-roundtrip-v2.handoff.json"
+  ],
+  "ledger": {
+    "task_path": ".agents/TASKS.json",
+    "task_current": "t-001",
+    "task_updated_at": "2026-04-27T21:54:44.569Z"
+  },
+  "safety": {
+    "shareable": true,
+    "redactions": []
+  }
+}

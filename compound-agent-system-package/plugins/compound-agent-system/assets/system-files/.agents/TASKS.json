@@ -1,0 +1,543 @@
+{
+  "version": "1",
+  "schema_url": ".agents/PROTOCOL.md",
+  "current": null,
+  "tasks": [
+    {
+      "id": "t-001",
+      "goal": "Live Handoff Bridge v1",
+      "state": "parked",
+      "dod": [
+        {
+          "check": "artifact",
+          "path": "handoff-bridge.mjs",
+          "passed_at": "2026-04-27T21:27:54.025Z",
+          "artifact_size": 14936
+        },
+        {
+          "check": "artifact",
+          "path": "schemas/handoff-contract.v1.json",
+          "passed_at": "2026-04-27T21:27:54.026Z",
+          "artifact_size": 3736
+        },
+        {
+          "check": "test",
+          "command": "node --test tests\\node-runtime.test.mjs",
+          "passed_at": "2026-04-27T21:27:55.001Z"
+        },
+        {
+          "check": "test",
+          "command": "node --test tests\\handoff-bridge.test.mjs",
+          "passed_at": "2026-04-27T21:27:55.554Z"
+        },
+        {
+          "check": "test",
+          "command": "node tests\\handoff-roundtrip-sim.mjs",
+          "passed_at": "2026-04-27T21:27:55.838Z"
+        },
+        {
+          "check": "manual",
+          "description": "Robin confirms an actual Codex-to-Claude roundtrip",
+          "passed_at": null,
+          "last_failure": {
+            "ts": "2026-04-27T21:27:55.860Z",
+            "ok": false,
+            "confirmer": "Robin"
+          }
+        }
+      ],
+      "skills": [
+        "agent-framework",
+        "harness-engineering",
+        "memory-systems",
+        "advanced-evaluation"
+      ],
+      "blocked_by": null,
+      "unlock_command": null,
+      "park_reason": "t-001 remains parked awaiting Robin manual roundtrip confirmation; clearing stale current pointer after bridge cleanup fix.",
+      "parent": null,
+      "agent": "codex-gpt-5-codex",
+      "started_at": "2026-04-27T19:54:22.448Z",
+      "updated_at": "2026-04-28T08:00:49.205Z",
+      "dod_removed": [
+        {
+          "check": {
+            "check": "test",
+            "command": "& 'C:\\Program Files\\heroku\\client\\bin\\node.exe' --test tests/handoff-bridge.test.mjs",
+            "passed_at": null
+          },
+          "reason": "Replace PowerShell-specific call syntax with shell-portable quoted executable path",
+          "ts": "2026-04-27T20:00:19.414Z"
+        },
+        {
+          "check": {
+            "check": "test",
+            "command": "& 'C:\\Program Files\\heroku\\client\\bin\\node.exe' tests/handoff-roundtrip-sim.mjs",
+            "passed_at": null
+          },
+          "reason": "Replace PowerShell-specific call syntax with shell-portable quoted executable path",
+          "ts": "2026-04-27T20:00:49.817Z"
+        },
+        {
+          "check": {
+            "check": "manual",
+            "description": "Robin bekräftar en faktisk CodexClaude roundtrip",
+            "passed_at": null
+          },
+          "reason": "Run automatic artifact and test DoD before manual Robin confirmation",
+          "ts": "2026-04-27T20:01:29.450Z"
+        },
+        {
+          "check": {
+            "check": "test",
+            "command": "\"C:\\Program Files\\heroku\\client\\bin\\node.exe\" tests\\handoff-roundtrip-sim.mjs",
+            "passed_at": null
+          },
+          "reason": "Replace host-specific node path with Compound runtime resolver",
+          "ts": "2026-04-27T20:48:10.437Z"
+        },
+        {
+          "check": {
+            "check": "test",
+            "command": "\"C:\\Program Files\\heroku\\client\\bin\\node.exe\" --test tests\\handoff-bridge.test.mjs",
+            "passed_at": null
+          },
+          "reason": "Replace host-specific node path with Compound runtime resolver",
+          "ts": "2026-04-27T20:48:26.605Z"
+        },
+        {
+          "check": {
+            "check": "manual",
+            "description": "Robin confirms an actual Codex-to-Claude roundtrip",
+            "passed_at": null
+          },
+          "reason": "Keep manual confirmation after automatic runtime and bridge checks",
+          "ts": "2026-04-27T20:48:36.408Z"
+        }
+      ],
+      "handoffs": [
+        {
+          "checkpoint_id": "cp-20260427T200834Z-t-001",
+          "path": ".omc/state/checkpoints/codex-to-claude-live.handoff.json",
+          "to": "claude",
+          "trigger": "manual",
+          "created_at": "2026-04-27T20:08:34.000Z"
+        },
+        {
+          "checkpoint_id": "cp-20260427T205034Z-t-001",
+          "path": ".omc/state/checkpoints/codex-to-claude-live-v2.handoff.json",
+          "to": "claude",
+          "trigger": "manual",
+          "created_at": "2026-04-27T20:50:34.153Z"
+        },
+        {
+          "checkpoint_id": "cp-20260427T212054Z-t-001",
+          "path": ".omc/state/checkpoints/claude-to-codex-roundtrip-proof.handoff.json",
+          "to": "codex",
+          "trigger": "manual",
+          "created_at": "2026-04-27T21:20:54.328Z"
+        },
+        {
+          "checkpoint_id": "cp-20260427T215305Z-t-001",
+          "path": ".omc/state/checkpoints/codex-ack-claude-roundtrip.handoff.json",
+          "to": "claude",
+          "trigger": "manual",
+          "created_at": "2026-04-27T21:53:05.514Z"
+        },
+        {
+          "checkpoint_id": "cp-20260427T215444Z-t-001",
+          "path": ".omc/state/checkpoints/codex-ack-claude-roundtrip-v2.handoff.json",
+          "to": "claude",
+          "trigger": "manual",
+          "created_at": "2026-04-27T21:54:44.569Z"
+        },
+        {
+          "checkpoint_id": "cp-20260428T075548Z-t-001",
+          "path": ".omc/state/checkpoints/codex-bridge-cleanup-v3.handoff.json",
+          "to": "claude",
+          "trigger": "manual",
+          "created_at": "2026-04-28T07:55:48.710Z"
+        },
+        {
+          "checkpoint_id": "cp-20260428T080049Z-t-001",
+          "path": ".omc/state/checkpoints/codex-phase6-manual-gates-v4.handoff.json",
+          "to": "claude",
+          "trigger": "manual",
+          "created_at": "2026-04-28T08:00:49.205Z"
+        }
+      ],
+      "last_handoff": {
+        "checkpoint_id": "cp-20260428T080049Z-t-001",
+        "path": ".omc/state/checkpoints/codex-phase6-manual-gates-v4.handoff.json",
+        "to": "claude",
+        "trigger": "manual",
+        "created_at": "2026-04-28T08:00:49.205Z"
+      }
+    },
+    {
+      "id": "t-002",
+      "goal": "Token Budget Tracker — heuristic detector + handoff-bridge adapter",
+      "state": "parked",
+      "dod": [
+        {
+          "check": "artifact",
+          "path": "lib/token-budget.mjs",
+          "passed_at": "2026-04-27T21:51:38.166Z",
+          "artifact_size": 4382
+        },
+        {
+          "check": "test",
+          "command": "node --test tests/token-budget.test.mjs",
+          "passed_at": "2026-04-27T21:51:39.000Z"
+        },
+        {
+          "check": "test",
+          "command": "node tests/token-budget-trigger-sim.mjs",
+          "passed_at": "2026-04-27T21:51:39.497Z"
+        },
+        {
+          "check": "manual",
+          "description": "Robin reviews default threshold (85% used) and confirms heuristic accuracy ±15% acceptable for v1",
+          "passed_at": null,
+          "last_failure": {
+            "ts": "2026-04-27T21:51:39.507Z",
+            "ok": false,
+            "confirmer": "Robin"
+          }
+        }
+      ],
+      "skills": [
+        "harness-engineering",
+        "agent-framework",
+        "continuous-agent-loop",
+        "advanced-evaluation"
+      ],
+      "blocked_by": null,
+      "unlock_command": null,
+      "park_reason": "3/4 auto-DoD verified by Claude (lib/token-budget.mjs exists, both tests green, sim ran with 2.94% variance well within 5% allowed). Manual DoD awaits Robin's review of default 85% threshold + ±15% heuristic accuracy acceptance.",
+      "parent": null,
+      "agent": "claude-opus-4.7",
+      "started_at": "2026-04-27T21:28:16.742Z",
+      "updated_at": "2026-04-27T21:51:39.949Z"
+    },
+    {
+      "id": "t-003",
+      "goal": "Repo cleanup report — Claude side for cross-review with Codex",
+      "state": "parked",
+      "dod": [
+        {
+          "check": "artifact",
+          "path": "CLEANUP_REPORT_CLAUDE.md",
+          "passed_at": "2026-04-28T21:21:48.401Z",
+          "artifact_size": 6834
+        },
+        {
+          "check": "manual",
+          "description": "Robin reviews report and decides which proposals to act on",
+          "passed_at": null,
+          "last_failure": {
+            "ts": "2026-04-28T21:21:48.414Z",
+            "ok": false,
+            "confirmer": "Robin"
+          }
+        }
+      ],
+      "skills": [
+        "harness-engineering",
+        "agent-framework"
+      ],
+      "blocked_by": null,
+      "unlock_command": null,
+      "park_reason": "Artifact DoD verified (CLEANUP_REPORT_CLAUDE.md exists). Awaiting Robin review + cross-feed of Codex's report.",
+      "parent": null,
+      "agent": "claude-opus-4-7-resume",
+      "started_at": "2026-04-28T19:13:37.001Z",
+      "updated_at": "2026-04-28T21:21:59.226Z"
+    },
+    {
+      "id": "t-004",
+      "goal": "Reciprocal cleanup report — Claude → Codex per Codex's prompt",
+      "state": "parked",
+      "dod": [
+        {
+          "check": "artifact",
+          "path": "CLAUDE_REPO_CLEANUP_REPORT_FOR_CODEX.md",
+          "passed_at": null
+        },
+        {
+          "check": "manual",
+          "description": "Robin reviews and decides next cleanup commit",
+          "passed_at": null
+        }
+      ],
+      "skills": [
+        "harness-engineering",
+        "agent-framework"
+      ],
+      "blocked_by": null,
+      "unlock_command": null,
+      "park_reason": "Artifact written (CLAUDE_REPO_CLEANUP_REPORT_FOR_CODEX.md, all 7 required sections). Awaiting Robin review + Codex acceptance/disagreement before any cleanup implementation.",
+      "parent": null,
+      "agent": "claude-opus-4-7-resume",
+      "started_at": "2026-04-29T14:12:39.493Z",
+      "updated_at": "2026-04-29T14:17:40.210Z"
+    }
+  ],
+  "agents_active": [
+    "codex-gpt-5-codex",
+    "claude-opus-4.7",
+    "claude-opus-4-7-resume"
+  ],
+  "log": [
+    {
+      "ts": "2026-04-27T19:54:01.219Z",
+      "event": "ack",
+      "task": null,
+      "agent": "codex-gpt-5-codex"
+    },
+    {
+      "ts": "2026-04-27T19:54:22.450Z",
+      "event": "open",
+      "task": "t-001",
+      "agent": "codex-gpt-5-codex",
+      "goal": "Live Handoff Bridge v1"
+    },
+    {
+      "ts": "2026-04-27T20:00:19.417Z",
+      "event": "remove-dod",
+      "task": "t-001",
+      "agent": "codex-gpt-5-codex",
+      "reason": "Replace PowerShell-specific call syntax with shell-portable quoted executable path",
+      "removed": {
+        "check": "test",
+        "command": "& 'C:\\Program Files\\heroku\\client\\bin\\node.exe' --test tests/handoff-bridge.test.mjs",
+        "passed_at": null
+      }
+    },
+    {
+      "ts": "2026-04-27T20:00:49.819Z",
+      "event": "remove-dod",
+      "task": "t-001",
+      "agent": "codex-gpt-5-codex",
+      "reason": "Replace PowerShell-specific call syntax with shell-portable quoted executable path",
+      "removed": {
+        "check": "test",
+        "command": "& 'C:\\Program Files\\heroku\\client\\bin\\node.exe' tests/handoff-roundtrip-sim.mjs",
+        "passed_at": null
+      }
+    },
+    {
+      "ts": "2026-04-27T20:01:29.453Z",
+      "event": "remove-dod",
+      "task": "t-001",
+      "agent": "codex-gpt-5-codex",
+      "reason": "Run automatic artifact and test DoD before manual Robin confirmation",
+      "removed": {
+        "check": "manual",
+        "description": "Robin bekräftar en faktisk CodexClaude roundtrip",
+        "passed_at": null
+      }
+    },
+    {
+      "ts": "2026-04-27T20:08:34.000Z",
+      "event": "handoff-checkpoint",
+      "task": "t-001",
+      "agent": "codex-gpt-5-codex",
+      "checkpoint_id": "cp-20260427T200834Z-t-001",
+      "to": "claude",
+      "path": ".omc/state/checkpoints/codex-to-claude-live.handoff.json"
+    },
+    {
+      "ts": "2026-04-27T20:48:10.439Z",
+      "event": "remove-dod",
+      "task": "t-001",
+      "agent": "codex-gpt-5-codex",
+      "reason": "Replace host-specific node path with Compound runtime resolver",
+      "removed": {
+        "check": "test",
+        "command": "\"C:\\Program Files\\heroku\\client\\bin\\node.exe\" tests\\handoff-roundtrip-sim.mjs",
+        "passed_at": null
+      }
+    },
+    {
+      "ts": "2026-04-27T20:48:26.606Z",
+      "event": "remove-dod",
+      "task": "t-001",
+      "agent": "codex-gpt-5-codex",
+      "reason": "Replace host-specific node path with Compound runtime resolver",
+      "removed": {
+        "check": "test",
+        "command": "\"C:\\Program Files\\heroku\\client\\bin\\node.exe\" --test tests\\handoff-bridge.test.mjs",
+        "passed_at": null
+      }
+    },
+    {
+      "ts": "2026-04-27T20:48:36.410Z",
+      "event": "remove-dod",
+      "task": "t-001",
+      "agent": "codex-gpt-5-codex",
+      "reason": "Keep manual confirmation after automatic runtime and bridge checks",
+      "removed": {
+        "check": "manual",
+        "description": "Robin confirms an actual Codex-to-Claude roundtrip",
+        "passed_at": null
+      }
+    },
+    {
+      "ts": "2026-04-27T20:50:34.153Z",
+      "event": "handoff-checkpoint",
+      "task": "t-001",
+      "agent": "codex-gpt-5-codex",
+      "checkpoint_id": "cp-20260427T205034Z-t-001",
+      "to": "claude",
+      "path": ".omc/state/checkpoints/codex-to-claude-live-v2.handoff.json"
+    },
+    {
+      "ts": "2026-04-27T21:20:54.328Z",
+      "event": "handoff-checkpoint",
+      "task": "t-001",
+      "agent": "codex-gpt-5-codex",
+      "checkpoint_id": "cp-20260427T212054Z-t-001",
+      "to": "codex",
+      "path": ".omc/state/checkpoints/claude-to-codex-roundtrip-proof.handoff.json"
+    },
+    {
+      "ts": "2026-04-27T21:27:53.752Z",
+      "event": "ack",
+      "task": null,
+      "agent": "claude-opus-4.7"
+    },
+    {
+      "ts": "2026-04-27T21:27:55.860Z",
+      "event": "verify",
+      "task": "t-001",
+      "agent": "codex-gpt-5-codex",
+      "allPass": false
+    },
+    {
+      "ts": "2026-04-27T21:27:56.232Z",
+      "event": "park",
+      "task": "t-001",
+      "agent": "codex-gpt-5-codex",
+      "reason": "5/6 auto-DoD verified by Claude. Manual DoD awaits Codex bidirectional pickup of .omc/state/checkpoints/claude-to-codex-roundtrip-proof.RESUME.md and Robin confirmation. Roundtrip artifacts exist on disk; closure is async."
+    },
+    {
+      "ts": "2026-04-27T21:28:16.743Z",
+      "event": "open",
+      "task": "t-002",
+      "agent": "claude-opus-4.7",
+      "goal": "Token Budget Tracker — heuristic detector + handoff-bridge adapter"
+    },
+    {
+      "ts": "2026-04-27T21:51:14.898Z",
+      "event": "ack",
+      "task": null,
+      "agent": "codex-gpt-5-codex"
+    },
+    {
+      "ts": "2026-04-27T21:51:39.508Z",
+      "event": "verify",
+      "task": "t-002",
+      "agent": "claude-opus-4.7",
+      "allPass": false
+    },
+    {
+      "ts": "2026-04-27T21:51:39.955Z",
+      "event": "park",
+      "task": "t-002",
+      "agent": "claude-opus-4.7",
+      "reason": "3/4 auto-DoD verified by Claude (lib/token-budget.mjs exists, both tests green, sim ran with 2.94% variance well within 5% allowed). Manual DoD awaits Robin's review of default 85% threshold + ±15% heuristic accuracy acceptance."
+    },
+    {
+      "ts": "2026-04-27T21:53:05.514Z",
+      "event": "handoff-checkpoint",
+      "task": "t-001",
+      "agent": "claude-opus-4.7",
+      "checkpoint_id": "cp-20260427T215305Z-t-001",
+      "to": "claude",
+      "path": ".omc/state/checkpoints/codex-ack-claude-roundtrip.handoff.json"
+    },
+    {
+      "ts": "2026-04-27T21:54:24.262Z",
+      "event": "park",
+      "task": "t-001",
+      "agent": "codex-gpt-5-codex",
+      "reason": "t-001 remains parked awaiting Robin manual roundtrip confirmation; clearing current pointer before corrected Codex-origin checkpoint."
+    },
+    {
+      "ts": "2026-04-27T21:54:44.569Z",
+      "event": "handoff-checkpoint",
+      "task": "t-001",
+      "agent": "codex-gpt-5-codex",
+      "checkpoint_id": "cp-20260427T215444Z-t-001",
+      "to": "claude",
+      "path": ".omc/state/checkpoints/codex-ack-claude-roundtrip-v2.handoff.json"
+    },
+    {
+      "ts": "2026-04-28T07:55:48.710Z",
+      "event": "handoff-checkpoint",
+      "task": "t-001",
+      "agent": "codex-gpt-5-codex",
+      "checkpoint_id": "cp-20260428T075548Z-t-001",
+      "to": "claude",
+      "path": ".omc/state/checkpoints/codex-bridge-cleanup-v3.handoff.json"
+    },
+    {
+      "ts": "2026-04-28T07:59:16.483Z",
+      "event": "park",
+      "task": "t-001",
+      "agent": "codex-gpt-5-codex",
+      "reason": "t-001 remains parked awaiting Robin manual roundtrip confirmation; clearing stale current pointer after bridge cleanup fix."
+    },
+    {
+      "ts": "2026-04-28T08:00:49.205Z",
+      "event": "handoff-checkpoint",
+      "task": "t-001",
+      "agent": "codex-gpt-5-codex",
+      "checkpoint_id": "cp-20260428T080049Z-t-001",
+      "to": "claude",
+      "path": ".omc/state/checkpoints/codex-phase6-manual-gates-v4.handoff.json"
+    },
+    {
+      "ts": "2026-04-28T19:05:33.744Z",
+      "event": "ack",
+      "task": null,
+      "agent": "claude-opus-4-7-resume"
+    },
+    {
+      "ts": "2026-04-28T19:13:37.003Z",
+      "event": "open",
+      "task": "t-003",
+      "agent": "claude-opus-4-7-resume",
+      "goal": "Repo cleanup report — Claude side for cross-review with Codex"
+    },
+    {
+      "ts": "2026-04-28T21:21:48.415Z",
+      "event": "verify",
+      "task": "t-003",
+      "agent": "claude-opus-4-7-resume",
+      "allPass": false
+    },
+    {
+      "ts": "2026-04-28T21:21:59.230Z",
+      "event": "park",
+      "task": "t-003",
+      "agent": "claude-opus-4-7-resume",
+      "reason": "Artifact DoD verified (CLEANUP_REPORT_CLAUDE.md exists). Awaiting Robin review + cross-feed of Codex's report."
+    },
+    {
+      "ts": "2026-04-29T14:12:39.495Z",
+      "event": "open",
+      "task": "t-004",
+      "agent": "claude-opus-4-7-resume",
+      "goal": "Reciprocal cleanup report — Claude → Codex per Codex's prompt"
+    },
+    {
+      "ts": "2026-04-29T14:17:40.212Z",
+      "event": "park",
+      "task": "t-004",
+      "agent": "claude-opus-4-7-resume",
+      "reason": "Artifact written (CLAUDE_REPO_CLEANUP_REPORT_FOR_CODEX.md, all 7 required sections). Awaiting Robin review + Codex acceptance/disagreement before any cleanup implementation."
+    }
+  ]
+}

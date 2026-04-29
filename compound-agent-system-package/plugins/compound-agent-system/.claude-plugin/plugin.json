@@ -1,0 +1,23 @@
+{
+  "name": "compound-agent-system",
+  "version": "1.0.0",
+  "description": "Claude Code compatible workspace harness for activating the Compound Agent System: task ledger, DoD gates, handoff bridge, agent profiles, and portable verification assets.",
+  "author": {
+    "name": "Robin Westerlund",
+    "email": "analys@camjo.se",
+    "url": "https://buildr.nu"
+  },
+  "homepage": "https://buildr.nu",
+  "repository": "local",
+  "license": "MIT",
+  "keywords": [
+    "compound-agents",
+    "definition-of-done",
+    "handoff",
+    "claude",
+    "codex",
+    "workspace-harness",
+    "multi-agent"
+  ],
+  "category": "productivity"
+}

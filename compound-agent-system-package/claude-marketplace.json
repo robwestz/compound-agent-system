@@ -1,0 +1,22 @@
+{
+  "name": "compound-agent-system",
+  "owner": {
+    "name": "Robin Westerlund",
+    "email": "analys@camjo.se"
+  },
+  "metadata": {
+    "description": "Local Claude Code marketplace entry for the Compound Agent System workspace harness."
+  },
+  "plugins": [
+    {
+      "name": "compound-agent-system",
+      "source": "./plugins/compound-agent-system",
+      "description": "Workspace harness for task ledger, DoD gates, handoff bridge, agent profiles, and portable verification.",
+      "author": {
+        "name": "Robin Westerlund",
+        "email": "analys@camjo.se"
+      },
+      "category": "productivity"
+    }
+  ]
+}

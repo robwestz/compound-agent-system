@@ -1,0 +1,41 @@
+{
+  "name": "compound-agent-system",
+  "version": "1.0.0",
+  "description": "Codex compatible workspace harness for activating the Compound Agent System: task ledger, DoD gates, handoff bridge, agent profiles, and portable verification assets.",
+  "author": {
+    "name": "Robin Westerlund",
+    "email": "analys@camjo.se",
+    "url": "https://buildr.nu"
+  },
+  "homepage": "https://buildr.nu",
+  "repository": "local",
+  "license": "MIT",
+  "keywords": [
+    "compound-agents",
+    "definition-of-done",
+    "handoff",
+    "codex",
+    "claude",
+    "workspace-harness",
+    "multi-agent"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Compound Agent System",
+    "shortDescription": "Activate task ledger, DoD gates, handoff bridge, and agent profiles.",
+    "longDescription": "A repo-portable workspace harness bundle. It installs the Compound Protocol files into a target repository, then guides agents through task activation, Definition of Done verification, token-budget handoff, and multi-agent profile usage.",
+    "developerName": "Robin Westerlund",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write",
+      "Automation"
+    ],
+    "defaultPrompt": [
+      "Activate Compound Protocol in this repo.",
+      "Open a task with DoD gates and verify it.",
+      "Create a handoff checkpoint for another agent."
+    ],
+    "brandColor": "#2563EB"
+  }
+}
