@@ -1,11 +1,17 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const repoRoot = resolve(here, "..");
 const ledgerPath = process.env.COMPOUND_TASKS_PATH || join(here, "TASKS.json");
+
+function workspaceRoot() {
+  const ledgerDir = dirname(resolve(ledgerPath));
+  if (basename(ledgerDir) === ".agents") return dirname(ledgerDir);
+  if (ledgerDir === here) return resolve(here, "..");
+  return ledgerDir;
+}
 
 function mode() {
   const explicit = String(process.env.COMPOUND_MODE || "").toLowerCase();
@@ -23,11 +29,35 @@ function latestLog(ledger, event) {
   return [...(ledger.log || [])].reverse().find((entry) => entry.event === event || String(entry.event || "").includes(event));
 }
 
+function fileExists(path) {
+  try {
+    return statSync(path).isFile();
+  } catch {
+    return false;
+  }
+}
+
+function checkpointFiles(dir) {
+  if (!existsSync(dir)) return [];
+  const found = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) found.push(...checkpointFiles(path));
+    else if (entry.isFile()) found.push(path);
+  }
+  return found;
+}
+
 function checkpoints(ledger) {
-  const fromTasks = (ledger.tasks || []).flatMap((task) => task.handoffs || []);
-  const dirs = [join(repoRoot, ".omc", "state", "checkpoints"), join(repoRoot, ".agents", "checkpoints")];
-  const fileExists = dirs.some((dir) => existsSync(dir));
-  return { count: fromTasks.length + (fileExists ? 1 : 0), fromTasks };
+  const root = workspaceRoot();
+  const fromTasks = (ledger.tasks || [])
+    .flatMap((task) => task.handoffs || [])
+    .map((handoff) => handoff.path ? resolve(root, handoff.path) : null)
+    .filter((path) => path && fileExists(path));
+  const dirs = [join(root, ".omc", "state", "checkpoints"), join(root, ".agents", "checkpoints")];
+  const files = dirs.flatMap(checkpointFiles);
+  const unique = new Set([...fromTasks, ...files]);
+  return { count: unique.size, fromTasks, files };
 }
 
 export function assessReadiness({ ledger = loadLedger(), complianceMode = mode() } = {}) {
