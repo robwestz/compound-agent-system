@@ -3,7 +3,7 @@
 ## Layer diagram
 
 ```text
-compound-agent-system-package/
+repo root/
 ├─ bootstrap.mjs
 ├─ manifest.json
 └─ plugins/compound-agent-system/
@@ -26,7 +26,7 @@ compound-agent-system-package/
       └─ tests/
 ```
 
-The package root exposes the one-command bootstrap and metadata. The plugin shell contains Claude/Codex manifests, command wrappers, scripts, and the system-files payload copied into target repositories. The payload contains the actual harness runtime.
+The repository root exposes the one-command bootstrap and metadata. The plugin shell contains Claude/Codex manifests, command wrappers, scripts, and the system-files payload copied into target repositories. The payload contains the actual harness runtime.
 
 ## Data flow
 

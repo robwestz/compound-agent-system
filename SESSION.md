@@ -6,7 +6,7 @@ Package the Compound Agent System as a repo-portable workspace harness for repos
 This is not part of the ECC Browser main build plan. It is a separate session artifact that can be copied, installed, or handed to another agent when a target repo needs the same operating system: skills, DoD rules, task ledger, handoff bridge, agent profiles, and verification assets.
 
 ## Status
-- Package folder: `out/compound-agent-system-package`
+- Package folder: repository root
 - Plugin root: `plugins/compound-agent-system`
 - Codex manifest: `plugins/compound-agent-system/.codex-plugin/plugin.json`
 - Claude manifest: `plugins/compound-agent-system/.claude-plugin/plugin.json`
