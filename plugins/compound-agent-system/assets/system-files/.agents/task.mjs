@@ -3,7 +3,7 @@
 // Zero runtime dependencies. Node 18+.
 // See .agents/PROTOCOL.md, .agents/DOD.md, .agents/SKILL_SELECT.md, .agents/PLAN_MARKERS.md
 
-import { readFileSync, writeFileSync, existsSync, statSync, renameSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, statSync, renameSync, mkdirSync, unlinkSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -48,6 +48,10 @@ function emitHook(mode, msg) {
 
 function groundedPath() {
   return join(dirname(TASKS_PATH), ".grounded");
+}
+
+function resetGrounding() {
+  if (existsSync(groundedPath())) unlinkSync(groundedPath());
 }
 
 function factForceMessage() {
@@ -548,6 +552,17 @@ function parseInlineAttrs(s) {
   return out;
 }
 
+function uniquePhases(phases) {
+  const seen = new Set();
+  const unique = [];
+  for (const phase of phases) {
+    if (!phase.id || seen.has(phase.id)) continue;
+    seen.add(phase.id);
+    unique.push(phase);
+  }
+  return unique;
+}
+
 function cmdImport(args) {
   const file = args._[1];
   if (!file) throw new Error("Usage: task.mjs import <plan-file> [--apply]");
@@ -567,7 +582,7 @@ function cmdImport(args) {
       phases.push(phase);
     }
   }
-  phases = phases.concat(parseInlineMarkers(content));
+  phases = uniquePhases(phases.concat(parseInlineMarkers(content)));
   const ledger = loadLedger();
   const existing = new Set(ledger.tasks.map((t) => t.id));
   const toAdd = phases.filter((p) => !existing.has(p.id));
@@ -598,6 +613,7 @@ function cmdImport(args) {
 // ----- Hook handlers -----
 
 function hookSessionStart() {
+  resetGrounding();
   const ledger = loadLedger();
   const cur = ledger.current ? findTask(ledger, ledger.current) : null;
   const open = ledger.tasks.filter((t) => t.state === "in_progress" || t.state === "open").length;

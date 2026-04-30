@@ -4,7 +4,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, writeFileSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, writeFileSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -302,6 +302,37 @@ test("import inline markers", () => {
   }
 });
 
+test("import deduplicates phases found in frontmatter and inline markers", () => {
+  const { ledger, dir } = freshLedger();
+  try {
+    const plan = join(dir, "plan.md");
+    writeFileSync(
+      plan,
+      [
+        "---",
+        "compound: active",
+        "phases:",
+        "  - id: phase-1-foundation",
+        "    goal: \"Foundation\"",
+        "    dod:",
+        "      - check: test",
+        "        command: \"echo ok\"",
+        "---",
+        "",
+        "[COMPOUND-PHASE id=phase-1-foundation goal=\"Foundation\" dod=\"test:echo ok\"]",
+      ].join("\n")
+    );
+    const r = run(ledger, ["import", plan, "--apply"]);
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stdout, /Imported 1 task/);
+    const data = readLedger(ledger);
+    assert.equal(data.tasks.length, 1);
+    assert.equal(data.tasks[0].id, "phase-1-foundation");
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
 test("import dry-run does not write", () => {
   const { ledger, dir } = freshLedger();
   try {
@@ -392,6 +423,23 @@ test("state-changing command succeeds after grounding", () => {
     const r = run(ledger, ["ack", "claude-opus-4.7"], { COMPOUND_MODE: "enforce", COMPOUND_GROUNDED: "Repository: robwestz/compound-agent-system" });
     assert.equal(r.status, 0, r.stderr);
     assert.match(r.stdout, /signed in/);
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
+test("session-start resets persisted grounding", () => {
+  const { ledger, dir } = freshLedger();
+  try {
+    const first = run(ledger, ["ack", "claude-opus-4.7"], { COMPOUND_MODE: "enforce", COMPOUND_GROUNDED: "Repository: robwestz/compound-agent-system" });
+    assert.equal(first.status, 0, first.stderr);
+    assert.equal(existsSync(join(dir, ".grounded")), true);
+    const start = run(ledger, ["hook", "session-start"], { COMPOUND_MODE: "enforce", COMPOUND_GROUNDED: "" });
+    assert.equal(start.status, 0, start.stderr);
+    assert.equal(existsSync(join(dir, ".grounded")), false);
+    const second = run(ledger, ["ack", "codex-test"], { COMPOUND_MODE: "enforce", COMPOUND_GROUNDED: "" });
+    assert.equal(second.status, 2);
+    assert.match(second.stderr, /Fact-Forcing Gate/);
   } finally {
     rmSync(dir, { recursive: true });
   }
