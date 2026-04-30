@@ -5,7 +5,7 @@ This package is a Claude/Codex plugin for autonomous project-start. It installs 
 ## Directory layout
 
 ```text
-compound-agent-system-package/
+repo root/
 ├─ bootstrap.mjs
 ├─ manifest.json
 ├─ compound-agent-system-product-upgrade-spec.md
@@ -28,7 +28,7 @@ compound-agent-system-package/
 
 ## Tests
 
-Run package system-file tests from the package root:
+Run package system-file tests from the repository root:
 
 ```bash
 node --test plugins/compound-agent-system/assets/system-files/tests/*.test.mjs
