@@ -36,11 +36,27 @@ function run(path, mode = "enforce") {
 test("ready scenario reports READY", () => {
   const dir = mkdtempSync(join(tmpdir(), "readiness-ready-"));
   try {
+    mkdirSync(join(dir, ".omc", "state", "checkpoints"), { recursive: true });
+    writeFileSync(join(dir, ".omc", "state", "checkpoints", "cp-1.json"), "{}");
     const path = makeLedger(dir);
     const r = run(path, "enforce");
     assert.equal(r.status, 0, r.stderr);
     assert.match(r.stdout, /Long-session readiness: READY/);
     assert.match(r.stdout, /unattended safe: yes/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("empty checkpoint directory does not satisfy readiness", () => {
+  const dir = mkdtempSync(join(tmpdir(), "readiness-empty-checkpoint-"));
+  try {
+    mkdirSync(join(dir, ".omc", "state", "checkpoints"), { recursive: true });
+    const path = makeLedger(dir, { tasks: [{ id: "t-001", goal: "Phase 1", state: "in_progress", dod: [{ check: "test", command: "echo ok" }], blocked_by: [], handoffs: [] }] });
+    const r = run(path, "enforce");
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stdout, /Long-session readiness: NOT_READY/);
+    assert.match(r.stdout, /handoff checkpoint: missing/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
