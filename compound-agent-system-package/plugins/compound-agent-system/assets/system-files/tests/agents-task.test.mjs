@@ -61,6 +61,46 @@ test("ack records agent identity", () => {
   }
 });
 
+
+test("agent activation normalizes alias identity fields", () => {
+  const { ledger, dir } = freshLedger();
+  try {
+    const agentActivate = join(REPO_ROOT, ".agents", "agent-activate.mjs");
+    const r = spawnSync(process.execPath, [agentActivate, "--id", "claude-opus-4.7", "--role", "planner", "--display-name", "Claude Planner"], {
+      cwd: dir,
+      encoding: "utf-8",
+      env: { ...process.env, COMPOUND_TASKS_PATH: ledger },
+    });
+    assert.equal(r.status, 0, r.stderr);
+    const data = readLedger(ledger);
+    assert.equal(data.agent_profiles["claude-opus-4.7"].client, "claude");
+    assert.equal(data.agent_profiles["claude-opus-4.7"].model, "opus-4.7");
+    assert.equal(data.agent_profiles["claude-opus-4.7"].role, "planner");
+    assert.equal(data.agent_profiles["claude-opus-4.7"].display_name, "Claude Planner");
+    assert.ok(data.agent_profiles["claude-opus-4.7"].session_id);
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
+test("task ack and status display normalized identity fields", () => {
+  const { ledger, dir } = freshLedger();
+  try {
+    const r = run(ledger, ["ack", "claude-opus-4.7", "--role", "reviewer"]);
+    assert.equal(r.status, 0, r.stderr);
+    const data = readLedger(ledger);
+    assert.equal(data.agent_profiles["claude-opus-4.7"].client, "claude");
+    assert.equal(data.agent_profiles["claude-opus-4.7"].model, "opus-4.7");
+    assert.ok(data.agent_profiles["claude-opus-4.7"].session_id);
+    assert.match(r.stdout, /client=claude/);
+    assert.match(r.stdout, /model=opus-4\.7/);
+    assert.match(r.stdout, /role=reviewer/);
+    assert.match(r.stdout, /session_id=/);
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
 test("open requires --dod or --qa", () => {
   const { ledger, dir } = freshLedger();
   try {
@@ -315,6 +355,89 @@ test("update adds skill and dod", () => {
     const data = readLedger(ledger);
     assert.deepEqual(data.tasks[0].skills, ["added-skill"]);
     assert.equal(data.tasks[0].dod.length, 2);
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
+
+
+test("fact-forcing gate explains why for state-changing commands", () => {
+  const { ledger, dir } = freshLedger();
+  try {
+    const r = run(ledger, ["ack", "claude-opus-4.7"], { COMPOUND_MODE: "enforce", COMPOUND_GROUNDED: "" });
+    assert.equal(r.status, 2);
+    assert.match(r.stderr, /Fact-Forcing Gate/);
+    assert.match(r.stderr, /prevents agents from acting on stale or assumed context/);
+    assert.match(r.stderr, /COMPOUND_GROUNDED/);
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
+test("read-only commands pass without grounding in enforce mode", () => {
+  const { ledger, dir } = freshLedger();
+  try {
+    const r = run(ledger, ["status"], { COMPOUND_MODE: "enforce", COMPOUND_GROUNDED: "" });
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stdout, /Compound Protocol Ledger/);
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
+test("state-changing command succeeds after grounding", () => {
+  const { ledger, dir } = freshLedger();
+  try {
+    const r = run(ledger, ["ack", "claude-opus-4.7"], { COMPOUND_MODE: "enforce", COMPOUND_GROUNDED: "Repository: robwestz/compound-agent-system" });
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stdout, /signed in/);
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
+test("observe mode logs but does not block pre-edit hook", () => {
+  const { ledger, dir } = freshLedger();
+  try {
+    const r = run(ledger, ["hook", "pre-edit"], { COMPOUND_MODE: "observe" });
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stdout, /compound_mode":"observe/);
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
+test("warn mode warns but does not block pre-edit hook", () => {
+  const { ledger, dir } = freshLedger();
+  try {
+    const r = run(ledger, ["hook", "pre-edit"], { COMPOUND_MODE: "warn" });
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stdout, /No in_progress task/);
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
+test("enforce mode blocks pre-edit hook", () => {
+  const { ledger, dir } = freshLedger();
+  try {
+    const r = run(ledger, ["hook", "pre-edit"], { COMPOUND_MODE: "enforce" });
+    assert.equal(r.status, 2);
+    assert.match(r.stderr, /No in_progress task/);
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
+test("status output includes compliance level", () => {
+  const { ledger, dir } = freshLedger();
+  try {
+    const r = run(ledger, ["status"], { COMPOUND_MODE: "observe" });
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stdout, /Compliance level/);
+    assert.match(r.stdout, /mode: observe/);
+    assert.match(r.stdout, /recommended switch point/);
   } finally {
     rmSync(dir, { recursive: true });
   }
