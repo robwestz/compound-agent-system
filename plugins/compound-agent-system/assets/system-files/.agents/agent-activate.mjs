@@ -1,19 +1,22 @@
 #!/usr/bin/env node
 // .agents/agent-activate.mjs - sign an agent into the Compound ledger.
-// Usage: node .agents/agent-activate.mjs --id <agent-id> [--role <role>] [--skill <skill>...]
+// Usage: node .agents/agent-activate.mjs --id <agent-id> [--client <client>] [--model <model>] [--display-name <name>] [--role <role>] [--skill <skill>...]
 
 import { readFileSync, writeFileSync, existsSync, renameSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const ledgerPath = join(here, "TASKS.json");
+const ledgerPath = process.env.COMPOUND_TASKS_PATH || join(here, "TASKS.json");
 
 function parseArgs(argv) {
   const args = { skills: [] };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--id") args.id = argv[++i];
+    else if (a === "--client") args.client = argv[++i];
+    else if (a === "--model") args.model = argv[++i];
+    else if (a === "--display-name") args.displayName = argv[++i];
     else if (a === "--role") args.role = argv[++i];
     else if (a === "--skill") args.skills.push(argv[++i]);
     else if (a === "--help" || a === "-h") args.help = true;
@@ -40,10 +43,42 @@ function saveLedger(ledger) {
   renameSync(tmp, ledgerPath);
 }
 
+function normalizeIdentity(args, existing = {}) {
+  let client = args.client || existing.client || "agent";
+  let model = args.model || existing.model || "unspecified";
+  const alias = String(args.id || "").toLowerCase();
+  const m = /^(claude|codex|devin|cursor|gpt)-(.+)$/.exec(alias);
+  if (!args.client && !args.model && m) {
+    client = m[1] === "gpt" ? "codex" : m[1];
+    model = m[2];
+  }
+  const sessionId = existing.session_id || `${new Date().toISOString().replace(/[:.]/g, "-")}-${Math.random().toString(36).slice(2, 8)}`;
+  return {
+    id: args.id,
+    client,
+    model,
+    role: args.role || existing.role || "agent",
+    display_name: args.displayName || existing.display_name || `${client} ${model}`.trim(),
+    session_id: sessionId,
+    skills: args.skills.length ? args.skills : existing.skills || [],
+    activated_at: new Date().toISOString(),
+  };
+}
+
+function printFirstSessionTemplate(profile) {
+  console.log("Compound Agent System is active.");
+  console.log("");
+  console.log(`System: installed, ledger ready, mode ${(process.env.COMPOUND_MODE || (process.env.COMPOUND_ENFORCE === "1" ? "enforce" : "warn")).toUpperCase()}.`);
+  console.log(`Agent: ${profile.display_name} signed in as ${profile.role}.`);
+  console.log("Next: send a raw idea or a full project brief.");
+  console.log("");
+  console.log("I will create an intake task, run GAP SCAN, propose defaults, assign agent roles, and prepare importable phase tasks with DoD.");
+}
+
 function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help || !args.id) {
-    console.log("Usage: node .agents/agent-activate.mjs --id <agent-id> [--role <role>] [--skill <skill>...]");
+    console.log("Usage: node .agents/agent-activate.mjs --id <agent-id> [--client <client>] [--model <model>] [--display-name <name>] [--role <role>] [--skill <skill>...]");
     console.log("");
     console.log("Activation means the agent is registered in .agents/TASKS.json before it opens or resumes work.");
     return args.help ? undefined : process.exit(1);
@@ -51,19 +86,15 @@ function main() {
 
   const ledger = loadLedger();
   if (!ledger.agents_active.includes(args.id)) ledger.agents_active.push(args.id);
-  ledger.agent_profiles[args.id] = {
-    id: args.id,
-    role: args.role || ledger.agent_profiles[args.id]?.role || "agent",
-    skills: args.skills.length ? args.skills : ledger.agent_profiles[args.id]?.skills || [],
-    activated_at: new Date().toISOString(),
-  };
-  ledger.log.push({ ts: new Date().toISOString(), event: "agent-activate", task: null, agent: args.id, role: ledger.agent_profiles[args.id].role });
+  const profile = normalizeIdentity(args, ledger.agent_profiles[args.id]);
+  ledger.agent_profiles[args.id] = profile;
+  ledger.log.push({ ts: new Date().toISOString(), event: "agent-activate", task: null, agent: args.id, identity: profile });
   saveLedger(ledger);
 
-  console.log(`Agent activated: ${args.id}`);
-  console.log(`Role: ${ledger.agent_profiles[args.id].role}`);
-  if (ledger.agent_profiles[args.id].skills.length) console.log(`Skills: ${ledger.agent_profiles[args.id].skills.join(", ")}`);
-  console.log("Next: node .agents/task.mjs status");
+  printFirstSessionTemplate(profile);
+  console.log("");
+  console.log(`Identity: id=${profile.id} client=${profile.client} model=${profile.model} role=${profile.role} session_id=${profile.session_id}`);
+  if (profile.skills.length) console.log(`Skills: ${profile.skills.join(", ")}`);
 }
 
 main();

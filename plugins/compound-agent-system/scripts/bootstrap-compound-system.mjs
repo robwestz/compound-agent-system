@@ -61,6 +61,7 @@ function main() {
 
   if (args.dryRun) {
     console.log("\nDry-run complete. No target files were changed.");
+    console.log(`Review install plan: ${join(targetRoot, "compound-install-plan.json")}`);
     return;
   }
 
@@ -85,9 +86,14 @@ function main() {
 
   run(process.execPath, [join(targetRoot, ".agents", "task.mjs"), "status"], { cwd: targetRoot });
 
-  console.log("\nBootstrap complete.");
-  console.log("Next project-start command:");
-  console.log('  node .agents/task.mjs open "<project goal>" --dod "manual:<first acceptance gate>" --skill <skill-id>');
+  const mode = process.env.COMPOUND_MODE || (process.env.COMPOUND_ENFORCE === "1" ? "enforce" : "warn");
+  console.log("\nCompound Agent System is active.");
+  console.log("");
+  console.log(`System: installed, ledger ready, mode ${mode.toUpperCase()}.`);
+  console.log(`Agent: ${args.agentId ? `${args.agentId} signed in` : "not signed in"}${args.role ? ` as ${args.role}` : ""}.`);
+  console.log("Next: send a raw idea or a full project brief.");
+  console.log("");
+  console.log("I will create an intake task, run GAP SCAN, propose defaults, assign agent roles, and prepare importable phase tasks with DoD.");
 }
 
 main();

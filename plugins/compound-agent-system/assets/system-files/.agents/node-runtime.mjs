@@ -136,12 +136,15 @@ export function runPortableNodeCommand(command, options = {}) {
   const parsed = parseNodeCommand(command);
   if (!parsed) return null;
   const runtime = resolveNodeRuntime(options);
+  const childEnv = { ...(options.env || process.env), NO_COLOR: "1", FORCE_COLOR: "0" };
   const result = spawnSync(runtime.executable, parsed.args, {
     cwd: options.cwd || process.cwd(),
-    env: options.env || process.env,
+    env: childEnv,
     encoding: "utf-8",
     stdio: "pipe",
   });
+  if (typeof result.stdout === "string") result.stdout = result.stdout.replace(/\x1B\[[0-9;]*m/g, "");
+  if (typeof result.stderr === "string") result.stderr = result.stderr.replace(/\x1B\[[0-9;]*m/g, "");
   result.portableNodeRuntime = runtime;
   return result;
 }

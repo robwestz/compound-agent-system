@@ -89,10 +89,20 @@ function main() {
   console.log("Installed hooks:");
   for (const ev of Object.keys(HOOKS_TO_INSTALL)) console.log(`  - ${ev}: node .agents/task.mjs hook ...`);
   console.log("");
-  console.log("Mode: " + (process.env.COMPOUND_ENFORCE === "1" ? "ENFORCE (block on violation)" : "WARN (advisory)"));
-  console.log("To enable enforcement: export COMPOUND_ENFORCE=1");
+  const mode = process.env.COMPOUND_MODE || (process.env.COMPOUND_ENFORCE === "1" ? "enforce" : "warn");
+  console.log("Compliance level: " + mode.toUpperCase());
+  console.log("Observe: log only; Warn: warn but do not block; Enforce: block invalid state-changing actions.");
+  console.log("To enable enforcement: export COMPOUND_MODE=enforce");
+  console.log("Recommended switch point: after the first smoke test passes, before unattended execution.");
   console.log("");
-  console.log("Next: read .agents/PROTOCOL.md, then `node .agents/task.mjs ack <your-agent-id>`");
+  console.log("");
+  console.log("Compound Agent System is active.");
+  console.log("");
+  console.log(`System: installed, ledger ready, mode ${mode.toUpperCase()}.`);
+  console.log("Agent: not signed in.");
+  console.log("Next: run `node .agents/agent-activate.mjs --id <agent-id>`, then send a raw idea or full project brief.");
+  console.log("");
+  console.log("I will create an intake task, run GAP SCAN, propose defaults, assign agent roles, and prepare importable phase tasks with DoD.");
 }
 
 main();

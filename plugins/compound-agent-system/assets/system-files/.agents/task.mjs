@@ -21,6 +21,57 @@ const c = (color, s) => `${COLORS[color]}${s}${COLORS.reset}`;
 
 const nowISO = () => new Date().toISOString();
 
+function complianceMode() {
+  const mode = String(process.env.COMPOUND_MODE || "").toLowerCase();
+  if (["observe", "warn", "enforce"].includes(mode)) return mode;
+  if (process.env.COMPOUND_ENFORCE === "1") return "enforce";
+  return "warn";
+}
+
+function complianceInfo() {
+  const mode = complianceMode();
+  return {
+    mode,
+    blocks: mode === "enforce" ? "state-changing actions without task/grounding" : "nothing",
+    does_not_block: mode === "observe" ? "all actions; logs only" : mode === "warn" ? "actions after warning" : "read-only commands",
+    switch: "export COMPOUND_MODE=enforce",
+    recommended: "Switch after the first smoke test passes and before unattended execution.",
+  };
+}
+
+function emitHook(mode, msg) {
+  if (mode === "enforce") { console.error(msg); process.exit(2); }
+  const payload = { hookSpecificOutput: { hookEventName: "PreToolUse", additionalContext: msg }, compound_mode: mode };
+  console.log(JSON.stringify(payload));
+  process.exit(0);
+}
+
+function groundedPath() {
+  return join(dirname(TASKS_PATH), ".grounded");
+}
+
+function factForceMessage() {
+  return "[Fact-Forcing Gate] First state-changing action in this session requires grounding in the user's exact instruction. " +
+    "This prevents agents from acting on stale or assumed context. Quote the current instruction verbatim, set COMPOUND_GROUNDED to that quote, then retry.";
+}
+
+function requireGrounding(command) {
+  const stateChanging = new Set(["ack", "open", "park", "resume", "block", "abandon", "update", "done", "verify", "import", "register"]);
+  if (!stateChanging.has(command)) return;
+  if (process.env.COMPOUND_GROUNDED || existsSync(groundedPath())) {
+    if (process.env.COMPOUND_GROUNDED) writeFileSync(groundedPath(), JSON.stringify({ grounded_at: nowISO(), quote: process.env.COMPOUND_GROUNDED }, null, 2) + "\n");
+    return;
+  }
+  const mode = complianceMode();
+  if (mode === "observe") {
+    console.log(JSON.stringify({ ok: true, gate: "fact-forcing", mode, message: factForceMessage() }));
+    return;
+  }
+  const msg = factForceMessage();
+  if (mode === "enforce") { console.error(msg); process.exit(2); }
+  console.warn(msg);
+}
+
 function loadLedger() {
   if (!existsSync(TASKS_PATH)) {
     return { version: "1", schema_url: ".agents/PROTOCOL.md", current: null, tasks: [], agents_active: [], log: [] };
@@ -115,6 +166,19 @@ function cmdStatus() {
     console.log(c("dim", "No current task. Use: task.mjs open \"<goal>\" --dod \"<type>:<value>\""));
   }
   console.log(`Open: ${open}  Blocked: ${blocked}  Parked: ${parked}  Total: ${ledger.tasks.length}`);
+  if (ledger.agent_profiles && Object.keys(ledger.agent_profiles).length) {
+    console.log("Agents:");
+    for (const profile of Object.values(ledger.agent_profiles)) {
+      console.log(`  ${profile.id}: client=${profile.client || "unknown"} model=${profile.model || "unspecified"} role=${profile.role || "agent"} session_id=${profile.session_id || "unknown"}`);
+    }
+  }
+  const compliance = complianceInfo();
+  console.log("Compliance level:");
+  console.log(`  mode: ${compliance.mode}`);
+  console.log(`  blocks: ${compliance.blocks}`);
+  console.log(`  does not block: ${compliance.does_not_block}`);
+  console.log(`  switch: ${compliance.switch}`);
+  console.log(`  recommended switch point: ${compliance.recommended}`);
   if (blocked > 0) {
     console.log(c("yellow", "Blocked tasks:"));
     for (const t of ledger.tasks.filter((t) => t.state === "blocked")) {
@@ -128,14 +192,39 @@ function cmdCurrent() {
   process.stdout.write(ledger.current || "");
 }
 
+function normalizeIdentity(agentId, args, existing = {}) {
+  let client = args.client || existing.client || "agent";
+  let model = args.model || existing.model || "unspecified";
+  const alias = String(agentId || "").toLowerCase();
+  const m = /^(claude|codex|devin|cursor|gpt)-(.+)$/.exec(alias);
+  if (!args.client && !args.model && m) {
+    client = m[1] === "gpt" ? "codex" : m[1];
+    model = m[2];
+  }
+  return {
+    id: agentId,
+    client,
+    model,
+    role: args.role || existing.role || "agent",
+    display_name: args["display-name"] || args.displayName || existing.display_name || `${client} ${model}`.trim(),
+    session_id: existing.session_id || `${nowISO().replace(/[:.]/g, "-")}-${Math.random().toString(36).slice(2, 8)}`,
+    skills: args.skill?.length ? args.skill : existing.skills || [],
+    activated_at: nowISO(),
+  };
+}
+
 function cmdAck(args) {
   const agentId = args._[1];
   if (!agentId) throw new Error("Usage: task.mjs ack <agent-id>");
   const ledger = loadLedger();
+  if (!ledger.agent_profiles || typeof ledger.agent_profiles !== "object") ledger.agent_profiles = {};
   if (!ledger.agents_active.includes(agentId)) ledger.agents_active.push(agentId);
-  appendLog(ledger, "ack", null, agentId);
+  const profile = normalizeIdentity(agentId, args, ledger.agent_profiles[agentId]);
+  ledger.agent_profiles[agentId] = profile;
+  appendLog(ledger, "ack", null, agentId, { identity: profile });
   saveLedger(ledger);
   console.log(c("green", `✓ Agent "${agentId}" signed in.`));
+  console.log(`Identity: client=${profile.client} model=${profile.model} role=${profile.role} session_id=${profile.session_id}`);
   cmdStatus();
 }
 
@@ -520,14 +609,13 @@ function hookSessionStart() {
 }
 
 function hookPreEdit() {
-  const enforce = process.env.COMPOUND_ENFORCE === "1";
+  const mode = complianceMode();
   const ledger = loadLedger();
   const cur = ledger.current ? findTask(ledger, ledger.current) : null;
   if (cur && cur.state === "in_progress") { process.exit(0); }
   const msg = "[Compound Protocol] No in_progress task. Open one before editing:\n" +
     "  node .agents/task.mjs open \"<goal>\" --dod \"<type>:<value>\" --skill <id>";
-  if (enforce) { console.error(msg); process.exit(2); }
-  console.log(JSON.stringify({ hookSpecificOutput: { hookEventName: "PreToolUse", additionalContext: msg } }));
+  emitHook(mode, msg);
 }
 
 function hookStop() {
@@ -568,6 +656,7 @@ async function main() {
   const cmd = args._[0];
   try {
     if (!cmd || cmd === "help" || cmd === "--help" || cmd === "-h") { console.log(HELP); return; }
+    requireGrounding(cmd);
     if (cmd === "status") return cmdStatus();
     if (cmd === "current") return cmdCurrent();
     if (cmd === "ack") return cmdAck(args);

@@ -45,7 +45,7 @@ Bootstrap means:
 - copy the harness files into the target repo
 - run `.agents/activate.mjs` to install hooks and initialize the ledger
 - optionally run `.agents/agent-activate.mjs --id <agent-id>`
-- print ledger status and the first project task command
+- print ledger status and the first idea-intake next action
 
 If activation should be separate:
 
@@ -86,6 +86,60 @@ For Claude marketplace installation, stage it first and then run in Claude Code:
 /plugin marketplace add C:\Users\<you>\.claude\plugins\marketplaces\compound-agent-system
 /plugin install compound-agent-system@compound-agent-system
 ```
+
+
+## Compliance modes: observe, warn, enforce
+
+The installed harness reads `COMPOUND_MODE=observe|warn|enforce`. `observe` logs structured guidance and never blocks. `warn` is the default: it warns but exits 0. `enforce` blocks invalid state-changing actions with exit code 2. The legacy `COMPOUND_ENFORCE=1` still maps to enforce. Switch to enforce after the first smoke test passes and before unattended multi-hour execution.
+
+## Identity model
+
+Agent identity separates client, model, role, ledger id, session id, and display name. For example, `claude-opus-4.7` normalizes to client `claude` and model `opus-4.7`; role remains a separate field such as `planner`, `executor`, `reviewer`, or `verifier`. Status output displays these fields separately for auditability.
+
+## Idea intake
+
+After installation, use idea intake instead of opening implementation work directly:
+
+```powershell
+node .agents\idea-intake.mjs --input fixtures\ideas\simple-idea.md --apply
+node .agents\task.mjs status
+```
+
+Idea intake immediately creates an intake/planning task, records the original idea text, runs deterministic GAP SCAN, proposes recommended defaults, assigns planner/executor/reviewer/verifier roles, and writes Phase 0 artifacts. Blocker questions do not prevent the intake task from opening; implementation tasks wait for accepted scope.
+
+Generated planning output must pass `.agents/check-output-quality.mjs` before it is treated as an artifact.
+
+## Phase 0 plan artifacts
+
+Idea intake writes these standard artifacts under `phase-0/`:
+
+- `PROJECT_BRIEF.md`
+- `GAP_SCAN.md`
+- `DECISIONS.md`
+- `PHASE_PLAN.md`
+- `OPEN_QUESTIONS.md`
+- `AGENT_ROLES.md`
+- `DOD_MATRIX.md`
+
+`PHASE_PLAN.md` contains `compound: active` frontmatter and `[COMPOUND-PHASE]` markers so it can be imported with:
+
+```powershell
+node .agents\task.mjs import phase-0\PHASE_PLAN.md --apply
+```
+
+## Fact-Forcing Gate
+
+The first state-changing action in a session requires grounding in the user's exact instruction. Set `COMPOUND_GROUNDED` to a verbatim quote before retrying. This prevents agents from acting on stale or assumed context. Read-only commands such as `status`, `list`, `show`, and `current` do not require grounding.
+
+## Long-session readiness
+
+Before unattended execution, run:
+
+```powershell
+node .agents\session-readiness.mjs
+```
+
+The command reports READY or NOT_READY, checks active task/DoD/current phase/context refresh/compound register/blockers/pending questions/handoff checkpoint/compliance mode, and prints unlock steps when the session is not safe to continue unattended.
 
 ## Curation Notes
 
