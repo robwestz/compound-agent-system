@@ -50,7 +50,7 @@
     },
     {
       "path": ".agents/task.mjs",
-      "bytes": 41975
+      "bytes": 42183
     },
     {
       "path": ".claude/commands/add-new-workspace-or-prototype.md",
@@ -298,7 +298,7 @@
     },
     {
       "path": "tests/agents-task.test.mjs",
-      "bytes": 18637
+      "bytes": 18641
     },
     {
       "path": "tests/assemble.test.mjs",

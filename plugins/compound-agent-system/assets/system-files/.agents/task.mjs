@@ -351,7 +351,11 @@ function securityBoundaryStatus() {
     fixture_secrets: fixtureSecrets,
     next_action: docs.security_model && docs.secrets_ai_policy && fixtureSecrets.ok
       ? "No security boundary action required."
-      : "Add docs/security-boundary-model.md and docs/secrets-and-ai-policy.md, then remove any fixture secret findings.",
+      : [
+          !docs.security_model ? "Add docs/security-boundary-model.md." : "",
+          !docs.secrets_ai_policy ? "Add docs/secrets-and-ai-policy.md." : "",
+          !fixtureSecrets.ok ? "Remove real-looking secrets from fixtures or replace them with documented placeholders." : "",
+        ].filter(Boolean).join(" "),
   };
 }
 

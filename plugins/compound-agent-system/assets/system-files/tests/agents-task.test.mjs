@@ -412,7 +412,7 @@ test("doctor is read-only without grounding and reports security next action", (
     const r = run(ledger, ["doctor"], { COMPOUND_MODE: "enforce", COMPOUND_GROUNDED: "" });
     assert.equal(r.status, 0, r.stderr);
     assert.match(r.stdout, /Compound doctor:/);
-    assert.match(r.stdout, /Add docs\/security-boundary-model.md and docs\/secrets-and-ai-policy.md/);
+    assert.match(r.stdout, /Add docs\/security-boundary-model.md\. Add docs\/secrets-and-ai-policy.md\./);
   } finally {
     rmSync(dir, { recursive: true });
   }

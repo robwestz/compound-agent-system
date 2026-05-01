@@ -102,8 +102,25 @@ test("doctor reports fixture secret findings with a recovery action", () => {
     assert.equal(r.status, 0, r.stderr);
     const report = parseDoctor(r.stdout);
     assert.equal(report.checks.security.ok, false);
+    assert.equal(report.checks.security.next_action, "Remove real-looking secrets from fixtures or replace them with documented placeholders.");
     assert.match(report.checks.security.fixture_secrets.next_action, /Remove real-looking secrets/);
     assert.equal(report.checks.security.fixture_secrets.findings[0].type, "groq-key");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("doctor security next_action only names missing docs", () => {
+  const { dir, ledger } = workspace();
+  try {
+    mkdirSync(join(dir, "docs"), { recursive: true });
+    writeFileSync(join(dir, "docs", "security-boundary-model.md"), "# Security Boundary Model\n");
+    writeLedger(ledger, { version: "1", schema_url: ".agents/PROTOCOL.md", current: null, tasks: [], agents_active: [], log: [] });
+    const r = run(ledger, ["doctor"]);
+    assert.equal(r.status, 0, r.stderr);
+    const report = parseDoctor(r.stdout);
+    assert.equal(report.checks.security.ok, false);
+    assert.equal(report.checks.security.next_action, "Add docs/secrets-and-ai-policy.md.");
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
