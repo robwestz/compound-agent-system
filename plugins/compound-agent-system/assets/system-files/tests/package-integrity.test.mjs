@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, cpSync, rmSync, unlinkSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -20,10 +20,22 @@ function cloneRepo() {
   cpSync(REPO_ROOT, dir, {
     recursive: true,
     dereference: true,
-    filter: (src) => !src.includes(`${join(REPO_ROOT, ".git")}`),
+    filter: (src) => {
+      const gitDir = join(REPO_ROOT, ".git");
+      return !(src === gitDir || src.startsWith(gitDir + sep));
+    },
   });
   return dir;
 }
+
+test("cloneRepo preserves root dot-git-prefixed metadata files", () => {
+  const clone = cloneRepo();
+  try {
+    assert.equal(existsSync(join(clone, ".gitignore")), existsSync(join(REPO_ROOT, ".gitignore")));
+  } finally {
+    rmSync(clone, { recursive: true, force: true });
+  }
+});
 
 test("package validator reports payload size and passes current manifest", () => {
   const r = runValidator();

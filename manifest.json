@@ -318,7 +318,7 @@
     },
     {
       "path": "tests/package-integrity.test.mjs",
-      "bytes": 3538
+      "bytes": 3903
     },
     {
       "path": "tests/token-budget-trigger-sim.mjs",
