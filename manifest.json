@@ -278,7 +278,7 @@
     },
     {
       "path": "handoff-bridge.mjs",
-      "bytes": 23691
+      "bytes": 23861
     },
     {
       "path": "lib/token-budget.mjs",
@@ -310,7 +310,7 @@
     },
     {
       "path": "tests/handoff-bridge.test.mjs",
-      "bytes": 12645
+      "bytes": 12754
     },
     {
       "path": "tests/handoff-roundtrip-sim.mjs",

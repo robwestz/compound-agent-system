@@ -306,6 +306,9 @@ export function validateHandoff(contract) {
     for (const field of ["completed_chunks", "pending_decisions", "artifacts", "risks", "resume_commands", "commands_run", "verification"]) {
       if (!Array.isArray(contract?.[field])) errors.push(`${field} must be an array.`);
     }
+    if (Array.isArray(contract?.resume_commands) && contract.resume_commands.length === 0) {
+      errors.push("resume_commands must contain at least one entry.");
+    }
     for (const [index, chunk] of (contract?.completed_chunks || []).entries()) {
       if (!chunk.id || !chunk.summary) errors.push(`completed_chunks[${index}] requires id and summary.`);
     }

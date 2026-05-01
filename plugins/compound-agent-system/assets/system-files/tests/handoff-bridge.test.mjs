@@ -100,6 +100,7 @@ test("validateHandoff rejects missing required v2 fields", () => {
     const validation = validateHandoff(contract);
     assert.equal(validation.ok, false);
     assert.ok(validation.errors.some((err) => /task_state\.goal/.test(err)));
+    assert.ok(validation.errors.some((err) => /resume_commands must contain at least one entry/.test(err)));
     assert.ok(validation.errors.some((err) => /artifacts\[/.test(err)));
   } finally {
     rmSync(dir, { recursive: true, force: true });
