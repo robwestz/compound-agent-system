@@ -33,6 +33,7 @@ const required = [
   "assets/system-files/.agents/task.mjs",
   "assets/system-files/.agents/activate.mjs",
   "assets/system-files/.agents/agent-activate.mjs",
+  "assets/system-files/.agents/first-session-wizard.mjs",
   "assets/system-files/.codex/config.toml",
   "assets/system-files/handoff-bridge.mjs",
   "assets/system-files/lib/token-budget.mjs",

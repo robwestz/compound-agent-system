@@ -249,11 +249,7 @@ function main() {
   console.log(`\nCompound system install ${args.dryRun ? "dry-run" : "complete"}: ${plan.files_to_create.length + plan.files_to_modify.length} copied, ${plan.files_to_skip.length} skipped.`);
   console.log(`Install plan: ${planPath(targetRoot)}`);
   if (plan.warnings.length) console.log(`Warnings: ${plan.warnings.length} (review high_impact root writes before applying).`);
-  console.log("Next:");
-  console.log("  node .agents/activate.mjs");
-  console.log("  node .agents/agent-activate.mjs --id <agent-id>");
-  console.log("  node .agents/task.mjs status");
-  console.log("  node .agents/idea-intake.mjs --input <idea-file> --apply");
+  console.log("Next: node .agents/activate.mjs");
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) main();

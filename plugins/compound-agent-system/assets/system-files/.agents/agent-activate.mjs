@@ -5,6 +5,7 @@
 import { readFileSync, writeFileSync, existsSync, renameSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { printFirstSessionWizard } from "./first-session-wizard.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const ledgerPath = process.env.COMPOUND_TASKS_PATH || join(here, "TASKS.json");
@@ -65,16 +66,6 @@ function normalizeIdentity(args, existing = {}) {
   };
 }
 
-function printFirstSessionTemplate(profile) {
-  console.log("Compound Agent System is active.");
-  console.log("");
-  console.log(`System: installed, ledger ready, mode ${(process.env.COMPOUND_MODE || (process.env.COMPOUND_ENFORCE === "1" ? "enforce" : "warn")).toUpperCase()}.`);
-  console.log(`Agent: ${profile.display_name} signed in as ${profile.role}.`);
-  console.log("Next: send a raw idea or a full project brief.");
-  console.log("");
-  console.log("I will create an intake task, run GAP SCAN, propose defaults, assign agent roles, and prepare importable phase tasks with DoD.");
-}
-
 function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help || !args.id) {
@@ -91,7 +82,7 @@ function main() {
   ledger.log.push({ ts: new Date().toISOString(), event: "agent-activate", task: null, agent: args.id, identity: profile });
   saveLedger(ledger);
 
-  printFirstSessionTemplate(profile);
+  printFirstSessionWizard({ ledger });
   console.log("");
   console.log(`Identity: id=${profile.id} client=${profile.client} model=${profile.model} role=${profile.role} session_id=${profile.session_id}`);
   if (profile.skills.length) console.log(`Skills: ${profile.skills.join(", ")}`);
