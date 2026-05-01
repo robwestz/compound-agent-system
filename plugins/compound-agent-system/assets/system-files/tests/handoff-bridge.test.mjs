@@ -1,8 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { spawnSync } from "node:child_process";
 
 import {
   buildResumePrompt,
@@ -181,6 +182,44 @@ test("writeCheckpoint writes handoff JSON and persists pointer in TASKS ledger",
     assert.equal(ledger.tasks[0].last_handoff.to, "claude");
     assert.equal(ledger.tasks[0].last_handoff.schema_version, "handoff-contract.v2");
     assert.equal(ledger.log.at(-1).event, "handoff-checkpoint");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("checkpoint CLI accepts documented --from-agent flag", () => {
+  const { dir, ledgerPath } = tempWorkspace();
+  try {
+    const cliPath = join(dir, "handoff-bridge.mjs");
+    const ledgerDir = join(dir, ".agents");
+    mkdirSync(ledgerDir, { recursive: true });
+    writeFileSync(cliPath, readFileSync(join(import.meta.dirname, "..", "handoff-bridge.mjs")));
+    writeFileSync(join(ledgerDir, "TASKS.json"), readFileSync(ledgerPath));
+    const out = join(dir, "checkpoint.json");
+    const result = spawnSync(
+      process.execPath,
+      [
+        cliPath,
+        "checkpoint",
+        "--task",
+        "t-001",
+        "--from-agent",
+        "codex-gpt-5-codex",
+        "--summary",
+        "safe summary",
+        "--out",
+        out,
+      ],
+      {
+        cwd: dir,
+        env: { ...process.env, COMPOUND_AGENT_ID: "" },
+        encoding: "utf8",
+      }
+    );
+
+    assert.equal(result.status, 0, result.stderr);
+    const contract = JSON.parse(readFileSync(out, "utf-8"));
+    assert.equal(contract.from_agent.id, "codex-gpt-5-codex");
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

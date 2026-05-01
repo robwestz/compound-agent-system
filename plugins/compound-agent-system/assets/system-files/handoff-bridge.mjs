@@ -572,7 +572,7 @@ async function main() {
         commands: args.command,
         verification: args.verification,
         out: args.out,
-        from: args.fromAgent || args.from,
+        from: args["from-agent"] || args.from,
         runtime: args.runtime,
       });
       console.log(`checkpoint: ${result.contract.checkpoint_id}`);
