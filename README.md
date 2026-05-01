@@ -129,6 +129,10 @@ node .agents\task.mjs import phase-0\PHASE_PLAN.md --apply
 
 The generated plan is idea-derived: short, medium, and long idea fixtures should produce different 3–6 phase plans. Each plan includes a `first_vertical_slice`, expected artifacts, DoD checks, proceed-without-user status, and phase-linked planner/executor/reviewer/verifier role ownership.
 
+## Premium production roadmap
+
+The premium-production hardening catalog lives in `docs/premium-production/`. It breaks the remaining commercial-readiness work into small task files with DoD, constraints, quality bar, dependencies, skill guidance, and implementer/evaluator feedback-loop expectations. Use that catalog before starting broad hardening work so the core plugin stays focused and optional workflows can remain skills, docs/playbooks, external workbench work, or test-only assets.
+
 ## Fact-Forcing Gate
 
 The first state-changing action in a session requires grounding in the user's exact instruction. Set `COMPOUND_GROUNDED` to a verbatim quote before retrying. This prevents agents from acting on stale or assumed context. Read-only commands such as `status`, `list`, `show`, and `current` do not require grounding.
