@@ -9,24 +9,12 @@
   "bootstrap": "bootstrap.mjs",
   "system_files": [
     {
-      "path": ".agents/activate.mjs",
-      "bytes": 3677
-    },
-    {
       "path": ".agents/COMPOUND.md",
       "bytes": 8721
     },
     {
       "path": ".agents/DOD.md",
       "bytes": 4328
-    },
-    {
-      "path": ".agents/first-session-wizard.mjs",
-      "bytes": 5442
-    },
-    {
-      "path": ".agents/node-runtime.mjs",
-      "bytes": 5166
     },
     {
       "path": ".agents/PLAN_MARKERS.md",
@@ -41,20 +29,32 @@
       "bytes": 4148
     },
     {
-      "path": ".agents/skills/SkiLLBuilDr/agents/openai.yaml",
-      "bytes": 277
+      "path": ".agents/TASKS.json",
+      "bytes": 20703
+    },
+    {
+      "path": ".agents/activate.mjs",
+      "bytes": 3677
+    },
+    {
+      "path": ".agents/first-session-wizard.mjs",
+      "bytes": 5442
+    },
+    {
+      "path": ".agents/node-runtime.mjs",
+      "bytes": 5166
     },
     {
       "path": ".agents/skills/SkiLLBuilDr/SKILL.md",
       "bytes": 3651
     },
     {
-      "path": ".agents/task.mjs",
-      "bytes": 42183
+      "path": ".agents/skills/SkiLLBuilDr/agents/openai.yaml",
+      "bytes": 277
     },
     {
-      "path": ".agents/TASKS.json",
-      "bytes": 20703
+      "path": ".agents/task.mjs",
+      "bytes": 42183
     },
     {
       "path": ".claude/commands/add-new-workspace-or-prototype.md",
@@ -81,16 +81,16 @@
       "bytes": 752
     },
     {
+      "path": ".claude/skills/SkiLLBuilDr/SKILL.md",
+      "bytes": 3651
+    },
+    {
       "path": ".claude/skills/agent-onboarding/SKILL.md",
       "bytes": 4111
     },
     {
       "path": ".claude/skills/skill-development/SKILL.md",
       "bytes": 10409
-    },
-    {
-      "path": ".claude/skills/SkiLLBuilDr/SKILL.md",
-      "bytes": 3651
     },
     {
       "path": ".codex/AGENTS.md",
@@ -177,56 +177,56 @@
       "bytes": 285
     },
     {
-      "path": ".omc/state/checkpoints/claude-to-codex-roundtrip-proof.handoff.json",
-      "bytes": 4316
-    },
-    {
       "path": ".omc/state/checkpoints/claude-to-codex-roundtrip-proof.RESUME.md",
       "bytes": 3140
     },
     {
-      "path": ".omc/state/checkpoints/codex-ack-claude-roundtrip-v2.handoff.json",
-      "bytes": 3754
+      "path": ".omc/state/checkpoints/claude-to-codex-roundtrip-proof.handoff.json",
+      "bytes": 4316
     },
     {
       "path": ".omc/state/checkpoints/codex-ack-claude-roundtrip-v2.RESUME.md",
       "bytes": 2251
     },
     {
-      "path": ".omc/state/checkpoints/codex-ack-claude-roundtrip.handoff.json",
-      "bytes": 3566
+      "path": ".omc/state/checkpoints/codex-ack-claude-roundtrip-v2.handoff.json",
+      "bytes": 3754
     },
     {
-      "path": ".omc/state/checkpoints/codex-bridge-cleanup-v3.handoff.json",
-      "bytes": 3556
+      "path": ".omc/state/checkpoints/codex-ack-claude-roundtrip.handoff.json",
+      "bytes": 3566
     },
     {
       "path": ".omc/state/checkpoints/codex-bridge-cleanup-v3.RESUME.md",
       "bytes": 2014
     },
     {
-      "path": ".omc/state/checkpoints/codex-phase6-manual-gates-v4.handoff.json",
-      "bytes": 3112
+      "path": ".omc/state/checkpoints/codex-bridge-cleanup-v3.handoff.json",
+      "bytes": 3556
     },
     {
       "path": ".omc/state/checkpoints/codex-phase6-manual-gates-v4.RESUME.md",
       "bytes": 1853
     },
     {
-      "path": ".omc/state/checkpoints/codex-to-claude-live-v2.handoff.json",
-      "bytes": 3023
+      "path": ".omc/state/checkpoints/codex-phase6-manual-gates-v4.handoff.json",
+      "bytes": 3112
     },
     {
       "path": ".omc/state/checkpoints/codex-to-claude-live-v2.RESUME.md",
       "bytes": 1841
     },
     {
-      "path": ".omc/state/checkpoints/codex-to-claude-live.handoff.json",
-      "bytes": 2561
+      "path": ".omc/state/checkpoints/codex-to-claude-live-v2.handoff.json",
+      "bytes": 3023
     },
     {
       "path": ".omc/state/checkpoints/codex-to-claude-live.RESUME.md",
       "bytes": 1444
+    },
+    {
+      "path": ".omc/state/checkpoints/codex-to-claude-live.handoff.json",
+      "bytes": 2561
     },
     {
       "path": ".omc/state/last-tool-error.json",
@@ -245,12 +245,24 @@
       "bytes": 10102
     },
     {
-      "path": "assemble.mjs",
-      "bytes": 18112
-    },
-    {
       "path": "CLAUDE.md",
       "bytes": 4840
+    },
+    {
+      "path": "FUTURE_WORK.md",
+      "bytes": 12306
+    },
+    {
+      "path": "HANDOFF.md",
+      "bytes": 20394
+    },
+    {
+      "path": "README.md",
+      "bytes": 10766
+    },
+    {
+      "path": "assemble.mjs",
+      "bytes": 18112
     },
     {
       "path": "docs/plugin-size-budget.md",
@@ -269,16 +281,8 @@
       "bytes": 2204
     },
     {
-      "path": "FUTURE_WORK.md",
-      "bytes": 12306
-    },
-    {
       "path": "handoff-bridge.mjs",
       "bytes": 15242
-    },
-    {
-      "path": "HANDOFF.md",
-      "bytes": 20394
     },
     {
       "path": "lib/token-budget.mjs",
@@ -291,10 +295,6 @@
     {
       "path": "package.json",
       "bytes": 1395
-    },
-    {
-      "path": "README.md",
-      "bytes": 10766
     },
     {
       "path": "schemas/handoff-contract.v1.json",
