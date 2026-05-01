@@ -11,5 +11,6 @@ Verification expectations:
 - Run the phase-specific test for the phase you changed.
 - Run `node --test plugins/compound-agent-system/assets/system-files/tests/*.test.mjs` for full regression coverage.
 - Run `node plugins/compound-agent-system/scripts/validate-package.mjs` before handoff.
+- For idea-intake changes, run `node --test plugins/compound-agent-system/assets/system-files/tests/idea-intake.test.mjs plugins/compound-agent-system/assets/system-files/tests/check-planning-quality.test.mjs`.
 - Document pre-existing failures separately from new regressions in `UPGRADE_TRACKER.md`.
 - Do not add runtime dependencies; scripts must run on Node 18+ built-ins.

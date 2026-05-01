@@ -213,3 +213,151 @@ Notes:
 - Focused upgraded-suite verification passes (`pass 48`, `fail 0`) across new/modified phase tests.
 - README now documents compliance modes, identity model, idea-intake usage, plan artifacts, Fact-Forcing Gate, and long-session readiness.
 - Earlier full-suite baseline failures (missing bundled assembly support files and Node 22 colorized output) are fixed in this upgrade; full suite now passes (`pass 110`, `fail 0`).
+
+---
+
+# Upgrade Package 2 Tracker
+
+Source: `upgrade_package_2.md`. Status values: `NOT_STARTED`, `IN_PROGRESS`, `DONE`.
+
+## Upgrade Package 2 Phase 1: Fix Test Truthfulness And Cross-Platform Baseline
+
+Status: DONE
+
+DoD checklist:
+- [x] `idea-intake.test.mjs` uses CRLF-safe plan assertions.
+- [x] Full package test suite passes on this machine.
+- [x] Tracker reflects verified results only.
+- [x] No behavior changes beyond test portability for this phase.
+
+Verification command(s):
+- `node --test plugins/compound-agent-system/assets/system-files/tests/*.test.mjs`
+
+Notes:
+- Verified on Linux/Node 22: full suite passes (`pass 119`, `fail 0`).
+
+## Upgrade Package 2 Phase 2: Replace Generic Phase Plan With Idea-Derived Phase Plan
+
+Status: DONE
+
+DoD checklist:
+- [x] Phase generation is derived from idea content signals.
+- [x] Generated plans contain 3-6 phases.
+- [x] Each phase includes goal, role ownership, DoD checks, expected artifacts, and proceed-without-user status.
+- [x] Simple and long ideas produce meaningfully different phase plans.
+- [x] No generated plan consists only of generic foundation and verification phases.
+- [x] `PHASE_PLAN.md` remains importable by `task.mjs import`.
+
+Verification command(s):
+- `node --test plugins/compound-agent-system/assets/system-files/tests/idea-intake.test.mjs`
+- Temp smoke: `node .agents/idea-intake.mjs --input fixtures/ideas/simple-idea.md --apply && node .agents/task.mjs import phase-0/PHASE_PLAN.md --apply`
+
+Notes:
+- Short fixture imported 6 generated phase tasks in smoke verification.
+
+## Upgrade Package 2 Phase 3: First Vertical Slice Planning Concept
+
+Status: DONE
+
+DoD checklist:
+- [x] Generated artifacts include `first_vertical_slice`.
+- [x] The slice describes proof, smallest useful scope, proof command/artifact, and owning phase.
+- [x] At least one DoD check references the first vertical slice proof.
+- [x] Long idea fixture produces a more specific first slice than the short fixture.
+
+Verification command(s):
+- `node --test plugins/compound-agent-system/assets/system-files/tests/idea-intake.test.mjs`
+
+Notes:
+- Long fixture produces `local source-to-dataset manifest proof`; short fixture produces `CLI data-source planning proof`.
+
+## Upgrade Package 2 Phase 4: Upgrade Decision Quality In GAP SCAN
+
+Status: DONE
+
+DoD checklist:
+- [x] Every blocker has priority, reversibility, proceed policy, recommended default, rationale, and unlock condition.
+- [x] `OPEN_QUESTIONS.md` separates `blocking_now`, `can_default`, and `defer`.
+- [x] Tests assert no more than 5 immediate blocking questions.
+- [x] User-facing output can be limited to `blocking_now` questions.
+
+Verification command(s):
+- `node --test plugins/compound-agent-system/assets/system-files/tests/idea-intake.test.mjs`
+
+Notes:
+- Network/API approval is the only must-ask blocker for the current data-source fixtures.
+
+## Upgrade Package 2 Phase 5: Agent-Team Execution Map
+
+Status: DONE
+
+DoD checklist:
+- [x] `AGENT_ROLES.md` is project-specific.
+- [x] Every generated phase has planner, executor, reviewer, and verifier ownership.
+- [x] Role map includes expected artifacts, handoff condition, and autonomy level.
+- [x] Role map is machine-readable JSON.
+
+Verification command(s):
+- `node --test plugins/compound-agent-system/assets/system-files/tests/idea-intake.test.mjs`
+
+Notes:
+- Simple and medium fixtures generate different role maps linked to phase IDs.
+
+## Upgrade Package 2 Phase 6: Planning Quality Gate
+
+Status: DONE
+
+DoD checklist:
+- [x] `.agents/check-planning-quality.mjs` exists.
+- [x] Tests include failing generic two-phase fixture.
+- [x] Tests include passing idea-intake output.
+- [x] Generic foundation/verification-only plans fail.
+- [x] Idea-intake output passes the checker before writing.
+
+Verification command(s):
+- `node --test plugins/compound-agent-system/assets/system-files/tests/check-planning-quality.test.mjs`
+
+Notes:
+- Checker is deterministic and dependency-free.
+
+## Upgrade Package 2 Phase 7: Project-Start Benchmark Fixtures
+
+Status: DONE
+
+DoD checklist:
+- [x] One-line vague idea fixture is covered.
+- [x] Medium feature idea fixture exists.
+- [x] Long API Alchemy brief remains fixture-only.
+- [x] All three fixtures create intake task, GAP SCAN, defaults, specific phase plan, role map, DoD, first vertical slice, and importable markers.
+- [x] Tests prove phase plans differ meaningfully and are not generic-only.
+
+Verification command(s):
+- `node --test plugins/compound-agent-system/assets/system-files/tests/idea-intake.test.mjs`
+- `node --test plugins/compound-agent-system/assets/system-files/tests/*.test.mjs`
+
+Notes:
+- Full suite now passes with new benchmark coverage (`pass 119`, `fail 0`).
+
+## Upgrade Package 2 Final DoD
+
+Status: DONE
+
+DoD checklist:
+- [x] Full package test suite passes.
+- [x] Tracker reflects actual verified results.
+- [x] Idea intake generates project-specific phase plans.
+- [x] Every plan includes first vertical slice.
+- [x] GAP SCAN decisions include defaults, reversibility, priority, and proceed policy.
+- [x] `OPEN_QUESTIONS.md` separates blocking/defaultable/deferred questions.
+- [x] `AGENT_ROLES.md` is project-specific and phase-linked.
+- [x] Planning quality checker rejects generic plans.
+- [x] Short, medium, and long idea fixtures all pass.
+- [x] API Alchemy Engine was not built; it remains fixture material only.
+
+Verification command(s):
+- `node plugins/compound-agent-system/scripts/validate-package.mjs`
+- `node --test plugins/compound-agent-system/assets/system-files/tests/*.test.mjs`
+
+Notes:
+- Package validation passes.
+- Full suite passes (`pass 119`, `fail 0`).

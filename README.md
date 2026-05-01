@@ -107,7 +107,7 @@ node .agents\task.mjs status
 
 Idea intake immediately creates an intake/planning task, records the original idea text, runs deterministic GAP SCAN, proposes recommended defaults, assigns planner/executor/reviewer/verifier roles, and writes Phase 0 artifacts. Blocker questions do not prevent the intake task from opening; implementation tasks wait for accepted scope.
 
-Generated planning output must pass `.agents/check-output-quality.mjs` before it is treated as an artifact.
+Generated planning output must pass `.agents/check-output-quality.mjs` and `.agents/check-planning-quality.mjs` before it is treated as an artifact. The planning quality gate rejects generic foundation/verification-only plans, missing `first_vertical_slice`, missing phase DoD, missing role ownership, missing blocker defaults, and missing import markers.
 
 ## Phase 0 plan artifacts
 
@@ -126,6 +126,8 @@ Idea intake writes these standard artifacts under `phase-0/`:
 ```powershell
 node .agents\task.mjs import phase-0\PHASE_PLAN.md --apply
 ```
+
+The generated plan is idea-derived: short, medium, and long idea fixtures should produce different 3–6 phase plans. Each plan includes a `first_vertical_slice`, expected artifacts, DoD checks, proceed-without-user status, and phase-linked planner/executor/reviewer/verifier role ownership.
 
 ## Fact-Forcing Gate
 

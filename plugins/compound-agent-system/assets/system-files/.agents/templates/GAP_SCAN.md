@@ -4,13 +4,20 @@
 
 - Original request: {{SUMMARY}}
 - Complete version: a tracked project start with decisions, roles, phases, and DoD.
-- Current plan covers: intake, defaults, phase planning, and verification.
-- Current plan misses: user confirmation for decisions marked no-proceed.
+- Current plan covers: intake, defaults, first_vertical_slice, phase planning, role ownership, and verification.
+- Current plan misses: user confirmation for decisions marked must-ask.
 
 ## Blockers
 
 {{BLOCKERS}}
 
+## First vertical slice
+
+- title: {{FIRST_VERTICAL_SLICE_TITLE}}
+- description: {{FIRST_VERTICAL_SLICE_DESCRIPTION}}
+- proof-command-or-artifact: {{FIRST_VERTICAL_SLICE_PROOF}}
+- owning-phase: {{FIRST_VERTICAL_SLICE_PHASE}}
+
 ## Closing
 
-Use recommended defaults only where proceed-without-user is true.
+Ask only `blocking_now` questions in user-facing output. Use recommended defaults only where proceed-policy is `proceed-with-default`.

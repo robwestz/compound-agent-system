@@ -11,6 +11,7 @@ const ROOT = resolve(__dirname, "..");
 const CLI = join(ROOT, ".agents", "idea-intake.mjs");
 const TASK = join(ROOT, ".agents", "task.mjs");
 const REQUIRED_ARTIFACTS = ["PROJECT_BRIEF.md", "GAP_SCAN.md", "DECISIONS.md", "PHASE_PLAN.md", "OPEN_QUESTIONS.md", "AGENT_ROLES.md", "DOD_MATRIX.md"];
+const normalize = (text) => text.replace(/\r\n/g, "\n");
 
 function workspace() {
   const dir = mkdtempSync(join(tmpdir(), "idea-intake-"));
@@ -80,7 +81,7 @@ test("apply writes Phase 0 artifacts with roles and markers", () => {
     assert.equal(r.status, 0, r.stderr);
     for (const name of REQUIRED_ARTIFACTS) assert.ok(existsSync(join(dir, "phase-0", name)), `missing ${name}`);
     const plan = readFileSync(join(dir, "phase-0", "PHASE_PLAN.md"), "utf-8");
-    assert.match(plan, /^---\ncompound: active/m);
+    assert.match(normalize(plan), /^---\ncompound: active/m);
     assert.match(plan, /\[COMPOUND-PHASE/);
     for (const role of ["planner", "executor", "reviewer", "verifier"]) assert.match(plan, new RegExp(role));
     const quality = runTask(dir, ["import", "phase-0/PHASE_PLAN.md", "--apply"]);
@@ -89,6 +90,98 @@ test("apply writes Phase 0 artifacts with roles and markers", () => {
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("short and long ideas produce meaningfully different phase plans", () => {
+  const shortDir = workspace();
+  const longDir = workspace();
+  try {
+    assert.equal(runIdea(shortDir, ["--input", "fixtures/ideas/simple-idea.md", "--apply"]).status, 0);
+    assert.equal(runIdea(longDir, ["--input", "fixtures/ideas/long-idea-api-alchemy.md", "--apply"]).status, 0);
+    const shortPlan = readFileSync(join(shortDir, "phase-0", "PHASE_PLAN.md"), "utf-8");
+    const longPlan = readFileSync(join(longDir, "phase-0", "PHASE_PLAN.md"), "utf-8");
+    assert.notEqual(shortPlan, longPlan);
+    assert.match(shortPlan, /CLI data-source planning proof/);
+    assert.match(longPlan, /local source-to-dataset manifest proof/);
+    assert.match(longPlan, /adapter registry and provenance model/);
+    assert.doesNotMatch(shortPlan, /phase-1-foundation/);
+    assert.doesNotMatch(longPlan, /phase-2-verification/);
+  } finally {
+    rmSync(shortDir, { recursive: true, force: true });
+    rmSync(longDir, { recursive: true, force: true });
+  }
+});
+
+test("generated artifacts include first vertical slice and upgraded decisions", () => {
+  const dir = workspace();
+  try {
+    const apply = runIdea(dir, ["--input", "fixtures/ideas/long-idea-api-alchemy.md", "--apply"]);
+    assert.equal(apply.status, 0, apply.stderr);
+    const brief = readFileSync(join(dir, "phase-0", "PROJECT_BRIEF.md"), "utf-8");
+    const gap = readFileSync(join(dir, "phase-0", "GAP_SCAN.md"), "utf-8");
+    const questions = readFileSync(join(dir, "phase-0", "OPEN_QUESTIONS.md"), "utf-8");
+    const dod = readFileSync(join(dir, "phase-0", "DOD_MATRIX.md"), "utf-8");
+    assert.match(brief, /First vertical slice/);
+    assert.match(brief, /local source-to-dataset manifest proof/);
+    assert.match(gap, /priority: critical/);
+    assert.match(gap, /reversibility: costly/);
+    assert.match(gap, /proceed-policy: must-ask/);
+    assert.match(gap, /unlock-condition:/);
+    assert.match(questions, /## blocking_now/);
+    assert.match(questions, /## can_default/);
+    assert.match(questions, /## defer/);
+    const blocking = questions.split("## can_default")[0].split("\n").filter((line) => line.startsWith("- ") && !line.includes("None"));
+    assert.ok(blocking.length <= 5);
+    assert.match(dod, /First vertical slice is verified by:/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("agent role map is project-specific and phase-linked", () => {
+  const simpleDir = workspace();
+  const mediumDir = workspace();
+  try {
+    assert.equal(runIdea(simpleDir, ["--input", "fixtures/ideas/simple-idea.md", "--apply"]).status, 0);
+    assert.equal(runIdea(mediumDir, ["--input", "fixtures/ideas/medium-feature-idea.md", "--apply"]).status, 0);
+    const simpleRoles = readFileSync(join(simpleDir, "phase-0", "AGENT_ROLES.md"), "utf-8");
+    const mediumRoles = readFileSync(join(mediumDir, "phase-0", "AGENT_ROLES.md"), "utf-8");
+    assert.notEqual(simpleRoles, mediumRoles);
+    for (const role of ["planner", "executor", "reviewer", "verifier"]) assert.match(mediumRoles, new RegExp(`"${role}"`));
+    assert.match(mediumRoles, /"phase_id"/);
+    assert.match(mediumRoles, /"autonomy_level"/);
+  } finally {
+    rmSync(simpleDir, { recursive: true, force: true });
+    rmSync(mediumDir, { recursive: true, force: true });
+  }
+});
+
+test("short medium and long benchmark fixtures produce complete planning artifacts", () => {
+  const fixtures = ["simple-idea.md", "medium-feature-idea.md", "long-idea-api-alchemy.md"];
+  const plans = [];
+  for (const fixture of fixtures) {
+    const dir = workspace();
+    try {
+      const apply = runIdea(dir, ["--input", `fixtures/ideas/${fixture}`, "--apply"]);
+      assert.equal(apply.status, 0, apply.stderr);
+      const ledger = readLedger(dir);
+      assert.equal(ledger.tasks.length, 1);
+      const gap = readFileSync(join(dir, "phase-0", "GAP_SCAN.md"), "utf-8");
+      const plan = readFileSync(join(dir, "phase-0", "PHASE_PLAN.md"), "utf-8");
+      const roles = readFileSync(join(dir, "phase-0", "AGENT_ROLES.md"), "utf-8");
+      const dod = readFileSync(join(dir, "phase-0", "DOD_MATRIX.md"), "utf-8");
+      assert.match(gap, /recommended-default/);
+      assert.match(plan, /first_vertical_slice/);
+      assert.match(plan, /\[COMPOUND-PHASE/);
+      assert.match(roles, /"phase_id"/);
+      assert.match(dod, /First vertical slice is verified by:/);
+      assert.equal(runTask(dir, ["import", "phase-0/PHASE_PLAN.md", "--apply"]).status, 0);
+      plans.push(plan);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }
+  assert.equal(new Set(plans).size, fixtures.length);
 });
 
 test("task status proves intake task exists after apply", () => {

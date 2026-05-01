@@ -6,4 +6,4 @@
 
 ## Closing
 
-Roles are planning defaults and may be reassigned during implementation.
+Roles are project-specific planning defaults linked to phase IDs. They may be reassigned during implementation, but handoff should preserve planner/executor/reviewer/verifier coverage.
