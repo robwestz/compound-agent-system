@@ -45,7 +45,7 @@ Bootstrap means:
 - copy the harness files into the target repo
 - run `.agents/activate.mjs` to install hooks and initialize the ledger
 - optionally run `.agents/agent-activate.mjs --id <agent-id>`
-- print ledger status and the first idea-intake next action
+- print ledger status and the guided first-session wizard's one next action
 
 If activation should be separate:
 
@@ -54,6 +54,75 @@ node .\bootstrap.mjs --target C:\path\to\repo --no-activate
 cd C:\path\to\repo
 node .agents\activate.mjs
 node .agents\agent-activate.mjs --id codex
+```
+
+## First-session guided wizard
+
+After bootstrap, activation prints one primary next action at a time. The wizard is deterministic and can be skipped; skipping only hides the guide and does not disable any CLI command.
+
+Successful first run transcript:
+
+```text
+$ node bootstrap.mjs --target /tmp/demo-repo --agent-id devin-demo --role planner --skill compound-agent-system
+Compound workspace harness bootstrap
+Target: /tmp/demo-repo
+Mode: write
+Activate: yes
+Agent: devin-demo
+
+> /usr/bin/node plugins/compound-agent-system/scripts/install-compound-system.mjs --target /tmp/demo-repo
+Compound Agent System install
+Target: /tmp/demo-repo
+Mode: write
+Rollback manifest: /tmp/demo-repo/.agents/install-manifest.json
+Install complete.
+
+> /usr/bin/node /tmp/demo-repo/.agents/activate.mjs
+Compound Protocol — activation
+  Settings: /tmp/demo-repo/.claude/settings.json
+  Tasks ledger: /tmp/demo-repo/.agents/TASKS.json (already present)
+  Hooks: installed/updated
+
+Installed hooks:
+  - SessionStart: node .agents/task.mjs hook ...
+  - PreToolUse: node .agents/task.mjs hook ...
+  - Stop: node .agents/task.mjs hook ...
+
+Compliance level: WARN
+Observe: log only; Warn: warn but do not block; Enforce: block invalid state-changing actions.
+To enable enforcement: export COMPOUND_MODE=enforce
+Recommended switch point: after the first smoke test passes, before unattended execution.
+
+First-session guided wizard
+Step 1 of 5: sign in the agent.
+System: installed; mode WARN (guides without blocking).
+Agent: not signed in.
+Next: node .agents/agent-activate.mjs --id <agent-id>
+Skip: node .agents/first-session-wizard.mjs skip
+
+> /usr/bin/node /tmp/demo-repo/.agents/agent-activate.mjs --id devin-demo --role planner --skill compound-agent-system
+First-session guided wizard
+Step 2 of 5: capture your idea.
+System: installed; mode WARN (guides without blocking).
+Agent: devin-demo signed in as planner.
+Next: create idea.md with your raw idea
+Skip: node .agents/first-session-wizard.mjs skip
+
+Identity: id=devin-demo client=devin model=demo role=planner session_id=2026-05-01T16-45-00-000Z-demo00
+Skills: compound-agent-system
+
+```
+
+After creating `idea.md`, run `node .agents/first-session-wizard.mjs` and follow its next line. The later steps are:
+
+1. `node .agents/idea-intake.mjs --input idea.md --apply`
+2. `node .agents/task.mjs import phase-0/PHASE_PLAN.md --apply`
+3. `node .agents/session-readiness.mjs`
+
+To skip the guide:
+
+```powershell
+node .agents\first-session-wizard.mjs skip
 ```
 
 Stage/register as a home-local plugin:
