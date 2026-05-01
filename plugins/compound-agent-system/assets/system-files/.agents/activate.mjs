@@ -56,7 +56,7 @@ function ensureTasksLedger() {
   return true;
 }
 
-function mergeHooks(existing, incoming) {
+export function mergeHooks(existing, incoming) {
   const out = { ...existing };
   for (const [event, configs] of Object.entries(incoming)) {
     if (!Array.isArray(out[event])) out[event] = [];
@@ -105,4 +105,4 @@ function main() {
   console.log("I will create an intake task, run GAP SCAN, propose defaults, assign agent roles, and prepare importable phase tasks with DoD.");
 }
 
-main();
+if (process.argv[1] === fileURLToPath(import.meta.url)) main();

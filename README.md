@@ -92,6 +92,8 @@ For Claude marketplace installation, stage it first and then run in Claude Code:
 
 The installed harness reads `COMPOUND_MODE=observe|warn|enforce`. `observe` logs structured guidance and never blocks. `warn` is the default: it warns but exits 0. `enforce` blocks invalid state-changing actions with exit code 2. The legacy `COMPOUND_ENFORCE=1` still maps to enforce. Switch to enforce after the first smoke test passes and before unattended multi-hour execution.
 
+See `docs/compliance-mode-policy.md` for the command-by-command policy table. `node .agents/task.mjs status` and `node .agents/task.mjs doctor` report the active mode and recommended switch point.
+
 ## Identity model
 
 Agent identity separates client, model, role, ledger id, session id, and display name. For example, `claude-opus-4.7` normalizes to client `claude` and model `opus-4.7`; role remains a separate field such as `planner`, `executor`, `reviewer`, or `verifier`. Status output displays these fields separately for auditability.
@@ -126,6 +128,10 @@ Idea intake writes these standard artifacts under `phase-0/`:
 ```powershell
 node .agents\task.mjs import phase-0\PHASE_PLAN.md --apply
 ```
+
+## Environment workbench boundary
+
+Environment-file generation is owned outside this plugin by `robwestz/devin_workbench`; this repo consumes generated environment handoff files as project inputs. The plugin core must stay portable and dependency-free, so project-specific `.env`, cloud, SSO, VPN, or IDE setup belongs in the workbench or target repo, not in `.agents/` runtime code. See `docs/environment-workbench-contract.md` for inputs, outputs, failure modes, and the minimal handoff example.
 
 The generated plan is idea-derived: short, medium, and long idea fixtures should produce different 3–6 phase plans. Each plan includes a `first_vertical_slice`, expected artifacts, DoD checks, proceed-without-user status, and phase-linked planner/executor/reviewer/verifier role ownership.
 

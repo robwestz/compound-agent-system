@@ -1,22 +1,25 @@
 #!/usr/bin/env node
-// Usage: node scripts/install-compound-system.mjs --target <repo> [--overwrite] [--dry-run]
+// Usage: node scripts/install-compound-system.mjs --target <repo> [--overwrite] [--dry-run] [--uninstall] [--rollback <manifest>]
 // Copies the bundled Compound Agent System files into a target repository.
 
-import { existsSync, mkdirSync, readdirSync, statSync, copyFileSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, statSync, copyFileSync, readFileSync, writeFileSync, renameSync, unlinkSync, rmSync } from "node:fs";
 import { dirname, join, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const pluginRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const sourceRoot = join(pluginRoot, "assets", "system-files");
 const HIGH_IMPACT_ROOT_WRITES = new Set(["CLAUDE.md", "package.json", "AGENT_ONBOARDING.md", "HANDOFF.md", "FUTURE_WORK.md", "package-lock.json"]);
+const OWNERSHIP_MARKER = "compound-agent-system";
 
 function parseArgs(argv) {
-  const args = { target: process.cwd(), overwrite: false, dryRun: false };
+  const args = { target: process.cwd(), overwrite: false, dryRun: false, uninstall: false, rollback: null };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--target") args.target = argv[++i];
     else if (a === "--overwrite") args.overwrite = true;
     else if (a === "--dry-run") args.dryRun = true;
+    else if (a === "--uninstall") args.uninstall = true;
+    else if (a === "--rollback") args.rollback = argv[++i];
     else if (a === "--help" || a === "-h") args.help = true;
     else throw new Error(`Unknown argument: ${a}`);
   }
@@ -53,6 +56,41 @@ function classifyFile(rel, src, dest, args) {
   return { bucket: "files_to_skip", overwrite: { ...entry, reason: "target differs and --overwrite was not set" }, entry: { ...entry, reason: "exists" } };
 }
 
+function manifestPath(targetRoot) {
+  return join(targetRoot, ".agents", "install-manifests", `compound-install-${new Date().toISOString().replace(/[:.]/g, "-")}.json`);
+}
+
+function installedManifestPath(targetRoot) {
+  return join(targetRoot, ".agents", "install-manifest.json");
+}
+
+function fileSnapshot(path) {
+  if (!existsSync(path)) return { existed: false };
+  return { existed: true, content: readFileSync(path, "utf-8") };
+}
+
+function installManifest(targetRoot, plan) {
+  return {
+    schema: "compound-install-manifest.v1",
+    owner: OWNERSHIP_MARKER,
+    created_at: new Date().toISOString(),
+    target: targetRoot,
+    files: [...plan.files_to_create, ...plan.files_to_modify].map((entry) => ({
+      path: entry.path,
+      target: entry.target,
+      action: plan.files_to_create.some((item) => item.path === entry.path) ? "create" : "modify",
+      before: fileSnapshot(entry.target),
+    })),
+  };
+}
+
+function writeJsonAtomic(path, data) {
+  mkdirSync(dirname(path), { recursive: true });
+  const tmp = `${path}.tmp`;
+  writeFileSync(tmp, JSON.stringify(data, null, 2) + "\n");
+  renameSync(tmp, path);
+}
+
 export function buildInstallPlan(args) {
   const targetRoot = resolve(args.target);
   const files = walk(sourceRoot);
@@ -64,6 +102,7 @@ export function buildInstallPlan(args) {
     files_to_create: [],
     files_to_modify: [],
     files_to_skip: [],
+    files_to_remove: [],
     overwrites: [],
     root_level_writes: [],
     hook_mutations: [
@@ -75,6 +114,7 @@ export function buildInstallPlan(args) {
     activation_behavior: "run node .agents/activate.mjs after apply unless bootstrap used --no-activate",
     warnings: [],
     apply_command: `node ${relative(targetRoot, fileURLToPath(import.meta.url)).replaceAll("\\", "/")} --target ${JSON.stringify(targetRoot)}${args.overwrite ? " --overwrite" : ""}`,
+    uninstall_command: `node ${relative(targetRoot, fileURLToPath(import.meta.url)).replaceAll("\\", "/")} --target ${JSON.stringify(targetRoot)} --uninstall`,
   };
 
   for (const src of files) {
@@ -89,6 +129,69 @@ export function buildInstallPlan(args) {
   return plan;
 }
 
+function lastManifest(targetRoot) {
+  const path = installedManifestPath(targetRoot);
+  if (!existsSync(path)) return null;
+  const data = JSON.parse(readFileSync(path, "utf-8"));
+  if (data.owner !== OWNERSHIP_MARKER || !Array.isArray(data.files)) throw new Error("Install manifest is not owned by compound-agent-system.");
+  return data;
+}
+
+function buildUninstallPlan(args) {
+  const targetRoot = resolve(args.target);
+  const manifest = lastManifest(targetRoot);
+  if (!manifest) {
+    return { version: 1, target: targetRoot, dry_run: Boolean(args.dryRun), uninstall: true, files_to_remove: [], files_to_restore: [], refusals: [{ path: installedManifestPath(targetRoot), reason: "missing install manifest" }] };
+  }
+  const plan = { version: 1, target: targetRoot, dry_run: Boolean(args.dryRun), uninstall: true, files_to_remove: [], files_to_restore: [], refusals: [] };
+  for (const file of manifest.files) {
+    const target = resolve(targetRoot, file.path);
+    if (!target.startsWith(targetRoot)) {
+      plan.refusals.push({ path: file.path, reason: "target escapes repo" });
+      continue;
+    }
+    if (!existsSync(target)) continue;
+    const src = join(sourceRoot, file.path);
+    if (file.action === "create") {
+      if (existsSync(src) && sameFile(src, target)) plan.files_to_remove.push({ path: file.path, target });
+      else plan.refusals.push({ path: file.path, reason: "owned file changed since install" });
+    } else if (file.action === "modify" && file.before?.existed) {
+      plan.files_to_restore.push({ path: file.path, target });
+    }
+  }
+  return plan;
+}
+
+function applyRollback(targetRoot, manifestFile) {
+  const manifest = JSON.parse(readFileSync(resolve(manifestFile), "utf-8"));
+  if (manifest.owner !== OWNERSHIP_MARKER || !Array.isArray(manifest.files)) throw new Error("Rollback manifest is not owned by compound-agent-system.");
+  for (const file of manifest.files.toReversed()) {
+    const target = resolve(targetRoot, file.path);
+    if (!target.startsWith(targetRoot)) throw new Error(`Refusing rollback outside target: ${file.path}`);
+    if (file.before?.existed) {
+      mkdirSync(dirname(target), { recursive: true });
+      writeFileSync(target, file.before.content);
+    } else if (existsSync(target)) {
+      unlinkSync(target);
+    }
+  }
+  console.log(`Rollback applied from ${manifestFile}`);
+}
+
+function applyUninstall(targetRoot, plan) {
+  if (plan.refusals.length) {
+    throw new Error(`Refusing uninstall; unsafe files require review: ${plan.refusals.map((item) => item.path).join(", ")}`);
+  }
+  for (const entry of plan.files_to_restore) {
+    const manifest = lastManifest(targetRoot);
+    const original = manifest.files.find((file) => file.path === entry.path);
+    writeFileSync(entry.target, original.before.content);
+  }
+  for (const entry of plan.files_to_remove) unlinkSync(entry.target);
+  rmSync(installedManifestPath(targetRoot), { force: true });
+  console.log(`Uninstalled ${plan.files_to_remove.length} file(s), restored ${plan.files_to_restore.length} file(s).`);
+}
+
 function planPath(targetRoot) {
   return join(targetRoot, "compound-install-plan.json");
 }
@@ -96,14 +199,28 @@ function planPath(targetRoot) {
 function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help) {
-    console.log("Usage: node scripts/install-compound-system.mjs --target <repo> [--overwrite] [--dry-run]");
+    console.log("Usage: node scripts/install-compound-system.mjs --target <repo> [--overwrite] [--dry-run] [--uninstall] [--rollback <manifest>]");
     return;
   }
   if (!existsSync(sourceRoot)) throw new Error(`Missing bundled system files: ${sourceRoot}`);
   const targetRoot = resolve(args.target);
   mkdirSync(targetRoot, { recursive: true });
+  if (args.rollback) {
+    applyRollback(targetRoot, args.rollback);
+    return;
+  }
+  if (args.uninstall) {
+    const plan = buildUninstallPlan(args);
+    writeFileSync(planPath(targetRoot), JSON.stringify(plan, null, 2) + "\n");
+    for (const entry of plan.files_to_remove) console.log(`${args.dryRun ? "would remove" : "remove"}: ${entry.path}`);
+    for (const entry of plan.files_to_restore) console.log(`${args.dryRun ? "would restore" : "restore"}: ${entry.path}`);
+    for (const entry of plan.refusals) console.log(`review required: ${entry.path} (${entry.reason})`);
+    if (!args.dryRun) applyUninstall(targetRoot, plan);
+    return;
+  }
   const plan = buildInstallPlan(args);
   writeFileSync(planPath(targetRoot), JSON.stringify(plan, null, 2) + "\n");
+  const rollback = installManifest(targetRoot, plan);
 
   for (const entry of [...plan.files_to_create, ...plan.files_to_modify]) {
     console.log(`${args.dryRun ? "would copy" : "copy"}: ${entry.path}`);
@@ -113,6 +230,12 @@ function main() {
     }
   }
   for (const entry of plan.files_to_skip) console.log(`skip existing: ${entry.path}`);
+  if (!args.dryRun) {
+    const rollbackPath = manifestPath(targetRoot);
+    writeJsonAtomic(rollbackPath, rollback);
+    writeJsonAtomic(installedManifestPath(targetRoot), rollback);
+    console.log(`Rollback manifest: ${rollbackPath}`);
+  }
 
   console.log(`\nCompound system install ${args.dryRun ? "dry-run" : "complete"}: ${plan.files_to_create.length + plan.files_to_modify.length} copied, ${plan.files_to_skip.length} skipped.`);
   console.log(`Install plan: ${planPath(targetRoot)}`);
