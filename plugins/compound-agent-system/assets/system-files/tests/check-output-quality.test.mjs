@@ -43,3 +43,15 @@ test("idea fixtures pass through checker", () => {
     assert.equal(r.status, 0, `${rel}: ${r.stderr}`);
   }
 });
+
+test("wave 2 policy docs pass through checker", () => {
+  for (const rel of [
+    "docs/security-boundary-model.md",
+    "docs/secrets-and-ai-policy.md",
+    "docs/plugin-size-budget.md",
+    "docs/troubleshooting.md",
+  ]) {
+    const r = runFixture(rel);
+    assert.equal(r.status, 0, `${rel}: ${r.stderr}`);
+  }
+});

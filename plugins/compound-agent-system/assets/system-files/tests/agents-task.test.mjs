@@ -406,6 +406,18 @@ test("fact-forcing gate explains why for state-changing commands", () => {
   }
 });
 
+test("doctor is read-only without grounding and reports security next action", () => {
+  const { ledger, dir } = freshLedger();
+  try {
+    const r = run(ledger, ["doctor"], { COMPOUND_MODE: "enforce", COMPOUND_GROUNDED: "" });
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stdout, /Compound doctor:/);
+    assert.match(r.stdout, /Add docs\/security-boundary-model.md and docs\/secrets-and-ai-policy.md/);
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
 test("read-only commands pass without grounding in enforce mode", () => {
   const { ledger, dir } = freshLedger();
   try {
