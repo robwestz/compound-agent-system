@@ -1,30 +1,22 @@
----
-compound: active
-phases:
-  - id: phase-1-foundation
-    goal: "Establish project foundation from accepted Phase 0 plan"
-    dod:
-      - check: artifact
-        path: "README.md"
-      - check: test
-        command: "node --test tests/*.test.mjs"
-    skills:
-      - "planner"
-      - "executor"
-  - id: phase-2-verification
-    goal: "Verify generated implementation path against DoD"
-    dod:
-      - check: manual
-        description: "Verifier confirms generated plan is actionable"
-    skills:
-      - "reviewer"
-      - "verifier"
----
+{{PHASE_FRONTMATTER}}
 
 # Phase Plan
 
-[COMPOUND-PHASE id=phase-1-foundation goal="Establish project foundation from accepted Phase 0 plan" dod="artifact:README.md;test:node --test tests/*.test.mjs" skills="planner;executor"]
-[COMPOUND-PHASE id=phase-2-verification goal="Verify generated implementation path against DoD" dod="manual:Verifier confirms generated plan is actionable" skills="reviewer;verifier"]
+## First vertical slice
+
+- title: {{FIRST_VERTICAL_SLICE_TITLE}}
+- description: {{FIRST_VERTICAL_SLICE_DESCRIPTION}}
+- why-smallest-useful-slice: {{FIRST_VERTICAL_SLICE_RATIONALE}}
+- proof-command-or-artifact: {{FIRST_VERTICAL_SLICE_PROOF}}
+- owning-phase: {{FIRST_VERTICAL_SLICE_PHASE}}
+
+## Import markers
+
+{{PHASE_MARKERS}}
+
+## Phase details
+
+{{PHASE_SUMMARY}}
 
 ## Role assignments
 

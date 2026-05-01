@@ -2,11 +2,8 @@
 
 ## Checks
 
-- Intake task exists in `.agents/TASKS.json`.
-- GAP SCAN has recommended defaults.
-- PHASE_PLAN.md has [COMPOUND-PHASE] markers.
-- Generated markdown passes `.agents/check-output-quality.mjs`.
+{{DOD_MATRIX}}
 
 ## Closing
 
-Every implementation phase must add executable or artifact DoD before work starts.
+Every implementation phase must keep executable, artifact, or manual DoD before work starts.
