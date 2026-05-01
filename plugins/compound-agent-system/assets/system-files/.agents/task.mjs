@@ -3,7 +3,7 @@
 // Zero runtime dependencies. Node 18+.
 // See .agents/PROTOCOL.md, .agents/DOD.md, .agents/SKILL_SELECT.md, .agents/PLAN_MARKERS.md
 
-import { readFileSync, writeFileSync, existsSync, statSync, renameSync, mkdirSync, unlinkSync, copyFileSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, statSync, renameSync, mkdirSync, unlinkSync, copyFileSync, readdirSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -284,6 +284,81 @@ function ledgerVersionStatus(ledger) {
   return { status: "migration_needed", version };
 }
 
+
+function pathExistsFromWorkspace(rel) {
+  const root = workspaceRoot();
+  return existsSync(join(root, rel)) || existsSync(join(root, "plugins", "compound-agent-system", "assets", "system-files", rel));
+}
+
+function fixtureSecretScan() {
+  const root = workspaceRoot();
+  const candidates = [
+    join(root, "fixtures"),
+    join(root, "plugins", "compound-agent-system", "assets", "system-files", "fixtures"),
+  ];
+  const dirs = candidates.filter((dir, index) => existsSync(dir) && candidates.findIndex((item) => item === dir) === index);
+  const patterns = [
+    { type: "aws-access-key", re: /AKIA[0-9A-Z]{16}/ },
+    { type: "github-token", re: /ghp_[A-Za-z0-9_]{20,}/ },
+    { type: "groq-key", re: /gsk_[A-Za-z0-9]{20,}/ },
+    { type: "api-key-assignment", re: /\b(?:GROQ_API_KEY|OPENROUTER_API_KEY|API_KEY)\s*=\s*['\"]?[^\s'\"<>]+/i },
+    { type: "private-key", re: /-----BEGIN (?:RSA|OPENSSH|EC) PRIVATE KEY-----/ },
+  ];
+  const findings = [];
+  let scannedFiles = 0;
+  function walk(dir) {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const abs = join(dir, entry.name);
+      if (entry.isDirectory()) walk(abs);
+      else if (entry.isFile()) {
+        scannedFiles += 1;
+        let text = "";
+        try { text = readFileSync(abs, "utf-8"); }
+        catch { continue; }
+        for (const pattern of patterns) {
+          if (pattern.re.test(text)) findings.push({ type: pattern.type, path: abs });
+        }
+      }
+    }
+  }
+  for (const dir of dirs) walk(dir);
+  return {
+    ok: findings.length === 0,
+    dirs,
+    scanned_files: scannedFiles,
+    findings,
+    next_action: findings.length
+      ? "Remove real-looking secrets from fixtures or replace them with documented placeholders."
+      : "No fixture secret action required.",
+  };
+}
+
+function securityBoundaryStatus() {
+  const docs = {
+    security_model: pathExistsFromWorkspace("docs/security-boundary-model.md"),
+    secrets_ai_policy: pathExistsFromWorkspace("docs/secrets-and-ai-policy.md"),
+  };
+  const fixtureSecrets = fixtureSecretScan();
+  return {
+    ok: docs.security_model && docs.secrets_ai_policy && fixtureSecrets.ok,
+    trust_boundaries: ["workspace files", "hooks", "ledger", "generated artifacts", "fixtures", "optional external AI"],
+    default_deny: {
+      network: "Core harness uses deterministic local paths by default; optional provider calls require explicit --ai plus provider key.",
+      secrets: "Harness does not discover credentials; operators provide named env vars only when a command documents them.",
+      workspace: "Installer rollback/uninstall refuse paths outside the target root.",
+    },
+    docs,
+    fixture_secrets: fixtureSecrets,
+    next_action: docs.security_model && docs.secrets_ai_policy && fixtureSecrets.ok
+      ? "No security boundary action required."
+      : [
+          !docs.security_model ? "Add docs/security-boundary-model.md." : "",
+          !docs.secrets_ai_policy ? "Add docs/secrets-and-ai-policy.md." : "",
+          !fixtureSecrets.ok ? "Remove real-looking secrets from fixtures or replace them with documented placeholders." : "",
+        ].filter(Boolean).join(" "),
+  };
+}
+
 function hookStatus() {
   const settingsPath = join(workspaceRoot(), ".claude", "settings.json");
   if (!existsSync(settingsPath)) {
@@ -362,6 +437,7 @@ function doctorReport() {
       next_action: "Repair ledger before continuing.",
     },
     hooks,
+    security: securityBoundaryStatus(),
   };
   if (!ledgerResult.ok) {
     checks.ledger.error = ledgerResult.error;

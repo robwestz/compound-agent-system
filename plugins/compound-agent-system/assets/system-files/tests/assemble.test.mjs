@@ -382,6 +382,42 @@ test("assemble.mjs --auto produces a valid ZIP with KICKOFF/CLAUDE/README", () =
   }
 });
 
+test("assemble.mjs --ai without key keeps deterministic local ranking", () => {
+  if (!existsSync(join(ROOT, "data.json")) && !existsSync(join(ROOT, "data.public.js"))) {
+    return;
+  }
+  const tempOut = mkdtempSync(join(tmpdir(), "assemble-ai-fallback-"));
+  try {
+    const env = { ...process.env };
+    delete env.GROQ_API_KEY;
+    delete env.OPENROUTER_API_KEY;
+    const r = spawnSync(
+      process.execPath,
+      [
+        ASSEMBLE,
+        "--goal",
+        "review python code for security",
+        "--tier",
+        "production",
+        "--limit",
+        "4",
+        "--auto",
+        "--ai",
+        "--out",
+        tempOut,
+      ],
+      { encoding: "utf-8", timeout: 30_000, env }
+    );
+    assert.equal(r.status, 0, `expected exit 0, got ${r.status}. stderr: ${r.stderr}`);
+    assert.match(r.stderr, /--ai set but no GROQ_API_KEY \/ OPENROUTER_API_KEY in env/);
+    assert.match(r.stderr, /deterministic local ranking/);
+    assert.match(r.stdout, /Package written/);
+    assert.equal(readdirSync(tempOut).filter((f) => f.endsWith(".zip")).length, 1);
+  } finally {
+    rmSync(tempOut, { recursive: true, force: true });
+  }
+});
+
 test("assemble.mjs respects --tier mvp in KICKOFF output", () => {
   if (!existsSync(join(ROOT, "data.json")) && !existsSync(join(ROOT, "data.public.js"))) {
     return;

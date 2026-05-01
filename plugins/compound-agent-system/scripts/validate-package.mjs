@@ -9,6 +9,17 @@ import { fileURLToPath } from "node:url";
 const pluginRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const systemRoot = join(pluginRoot, "assets", "system-files");
 
+const SIZE_WARNING_BYTES = 750 * 1024;
+const FILE_COUNT_WARNING = 175;
+
+function fileSize(path) {
+  return readFileSync(path).byteLength;
+}
+
+function warn(message) {
+  console.warn(`Warning: ${message}`);
+}
+
 const required = [
   ".codex-plugin/plugin.json",
   ".claude-plugin/plugin.json",
@@ -64,6 +75,11 @@ const required = [
   "assets/system-files/tests/bootstrap-install-plan.test.mjs",
   "assets/system-files/tests/first-session-output.test.mjs",
   "assets/system-files/tests/session-readiness.test.mjs",
+  "assets/system-files/tests/package-integrity.test.mjs",
+  "assets/system-files/docs/security-boundary-model.md",
+  "assets/system-files/docs/secrets-and-ai-policy.md",
+  "assets/system-files/docs/plugin-size-budget.md",
+  "assets/system-files/docs/troubleshooting.md",
   "AGENT_HANDOFF.md"
 ];
 
@@ -79,9 +95,36 @@ function walk(dir) {
 
 const missing = required.filter((p) => !existsSync(join(pluginRoot, p)));
 if (missing.length) {
-  console.error("Missing required files:");
+  console.error("Package integrity failed: required files are missing.");
+  console.error("Why it matters: users may install an incomplete Compound Agent System payload.");
+  console.error("Next action: restore each path or remove stale manifest entries in the same PR.");
   for (const p of missing) console.error(`- ${p}`);
   process.exit(1);
+}
+
+const repoManifestPath = resolve(pluginRoot, "..", "..", "manifest.json");
+if (existsSync(repoManifestPath)) {
+  const manifest = JSON.parse(readFileSync(repoManifestPath, "utf-8"));
+  const stale = [];
+  for (const entry of manifest.system_files || []) {
+    const file = join(systemRoot, entry.path);
+    if (!existsSync(file)) {
+      stale.push({ path: entry.path, reason: "missing" });
+      continue;
+    }
+    const actual = fileSize(file);
+    if (entry.bytes !== actual) stale.push({ path: entry.path, expected_bytes: entry.bytes, actual_bytes: actual });
+  }
+  if (stale.length) {
+    console.error("Package integrity failed: manifest.json has stale system_files metadata.");
+    console.error("Why it matters: package reviewers cannot trust payload drift checks.");
+    console.error("Next action: update manifest.json bytes for changed files or remove stale entries.");
+    for (const entry of stale) {
+      if (entry.reason) console.error(`- ${entry.path}: ${entry.reason}`);
+      else console.error(`- ${entry.path}: expected ${entry.expected_bytes} bytes, got ${entry.actual_bytes}`);
+    }
+    process.exit(1);
+  }
 }
 
 JSON.parse(readFileSync(join(pluginRoot, ".codex-plugin", "plugin.json"), "utf-8"));
@@ -101,6 +144,14 @@ if (forbidden.length) {
   console.error("Forbidden bundled files:");
   for (const p of forbidden) console.error(`- ${p}`);
   process.exit(1);
+}
+
+if (existsSync(systemRoot)) {
+  const systemFiles = walk(systemRoot);
+  const totalBytes = systemFiles.reduce((sum, file) => sum + fileSize(file), 0);
+  if (totalBytes > SIZE_WARNING_BYTES) warn(`system-files payload is ${totalBytes} bytes; review docs/plugin-size-budget.md placement rules.`);
+  if (systemFiles.length > FILE_COUNT_WARNING) warn(`system-files payload has ${systemFiles.length} files; review docs/plugin-size-budget.md placement rules.`);
+  console.log(`Payload size: ${totalBytes} bytes across ${systemFiles.length} files`);
 }
 
 console.log("compound-agent-system package: valid");

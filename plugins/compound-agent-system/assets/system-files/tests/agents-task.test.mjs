@@ -406,6 +406,18 @@ test("fact-forcing gate explains why for state-changing commands", () => {
   }
 });
 
+test("doctor is read-only without grounding and reports security next action", () => {
+  const { ledger, dir } = freshLedger();
+  try {
+    const r = run(ledger, ["doctor"], { COMPOUND_MODE: "enforce", COMPOUND_GROUNDED: "" });
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stdout, /Compound doctor:/);
+    assert.match(r.stdout, /Add docs\/security-boundary-model.md\. Add docs\/secrets-and-ai-policy.md\./);
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
 test("read-only commands pass without grounding in enforce mode", () => {
   const { ledger, dir } = freshLedger();
   try {
@@ -504,6 +516,13 @@ test("hook session-start emits JSON additionalContext", () => {
   } finally {
     rmSync(dir, { recursive: true });
   }
+});
+
+
+test("bundled ledger starts with no active task", () => {
+  const bundled = readLedger(join(REPO_ROOT, ".agents", "TASKS.json"));
+  assert.equal(bundled.current, null);
+  assert.equal(bundled.tasks.some((task) => task.state === "in_progress"), false);
 });
 
 test("hook pre-edit warns when no task in WARN mode", () => {

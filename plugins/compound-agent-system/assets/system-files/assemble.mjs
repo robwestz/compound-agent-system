@@ -10,8 +10,9 @@
  *   node assemble.mjs --goal "your goal" [--tier mvp|production|cutting-edge]
  *                     [--limit 12] [--out ./out] [--ai] [--auto]
  *
- * --ai      reads GROQ_API_KEY (or OPENROUTER_API_KEY) and uses LLMClient
- *           for causal reranking on top of local IDF.
+ * --ai      opt-in only: reads GROQ_API_KEY (or OPENROUTER_API_KEY) and uses
+ *           LLMClient for causal reranking on top of deterministic local IDF.
+ *           Without a key, no network-capable path is used.
  * --auto    skip the interactive review prompt; proceed with top-N picks.
  *
  * Exit codes:
@@ -117,7 +118,8 @@ Options:
   --tier <name>     mvp | production | cutting-edge  (default: production)
   --limit <n>       Number of skills to select  (default: 12)
   --out <dir>       Output directory  (default: ./out)
-  --ai              Use Groq/OpenRouter for causal ranking (reads GROQ_API_KEY)
+  --ai              Opt in to Groq/OpenRouter ranking when GROQ_API_KEY or
+                    OPENROUTER_API_KEY is set; otherwise keep local ranking
   --auto            Skip interactive review; pick top-N automatically
   --scenario-gate <path>  Wire a scenario-factory dir as blind-eval gate
                           between chunks (e.g. --scenario-gate factory/v1).
@@ -147,7 +149,7 @@ Options:
 Examples:
   node assemble.mjs --goal "review python project for security" --tier production
   node assemble.mjs --goal "build CLI tool" --tier mvp --limit 8 --auto
-  GROQ_API_KEY=gsk_... node assemble.mjs --goal "..." --ai --auto
+  GROQ_API_KEY=<key> node assemble.mjs --goal "..." --ai --auto
 `);
 }
 
@@ -339,10 +341,10 @@ async function main() {
   if (args.ai) {
     const apiKey = process.env.GROQ_API_KEY || process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
-      console.warn("⚠  --ai set but no GROQ_API_KEY / OPENROUTER_API_KEY in env — keeping local ranking");
+      console.warn("⚠  --ai set but no GROQ_API_KEY / OPENROUTER_API_KEY in env. No AI provider will be called; keeping deterministic local ranking. Next: set one key only if you explicitly want external reranking.");
     } else {
       const provider = process.env.GROQ_API_KEY ? "groq" : "openrouter";
-      console.log(`✨ AI rerank via ${provider}…`);
+      console.log(`✨ AI rerank via ${provider} (explicit --ai opt-in; key stays in process env only)…`);
       try {
         const client = LLMClient.create({ provider, apiKey });
         const aiResults = await client.rankSkills(args.goal, picks.map((p) => p.item));
@@ -359,7 +361,7 @@ async function main() {
           console.log(`✨ AI rerank: ${picks.length} causal picks`);
         }
       } catch (err) {
-        console.warn(`⚠  AI rerank failed (${err.message}) — keeping local ranking`);
+        console.warn(`⚠  AI rerank failed (${err.message}). Keeping deterministic local ranking. Next: retry without --ai or verify provider credentials.`);
       }
     }
   }
