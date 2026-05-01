@@ -11,7 +11,7 @@
 | `.codex` | Agent profiles, AGENTS.md, config.toml | None |
 | `.github` | Workflows, CODEOWNERS, PR template | None |
 | `.omc` | Project memory, sessions, state JSON/JSONL, top-level handoff/resume checkpoints | ZIP test artifacts and checkpoint subdirectories |
-| Root runtime | `handoff-bridge.mjs`, `assemble.mjs`, `lib/token-budget.mjs`, schema, focused tests, package files | Browser UI data/build artifacts |
+| Root runtime | `handoff-bridge.mjs`, `assemble.mjs`, `lib/token-budget.mjs`, v1/v2 handoff schemas, focused tests, package files | Browser UI data/build artifacts |
 
 ## Why Some Files Are Excluded
 
@@ -29,4 +29,3 @@ Run:
 ```powershell
 node plugins/compound-agent-system/scripts/validate-package.mjs
 ```
-

@@ -233,9 +233,27 @@ node .agents\session-readiness.mjs
 
 The command reports READY or NOT_READY, checks active task/DoD/current phase/context refresh/compound register/blockers/pending questions/handoff checkpoint/compliance mode, and prints unlock steps when the session is not safe to continue unattended.
 
+## Handoff contract v2
+
+`handoff-bridge.mjs` exports `handoff-contract.v2` checkpoints by default and validates them before writing. The versioned schema lives at `schemas/handoff-contract.v2.json` and requires explicit `task_state`, `completed_chunks`, `pending_decisions`, `artifacts`, `risks`, and `resume_commands` fields. The bridge still accepts existing `handoff-contract.v1` files by migrating them in memory; do not rewrite older handoff artifacts unless you are intentionally creating a new checkpoint.
+
+Checkpoint export:
+
+```powershell
+node handoff-bridge.mjs checkpoint --task t-001 --from-agent codex-gpt-5-codex --summary "What changed" --pending "Next safe step" --file handoff-bridge.mjs --decision "Open decision for next agent" --out .agents\checkpoints\t-001.handoff.json
+```
+
+Resume prompt export:
+
+```powershell
+node handoff-bridge.mjs resume --from .agents\checkpoints\t-001.handoff.json --out RESUME.md
+```
+
+The generated resume prompt points the next agent to exact files, the ledger path, validation schema, concrete resume commands, and open decisions. Handoff artifacts must be shareable and must not include API keys, passwords, or machine-local user paths.
+
 ## Curation Notes
 
-The bundle includes `.agents`, `.codex`, `.github`, curated `.claude`, curated `.omc`, handoff bridge files, token-budget adapter, schema, and focused tests.
+The bundle includes `.agents`, `.codex`, `.github`, curated `.claude`, curated `.omc`, handoff bridge files, token-budget adapter, schemas, and focused tests.
 
 Excluded on purpose:
 

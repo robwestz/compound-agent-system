@@ -235,7 +235,7 @@ The command reports READY or NOT_READY, checks active task/DoD/current phase/con
 
 ## Curation Notes
 
-The bundle includes `.agents`, `.codex`, `.github`, curated `.claude`, curated `.omc`, handoff bridge files, token-budget adapter, schema, and focused tests.
+The bundle includes `.agents`, `.codex`, `.github`, curated `.claude`, curated `.omc`, handoff bridge files, token-budget adapter, schemas, and focused tests.
 
 Excluded on purpose:
 

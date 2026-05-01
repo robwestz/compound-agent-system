@@ -1,0 +1,304 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://buildr.nu/schemas/handoff-contract.v2.json",
+  "title": "Buildr Agent Handoff Contract v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "schema_path",
+    "checkpoint_id",
+    "created_at",
+    "trigger",
+    "from_agent",
+    "to_agent",
+    "task_state",
+    "context_summary",
+    "completed_chunks",
+    "pending_decisions",
+    "artifacts",
+    "risks",
+    "resume_commands",
+    "commands_run",
+    "verification",
+    "safety"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "handoff-contract.v2"
+    },
+    "schema_path": {
+      "const": "schemas/handoff-contract.v2.json"
+    },
+    "checkpoint_id": {
+      "type": "string",
+      "pattern": "^cp-[0-9]{8}T[0-9]{6}Z-[a-z0-9-]+$"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trigger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "enum": ["manual", "token", "stop-mid-task"]
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+    "from_agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "runtime": {
+          "type": "string"
+        }
+      }
+    },
+    "to_agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target"],
+      "properties": {
+        "target": {
+          "enum": ["claude", "codex"]
+        },
+        "expected_format": {
+          "type": "string"
+        }
+      }
+    },
+    "task_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "goal",
+        "state",
+        "skills",
+        "dod",
+        "ledger_path",
+        "ledger_current",
+        "updated_at",
+        "pending_steps"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "goal": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dod": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "ledger_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ledger_current": {
+          "type": ["string", "null"]
+        },
+        "updated_at": {
+          "type": ["string", "null"]
+        },
+        "pending_steps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "migrated_from": {
+          "type": "string"
+        }
+      }
+    },
+    "context_summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "completed_chunks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "summary"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "pending_decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "question", "status", "owner", "files"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "question": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "const": "open"
+          },
+          "owner": {
+            "type": "string",
+            "minLength": 1
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "path", "kind", "status"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "severity", "description", "mitigation"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "severity": {
+            "enum": ["low", "medium", "high", "critical"]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "mitigation": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "resume_commands": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "command", "cwd", "reason"],
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "command": {
+            "type": "string",
+            "minLength": 1
+          },
+          "cwd": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "commands_run": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "verification": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["shareable", "redactions"],
+      "properties": {
+        "shareable": {
+          "type": "boolean"
+        },
+        "redactions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "compatibility": {
+      "type": "object"
+    }
+  }
+}
