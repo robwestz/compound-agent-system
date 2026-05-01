@@ -40,6 +40,38 @@ function runTask(cwd, args) {
 
 const readLedger = (cwd) => JSON.parse(readFileSync(join(cwd, ".agents", "TASKS.json"), "utf-8"));
 
+function writeIdea(dir, benchmark) {
+  const rel = `fixtures/ideas/realworld-${benchmark.id}.md`;
+  writeFileSync(join(dir, rel), `# ${benchmark.id}\n\n${benchmark.idea}\n`);
+  return rel;
+}
+
+function parseRoleMap(roles) {
+  const match = /```json\n([\s\S]+?)\n```/.exec(roles);
+  assert.ok(match, "role map JSON block exists");
+  return JSON.parse(match[1]);
+}
+
+function generatedTraits(dir) {
+  const plan = readFileSync(join(dir, "phase-0", "PHASE_PLAN.md"), "utf-8");
+  const brief = readFileSync(join(dir, "phase-0", "PROJECT_BRIEF.md"), "utf-8");
+  const gap = readFileSync(join(dir, "phase-0", "GAP_SCAN.md"), "utf-8");
+  const roles = readFileSync(join(dir, "phase-0", "AGENT_ROLES.md"), "utf-8");
+  const phases = [...plan.matchAll(/^- phase_id: (.+)$/gm)].map((match) => match[1]);
+  const blocking = gap.split(/\n(?=### Decision: )/).filter((block) => /^- proceed-policy: must-ask$/m.test(block)).map((block) => {
+    const question = /^- question: (.+)$/m.exec(block);
+    assert.ok(question, "must-ask blocker has question");
+    return question[1];
+  });
+  return {
+    phaseCount: phases.length,
+    firstSlice: (/^- title: (.+)$/m.exec(brief) || [])[1],
+    blockers: blocking,
+    roleText: roles,
+    roleMap: parseRoleMap(roles),
+  };
+}
+
 test("short idea dry-run previews an intake task without writing", () => {
   const dir = workspace();
   try {
@@ -206,5 +238,41 @@ test("generated output passes check-output-quality", () => {
     assert.equal(quality.status, 0, quality.stderr);
   } finally {
     rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+
+test("real-world benchmark corpus covers categories and expected planning traits", () => {
+  const benchmarks = JSON.parse(readFileSync(join(ROOT, "fixtures", "ideas", "realworld-benchmarks.json"), "utf-8"));
+  assert.equal(benchmarks.length, 12);
+  assert.deepEqual(new Set(benchmarks.map((b) => b.category)), new Set(["CLI tool", "browser app", "data workflow", "library", "migration", "ambiguous product brief"]));
+  for (const benchmark of benchmarks) {
+    assert.match(benchmark.id, /^[a-z0-9-]+$/);
+    assert.ok(benchmark.why.length >= 30, `${benchmark.id} explains why it exists`);
+    assert.ok(benchmark.idea.length >= 80, `${benchmark.id} has a concise but meaningful idea`);
+    assert.equal(benchmark.expected.role_map_traits.length, 3, `${benchmark.id} role traits stay focused`);
+  }
+});
+
+test("real-world benchmark ideas produce expected phase counts first slices blockers and role maps", () => {
+  const benchmarks = JSON.parse(readFileSync(join(ROOT, "fixtures", "ideas", "realworld-benchmarks.json"), "utf-8"));
+  for (const benchmark of benchmarks) {
+    const dir = workspace();
+    try {
+      const ideaRel = writeIdea(dir, benchmark);
+      const apply = runIdea(dir, ["--input", ideaRel, "--apply"]);
+      assert.equal(apply.status, 0, `${benchmark.id}: ${apply.stderr}`);
+      const traits = generatedTraits(dir);
+      assert.equal(traits.phaseCount, benchmark.expected.phase_count, `${benchmark.id}: phase count`);
+      assert.equal(traits.firstSlice, benchmark.expected.first_slice_title, `${benchmark.id}: first slice`);
+      assert.deepEqual(new Set(traits.blockers), new Set(benchmark.expected.blocking_decisions), `${benchmark.id}: blockers`);
+      assert.equal(traits.roleMap.length, traits.phaseCount, `${benchmark.id}: role map phase count`);
+      for (const roleTrait of benchmark.expected.role_map_traits) {
+        assert.match(traits.roleText, new RegExp(roleTrait.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), `${benchmark.id}: missing role trait ${roleTrait}`);
+      }
+      assert.equal(runTask(dir, ["import", "phase-0/PHASE_PLAN.md", "--apply"]).status, 0, `${benchmark.id}: import markers`);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   }
 });

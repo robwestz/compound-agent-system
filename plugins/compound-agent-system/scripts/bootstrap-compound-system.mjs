@@ -83,17 +83,6 @@ function main() {
       run(process.execPath, [taskScript, "ack", args.agentId], { cwd: targetRoot });
     }
   }
-
-  run(process.execPath, [join(targetRoot, ".agents", "task.mjs"), "status"], { cwd: targetRoot });
-
-  const mode = process.env.COMPOUND_MODE || (process.env.COMPOUND_ENFORCE === "1" ? "enforce" : "warn");
-  console.log("\nCompound Agent System is active.");
-  console.log("");
-  console.log(`System: installed, ledger ready, mode ${mode.toUpperCase()}.`);
-  console.log(`Agent: ${args.agentId ? `${args.agentId} signed in` : "not signed in"}${args.role ? ` as ${args.role}` : ""}.`);
-  console.log("Next: send a raw idea or a full project brief.");
-  console.log("");
-  console.log("I will create an intake task, run GAP SCAN, propose defaults, assign agent roles, and prepare importable phase tasks with DoD.");
 }
 
 main();

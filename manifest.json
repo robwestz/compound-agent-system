@@ -34,7 +34,11 @@
     },
     {
       "path": ".agents/activate.mjs",
-      "bytes": 4049
+      "bytes": 3677
+    },
+    {
+      "path": ".agents/first-session-wizard.mjs",
+      "bytes": 5475
     },
     {
       "path": ".agents/node-runtime.mjs",
@@ -254,11 +258,15 @@
     },
     {
       "path": "README.md",
-      "bytes": 9451
+      "bytes": 11955
     },
     {
       "path": "assemble.mjs",
       "bytes": 18222
+    },
+    {
+      "path": "docs/compatibility-matrix.md",
+      "bytes": 5221
     },
     {
       "path": "docs/plugin-size-budget.md",
@@ -307,6 +315,10 @@
     {
       "path": "tests/assemble.test.mjs",
       "bytes": 20798
+    },
+    {
+      "path": "tests/compatibility-matrix.test.mjs",
+      "bytes": 4040
     },
     {
       "path": "tests/handoff-bridge.test.mjs",
