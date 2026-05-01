@@ -34,7 +34,11 @@
     },
     {
       "path": ".agents/activate.mjs",
-      "bytes": 4049
+      "bytes": 3677
+    },
+    {
+      "path": ".agents/first-session-wizard.mjs",
+      "bytes": 5475
     },
     {
       "path": ".agents/node-runtime.mjs",
@@ -254,7 +258,7 @@
     },
     {
       "path": "README.md",
-      "bytes": 8262
+      "bytes": 10766
     },
     {
       "path": "assemble.mjs",

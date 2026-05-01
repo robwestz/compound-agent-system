@@ -6,6 +6,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { printFirstSessionWizard } from "./first-session-wizard.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..");
@@ -95,14 +96,7 @@ function main() {
   console.log("To enable enforcement: export COMPOUND_MODE=enforce");
   console.log("Recommended switch point: after the first smoke test passes, before unattended execution.");
   console.log("");
-  console.log("");
-  console.log("Compound Agent System is active.");
-  console.log("");
-  console.log(`System: installed, ledger ready, mode ${mode.toUpperCase()}.`);
-  console.log("Agent: not signed in.");
-  console.log("Next: run `node .agents/agent-activate.mjs --id <agent-id>`, then send a raw idea or full project brief.");
-  console.log("");
-  console.log("I will create an intake task, run GAP SCAN, propose defaults, assign agent roles, and prepare importable phase tasks with DoD.");
+  printFirstSessionWizard({ complianceMode: mode });
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) main();
