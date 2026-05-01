@@ -49,6 +49,39 @@ The target repository installer is shared by both clients.
 | Multi-agent roles | Load explorer/reviewer/docs-researcher profiles | `references/agent-profiles.md` |
 | Package inspection | Compare copied assets against manifest | `references/file-manifest.md` |
 
+## Testing idea-intake planning changes
+
+Use a fresh local workspace copied from `plugins/compound-agent-system/assets/system-files` so tests do not mutate the package ledger:
+
+```bash
+mkdir -p /home/ubuntu/compound-agent-system-smoke/idea
+cp -R plugins/compound-agent-system/assets/system-files/.agents /home/ubuntu/compound-agent-system-smoke/idea/.agents
+cp -R plugins/compound-agent-system/assets/system-files/fixtures /home/ubuntu/compound-agent-system-smoke/idea/fixtures
+printf '{"version":"1","schema_url":".agents/PROTOCOL.md","current":null,"tasks":[],"agents_active":[],"agent_profiles":{},"log":[]}' > /home/ubuntu/compound-agent-system-smoke/idea/.agents/TASKS.json
+cd /home/ubuntu/compound-agent-system-smoke/idea
+```
+
+For idea-intake planning upgrades, run the long fixture through the CLI and verify the generated plan before importing it:
+
+```bash
+node .agents/idea-intake.mjs --input fixtures/ideas/long-idea-api-alchemy.md --apply
+node .agents/check-planning-quality.mjs phase-0/PHASE_PLAN.md phase-0/GAP_SCAN.md
+node .agents/task.mjs import phase-0/PHASE_PLAN.md --apply
+node .agents/check-planning-quality.mjs fixtures/planning-quality/generic-two-phase-plan.md
+```
+
+Expected checks:
+
+- Generated `phase-0/PHASE_PLAN.md` should include a `first_vertical_slice` section and idea-specific phase IDs rather than only `phase-1-foundation` / `phase-2-verification`.
+- Long API/data fixtures should produce `local source-to-dataset manifest proof`, `phase-2-local-source-to-dataset-slice`, and `phase-3-adapter-registry-provenance`.
+- `node .agents/check-planning-quality.mjs phase-0/PHASE_PLAN.md phase-0/GAP_SCAN.md` should print JSON with `"ok": true` and `"issues": []`.
+- `task.mjs import ... --apply` should import the generated phase count once; if COMPOUND_MODE is warn, a Fact-Forcing Gate message may appear on stderr without blocking.
+- The generic planning-quality fixture should exit non-zero and include `missing-first-vertical-slice` plus `generic-phase-plan`.
+
+## Devin Secrets Needed
+
+No Devin secrets are needed for local CLI testing of bootstrap, idea intake, planning quality, or package validation. Only request secrets if a future test explicitly uses optional `--ai`, external APIs, or browser services.
+
 ## Operating Rules
 
 | Rule | Required behavior | Anti-pattern |
