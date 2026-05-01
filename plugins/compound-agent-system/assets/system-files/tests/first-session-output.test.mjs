@@ -60,6 +60,20 @@ test("activate output uses first-session template", () => {
   }
 });
 
+test("activate wizard normalizes uppercase compliance mode", () => {
+  const dir = mkdtempSync(join(tmpdir(), "compound-activate-mode-"));
+  try {
+    const r = spawnSync(process.execPath, [ACTIVATE], { cwd: dir, encoding: "utf-8", env: { ...process.env, COMPOUND_MODE: "ENFORCE" } });
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stdout, /Compliance level: ENFORCE/);
+    assert.match(r.stdout, /System: installed; mode ENFORCE \(blocks unsafe changes\)\./);
+    assert.doesNotMatch(r.stdout, /mode WARN \(guides without blocking\)/);
+    assertTemplate(r.stdout);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("agent activation output uses first-session template", () => {
   const dir = mkdtempSync(join(tmpdir(), "compound-agent-activate-"));
   try {

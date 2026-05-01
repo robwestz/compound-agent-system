@@ -18,8 +18,9 @@ function mode() {
 }
 
 function modeLabel(value = mode()) {
-  if (value === "enforce") return "ENFORCE (blocks unsafe changes)";
-  if (value === "observe") return "OBSERVE (logs guidance only)";
+  const v = String(value).toLowerCase();
+  if (v === "enforce") return "ENFORCE (blocks unsafe changes)";
+  if (v === "observe") return "OBSERVE (logs guidance only)";
   return "WARN (guides without blocking)";
 }
 

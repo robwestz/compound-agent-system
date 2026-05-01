@@ -38,7 +38,7 @@
     },
     {
       "path": ".agents/first-session-wizard.mjs",
-      "bytes": 5442
+      "bytes": 5475
     },
     {
       "path": ".agents/node-runtime.mjs",
