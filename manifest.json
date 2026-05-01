@@ -30,7 +30,7 @@
     },
     {
       "path": ".agents/TASKS.json",
-      "bytes": 20336
+      "bytes": 20703
     },
     {
       "path": ".agents/activate.mjs",
@@ -298,7 +298,7 @@
     },
     {
       "path": "tests/agents-task.test.mjs",
-      "bytes": 18641
+      "bytes": 18899
     },
     {
       "path": "tests/assemble.test.mjs",

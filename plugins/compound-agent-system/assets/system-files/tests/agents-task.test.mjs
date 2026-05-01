@@ -518,6 +518,13 @@ test("hook session-start emits JSON additionalContext", () => {
   }
 });
 
+
+test("bundled ledger starts with no active task", () => {
+  const bundled = readLedger(join(REPO_ROOT, ".agents", "TASKS.json"));
+  assert.equal(bundled.current, null);
+  assert.equal(bundled.tasks.some((task) => task.state === "in_progress"), false);
+});
+
 test("hook pre-edit warns when no task in WARN mode", () => {
   const { ledger, dir } = freshLedger();
   try {
