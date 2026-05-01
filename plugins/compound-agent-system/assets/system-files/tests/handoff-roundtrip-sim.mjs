@@ -50,18 +50,18 @@ try {
     runtime: "codex",
     trigger: "manual",
     summary: "Codex created the contract shape and is asking Claude to continue implementation.",
-    completed: ["Ledger task opened", "Contract fields selected", "Manual trigger chosen for v1"],
+    completed: ["Ledger task opened", "Contract fields selected", "Manual trigger chosen for v2"],
     pending: ["Implement bridge CLI", "Add roundtrip simulation", "Run DoD tests"],
-    files: ["handoff-bridge.mjs", "schemas/handoff-contract.v1.json"],
+    files: ["handoff-bridge.mjs", "schemas/handoff-contract.v2.json"],
     decisions: ["Schema stays format-agnostic; target prompt is Claude first."],
-    risks: ["Token trigger is enum-only in v1."],
+    risks: ["Token trigger is enum-only in v2."],
     verification: ["No tests have passed yet"],
     out: "handoffs/codex-to-claude.json",
     createdAt: "2026-04-27T19:10:00.000Z",
   });
   const claudePrompt = buildResumePrompt(codexToClaude.contract, { target: "claude" });
   assert.match(claudePrompt, /Implement bridge CLI/);
-  assert.match(claudePrompt, /Manual trigger chosen for v1/);
+  assert.match(claudePrompt, /Manual trigger chosen for v2/);
 
   const claudeToCodex = writeCheckpoint({
     cwd: dir,
@@ -74,13 +74,13 @@ try {
     reason: "simulated context boundary",
     summary: "Claude completed the CLI and returns verification work to Codex.",
     completed: [
-      ...codexToClaude.contract.completed,
+      ...codexToClaude.contract.completed_chunks.map((chunk) => chunk.summary),
       "Bridge CLI implemented",
       "Resume prompt generated",
     ],
     pending: ["Run final DoD checks", "Ask Robin for manual roundtrip confirmation"],
     files: ["handoff-bridge.mjs", "tests/handoff-bridge.test.mjs", "tests/handoff-roundtrip-sim.mjs"],
-    decisions: [...codexToClaude.contract.decisions, "Ledger stores handoff pointers on task.handoffs."],
+    decisions: [...codexToClaude.contract.pending_decisions.map((decision) => decision.question), "Ledger stores handoff pointers on task.handoffs."],
     risks: ["Manual confirmation remains human-only."],
     verification: ["Roundtrip simulation constructed"],
     out: "handoffs/claude-to-codex.json",

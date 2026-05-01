@@ -139,9 +139,10 @@ Options:
                           before committing to a controversial decision.
                           When set, factory/v2-personas/ is bundled into
                           the ZIP so the substrate travels with the package.
-  --handoff <json>        Bundle an existing handoff-contract.v1 JSON as
-                          handoff.json in the package.
-  --resume <json>         Resume from an existing handoff-contract.v1 JSON.
+  --handoff <json>        Bundle an existing handoff-contract.v2 JSON as
+                          handoff.json in the package. Migratable v1 is accepted.
+  --resume <json>         Resume from an existing handoff-contract.v2 JSON.
+                          Migratable v1 is accepted and converted in memory.
                           If --goal is omitted, the handoff task goal is used.
                           Bundles handoff.json plus RESUME.md.
   --help, -h        Show this help
@@ -267,7 +268,7 @@ async function main() {
           target: handoffContract.to_agent?.target,
         });
       }
-      if (!args.goal) args.goal = `Resume ${handoffContract.task.goal}`;
+      if (!args.goal) args.goal = `Resume ${handoffContract.task_state.goal}`;
       console.log(`[${args.resume ? "resume handoff" : "handoff"}] ${handoffContract.checkpoint_id}`);
     } catch (err) {
       console.error(`Error: invalid handoff file: ${err.message}\n`);

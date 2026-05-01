@@ -37,6 +37,7 @@ const required = [
   "assets/system-files/handoff-bridge.mjs",
   "assets/system-files/lib/token-budget.mjs",
   "assets/system-files/schemas/handoff-contract.v1.json",
+  "assets/system-files/schemas/handoff-contract.v2.json",
   "assets/system-files/tests/handoff-bridge.test.mjs",
   "assets/system-files/tests/token-budget.test.mjs",
   "assets/system-files/factory/v2-personas/debate.mjs",

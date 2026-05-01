@@ -332,6 +332,51 @@
       "agent": "claude-opus-4-7-resume",
       "started_at": "2026-05-01T15:17:48.472Z",
       "updated_at": "2026-05-01T15:40:00.000Z"
+    },
+    {
+      "id": "t-006",
+      "goal": "Implement premium-production task 20 handoff contract v2",
+      "state": "done",
+      "dod": [
+        {
+          "check": "test",
+          "command": "node --test tests/handoff-bridge.test.mjs",
+          "passed_at": "2026-05-01T16:53:07.511Z"
+        },
+        {
+          "check": "test",
+          "command": "node --test tests/*.test.mjs",
+          "passed_at": "2026-05-01T16:53:15.313Z"
+        },
+        {
+          "check": "test",
+          "command": "node ../../scripts/validate-package.mjs",
+          "passed_at": "2026-05-01T16:53:15.383Z"
+        },
+        {
+          "check": "artifact",
+          "path": "schemas/handoff-contract.v2.json",
+          "passed_at": "2026-05-01T16:53:15.384Z",
+          "artifact_size": 6623
+        },
+        {
+          "check": "artifact",
+          "path": "handoff-bridge.mjs",
+          "passed_at": "2026-05-01T16:53:15.384Z",
+          "artifact_size": 23691
+        }
+      ],
+      "skills": [
+        "compound-agent-system"
+      ],
+      "blocked_by": null,
+      "unlock_command": null,
+      "park_reason": "Implementation task belongs to this PR authoring session only; bundled fixture ledger must install with no active task.",
+      "parent": null,
+      "agent": "devin-1c412d1728754940b9c8947c268a9ead",
+      "started_at": "2026-05-01T16:34:04.274Z",
+      "updated_at": "2026-05-01T16:53:30.222Z",
+      "completed_at": "2026-05-01T16:53:30.222Z"
     }
   ],
   "agents_active": [
@@ -611,6 +656,61 @@
       "task": "t-005",
       "agent": "claude-opus-4-7-resume",
       "reason": "Clear bundled current pointer before release so fresh installs do not bypass pre-edit hooks."
+    },
+    {
+      "ts": "2026-05-01T16:33:32.848Z",
+      "event": "ack",
+      "task": null,
+      "agent": "devin-1c412d1728754940b9c8947c268a9ead",
+      "identity": {
+        "id": "devin-1c412d1728754940b9c8947c268a9ead",
+        "client": "devin",
+        "model": "1c412d1728754940b9c8947c268a9ead",
+        "role": "agent",
+        "display_name": "devin 1c412d1728754940b9c8947c268a9ead",
+        "session_id": "2026-05-01T16-33-32-847Z-h3fdgw",
+        "skills": [],
+        "activated_at": "2026-05-01T16:33:32.848Z"
+      }
+    },
+    {
+      "ts": "2026-05-01T16:34:04.274Z",
+      "event": "open",
+      "task": "t-006",
+      "agent": "devin-1c412d1728754940b9c8947c268a9ead",
+      "goal": "Implement premium-production task 20 handoff contract v2"
+    },
+    {
+      "ts": "2026-05-01T16:50:00.000Z",
+      "event": "park",
+      "task": "t-006",
+      "agent": "devin-1c412d1728754940b9c8947c268a9ead",
+      "reason": "Clear bundled current pointer before release while preserving task 20 implementation trace."
+    },
+    {
+      "ts": "2026-05-01T16:53:15.384Z",
+      "event": "verify",
+      "task": "t-006",
+      "agent": "devin-1c412d1728754940b9c8947c268a9ead",
+      "allPass": true
+    },
+    {
+      "ts": "2026-05-01T16:53:30.222Z",
+      "event": "done",
+      "task": "t-006",
+      "agent": "devin-1c412d1728754940b9c8947c268a9ead"
     }
-  ]
+  ],
+  "agent_profiles": {
+    "devin-1c412d1728754940b9c8947c268a9ead": {
+      "id": "devin-1c412d1728754940b9c8947c268a9ead",
+      "client": "devin",
+      "model": "1c412d1728754940b9c8947c268a9ead",
+      "role": "agent",
+      "display_name": "devin 1c412d1728754940b9c8947c268a9ead",
+      "session_id": "2026-05-01T16-33-32-847Z-h3fdgw",
+      "skills": [],
+      "activated_at": "2026-05-01T16:33:32.848Z"
+    }
+  }
 }

@@ -7,7 +7,8 @@
 | Path | Role |
 |---|---|
 | `handoff-bridge.mjs` | CLI and library for checkpoint, resume, and verify |
-| `schemas/handoff-contract.v1.json` | JSON schema for `*.handoff.json` |
+| `schemas/handoff-contract.v2.json` | Default JSON schema for new `*.handoff.json` |
+| `schemas/handoff-contract.v1.json` | Legacy schema; existing files migrate in memory |
 | `lib/token-budget.mjs` | Heuristic token-budget detector and command suggestion adapter |
 | `.omc/state/checkpoints/*.handoff.json` | Handoff snapshots |
 | `.omc/state/checkpoints/*.RESUME.md` | Copy-pasteable target-agent resume prompts |
@@ -28,6 +29,7 @@
 | Prefer explicit `--from [agent-id]` in multi-agent runs | Avoids wrong sender attribution |
 | Validate before sharing | Detects schema errors, secrets, and unsafe paths |
 | Use v2/v3/v4 checkpoint names over stale proof files | Avoids earlier wrong-agent proof artifacts |
+| Resume from generated prompts | Prompts include exact files, commands, and open decisions |
 
 ## Anti-Patterns
 
@@ -35,5 +37,5 @@
 |---|---|
 | Treat a checkpoint as task completion | Verify DoD separately |
 | Share unverified handoff JSON | Run `verify` first |
-| Auto-fire token handoff in v1 | Emit suggestion, let operator decide |
-
+| Auto-fire token handoff | Emit suggestion, let operator decide |
+| Rewrite old v1 handoff files in place | Create a new v2 checkpoint or use in-memory migration |

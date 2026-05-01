@@ -8,6 +8,7 @@ import {
   buildResumePrompt,
   createHandoffContract,
   loadHandoff,
+  migrateHandoffV1ToV2,
   validateHandoff,
   writeCheckpoint,
   writeResumePrompt,
@@ -41,7 +42,7 @@ function tempWorkspace() {
   return { dir, ledgerPath, ledger };
 }
 
-test("createHandoffContract builds a safe v1 contract from ledger task", () => {
+test("createHandoffContract builds a safe v2 contract from ledger task", () => {
   const { dir, ledgerPath, ledger } = tempWorkspace();
   try {
     const contract = createHandoffContract({
@@ -63,12 +64,66 @@ test("createHandoffContract builds a safe v1 contract from ledger task", () => {
       from: "codex-gpt-5-codex",
     });
 
-    assert.equal(contract.schema_version, "handoff-contract.v1");
+    assert.equal(contract.schema_version, "handoff-contract.v2");
+    assert.equal(contract.schema_path, "schemas/handoff-contract.v2.json");
     assert.equal(contract.trigger.type, "manual");
     assert.equal(contract.to_agent.target, "claude");
-    assert.equal(contract.task.id, "t-001");
-    assert.deepEqual(contract.current_files, ["handoff-bridge.mjs"]);
+    assert.equal(contract.task_state.id, "t-001");
+    assert.deepEqual(contract.task_state.pending_steps, ["Implement bridge CLI"]);
+    assert.deepEqual(contract.artifacts.map((artifact) => artifact.path), ["handoff-bridge.mjs"]);
+    assert.equal(contract.completed_chunks[0].summary, "Task opened in Compound ledger");
+    assert.equal(contract.pending_decisions[0].question, "Manual trigger ships first; token trigger stays enum-only.");
+    assert.ok(contract.resume_commands.some((entry) => entry.command === "node .agents/task.mjs open ..."));
     assert.equal(validateHandoff(contract).ok, true);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("validateHandoff rejects missing required v2 fields", () => {
+  const { dir, ledgerPath, ledger } = tempWorkspace();
+  try {
+    const contract = createHandoffContract({
+      cwd: dir,
+      ledgerPath,
+      ledger,
+      taskId: "t-001",
+      summary: "safe summary",
+      pending: ["Continue"],
+      createdAt: "2026-04-27T19:01:02.000Z",
+      from: "codex-gpt-5-codex",
+    });
+    delete contract.task_state.goal;
+    contract.resume_commands = [];
+    contract.artifacts.push({ id: "bad-artifact", path: "handoff-bridge.mjs" });
+
+    const validation = validateHandoff(contract);
+    assert.equal(validation.ok, false);
+    assert.ok(validation.errors.some((err) => /task_state\.goal/.test(err)));
+    assert.ok(validation.errors.some((err) => /artifacts\[/.test(err)));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("validateHandoff rejects incompatible schema versions", () => {
+  const { dir, ledgerPath, ledger } = tempWorkspace();
+  try {
+    const contract = createHandoffContract({
+      cwd: dir,
+      ledgerPath,
+      ledger,
+      taskId: "t-001",
+      summary: "safe summary",
+      pending: ["Continue"],
+      createdAt: "2026-04-27T19:01:02.000Z",
+      from: "codex-gpt-5-codex",
+    });
+    contract.schema_version = "handoff-contract.v99";
+
+    const validation = validateHandoff(contract);
+    assert.equal(validation.ok, false);
+    assert.ok(validation.errors.some((err) => /schema_version/.test(err)));
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -88,7 +143,7 @@ test("validateHandoff rejects secret-like content and user-absolute paths", () =
       from: "codex-gpt-5-codex",
     });
     contract.commands_run.push("export API_KEY=sk-test-secret-token");
-    contract.current_files.push("C:\\Users\\robin\\secret.txt");
+    contract.artifacts.push({ id: "artifact-secret", path: "C:\\Users\\robin\\secret.txt", kind: "file", status: "referenced" });
 
     const validation = validateHandoff(contract);
     assert.equal(validation.ok, false);
@@ -118,10 +173,12 @@ test("writeCheckpoint writes handoff JSON and persists pointer in TASKS ledger",
     assert.match(outPath, /codex-to-claude\.json$/);
     const loaded = loadHandoff(outPath, dir);
     assert.equal(loaded.checkpoint_id, contract.checkpoint_id);
+    assert.equal(loaded.schema_version, "handoff-contract.v2");
 
     const ledger = JSON.parse(readFileSync(ledgerPath, "utf-8"));
     assert.equal(ledger.tasks[0].handoffs.length, 1);
     assert.equal(ledger.tasks[0].last_handoff.to, "claude");
+    assert.equal(ledger.tasks[0].last_handoff.schema_version, "handoff-contract.v2");
     assert.equal(ledger.log.at(-1).event, "handoff-checkpoint");
   } finally {
     rmSync(dir, { recursive: true, force: true });
@@ -226,10 +283,55 @@ test("buildResumePrompt tells the target agent to continue pending work, not res
     assert.match(prompt, /You are Claude Code/);
     assert.match(prompt, /Continue from Pending, not from scratch/);
     assert.match(prompt, /Add roundtrip simulation/);
-    assert.match(prompt, /\.agents\/TASKS\.json/);
+    assert.match(prompt, /TASKS\.json/);
+    assert.match(prompt, /Exact files\/artifacts/);
+    assert.match(prompt, /Resume commands/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("v1 handoffs migrate to v2 without breaking existing handoff files", () => {
+  const v1 = {
+    schema_version: "handoff-contract.v1",
+    checkpoint_id: "cp-20260427T190102Z-t-001",
+    created_at: "2026-04-27T19:01:02.000Z",
+    trigger: { type: "manual" },
+    from_agent: { id: "codex-gpt-5-codex" },
+    to_agent: { target: "claude", expected_format: "Claude Code startup prompt" },
+    task: {
+      id: "t-001",
+      goal: "Live Handoff Bridge v1",
+      state: "parked",
+      skills: ["agent-framework"],
+      dod: [{ check: "test", command: "node --test tests/handoff-bridge.test.mjs", passed_at: null }],
+    },
+    context_summary: "v1 checkpoint",
+    completed: ["Created v1 bridge"],
+    pending: ["Resume work"],
+    current_files: ["handoff-bridge.mjs"],
+    decisions: ["Keep manual trigger first"],
+    risks: ["Manual confirmation remains external"],
+    commands_run: ["node --test tests/handoff-bridge.test.mjs"],
+    verification: ["Focused tests passed"],
+    ledger: {
+      task_path: ".agents/TASKS.json",
+      task_current: null,
+      task_updated_at: "2026-04-27T19:00:00.000Z",
+    },
+    safety: {
+      shareable: true,
+      redactions: [],
+    },
+  };
+
+  const migrated = migrateHandoffV1ToV2(v1);
+  assert.equal(migrated.schema_version, "handoff-contract.v2");
+  assert.equal(migrated.task_state.id, "t-001");
+  assert.equal(migrated.completed_chunks[0].summary, "Created v1 bridge");
+  assert.equal(migrated.pending_decisions[0].question, "Keep manual trigger first");
+  assert.equal(validateHandoff(migrated).ok, true);
+  assert.match(buildResumePrompt(v1), /Open decisions/);
 });
 
 test("writeResumePrompt can write a copy-pasteable prompt file", () => {

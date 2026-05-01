@@ -30,7 +30,7 @@
     },
     {
       "path": ".agents/TASKS.json",
-      "bytes": 20703
+      "bytes": 23971
     },
     {
       "path": ".agents/activate.mjs",
@@ -254,11 +254,11 @@
     },
     {
       "path": "README.md",
-      "bytes": 8262
+      "bytes": 9451
     },
     {
       "path": "assemble.mjs",
-      "bytes": 18112
+      "bytes": 18222
     },
     {
       "path": "docs/plugin-size-budget.md",
@@ -278,7 +278,7 @@
     },
     {
       "path": "handoff-bridge.mjs",
-      "bytes": 15242
+      "bytes": 23691
     },
     {
       "path": "lib/token-budget.mjs",
@@ -297,6 +297,10 @@
       "bytes": 3736
     },
     {
+      "path": "schemas/handoff-contract.v2.json",
+      "bytes": 6623
+    },
+    {
       "path": "tests/agents-task.test.mjs",
       "bytes": 18899
     },
@@ -306,11 +310,11 @@
     },
     {
       "path": "tests/handoff-bridge.test.mjs",
-      "bytes": 8628
+      "bytes": 12645
     },
     {
       "path": "tests/handoff-roundtrip-sim.mjs",
-      "bytes": 3792
+      "bytes": 3874
     },
     {
       "path": "tests/node-runtime.test.mjs",
