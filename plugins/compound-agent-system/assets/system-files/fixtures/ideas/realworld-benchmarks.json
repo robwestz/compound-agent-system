@@ -1,0 +1,202 @@
+[
+  {
+    "id": "cli-log-summarizer",
+    "category": "CLI tool",
+    "why": "Covers a local terminal utility with deterministic file input and no service dependency.",
+    "idea": "Build a CLI that reads local application logs, groups warnings by component, and writes a Markdown incident summary for a reviewer.",
+    "expected": {
+      "phase_count": 4,
+      "first_slice_title": "CLI planning proof",
+      "blocking_decisions": [],
+      "role_map_traits": [
+        "scope reviewer",
+        "vertical-slice builder",
+        "handoff reviewer"
+      ]
+    }
+  },
+  {
+    "id": "cli-csv-lint",
+    "category": "CLI tool",
+    "why": "Exercises file validation plus reusable data-shape output without implying integration work.",
+    "idea": "Create a terminal command that checks local delimited table exports for required columns, reports duplicate row identifiers, and emits a reusable validation manifest.",
+    "expected": {
+      "phase_count": 6,
+      "first_slice_title": "CLI data-source planning proof",
+      "blocking_decisions": [
+        "Can the agent call external APIs during implementation?"
+      ],
+      "role_map_traits": [
+        "data planner",
+        "schema verifier",
+        "checkpoint executor"
+      ]
+    }
+  },
+  {
+    "id": "browser-release-board",
+    "category": "browser app",
+    "why": "Confirms browser-first planning keeps a CLI smoke path and local fixture boundary.",
+    "idea": "Design a browser dashboard that loads local release notes, groups features by owner, flags missing QA evidence, and exports a release-readiness summary.",
+    "expected": {
+      "phase_count": 4,
+      "first_slice_title": "single-screen browser workflow proof",
+      "blocking_decisions": [],
+      "role_map_traits": [
+        "UX planner",
+        "frontend executor",
+        "browser verifier"
+      ]
+    }
+  },
+  {
+    "id": "browser-support-triage",
+    "category": "browser app",
+    "why": "Represents a review workflow with browser UI and triage language while avoiding live ticket systems.",
+    "idea": "Build a browser UI for support triage that imports a local JSON ticket sample, labels likely duplicates, and prepares a reviewer handoff workflow.",
+    "expected": {
+      "phase_count": 5,
+      "first_slice_title": "single-screen browser workflow proof",
+      "blocking_decisions": [],
+      "role_map_traits": [
+        "workflow",
+        "UX reviewer",
+        "release verifier"
+      ]
+    }
+  },
+  {
+    "id": "data-rss-quality",
+    "category": "data workflow",
+    "why": "Forces external-source blockers, provenance, quality scoring, and data model phases.",
+    "idea": "Plan a data workflow that evaluates public RSS feeds for freshness, sparse records, licensing notes, and export readiness using deterministic sample files first.",
+    "expected": {
+      "phase_count": 6,
+      "first_slice_title": "CLI data-source planning proof",
+      "blocking_decisions": [
+        "Can the agent call external APIs during implementation?"
+      ],
+      "role_map_traits": [
+        "provenance reviewer",
+        "security reviewer",
+        "release verifier"
+      ]
+    }
+  },
+  {
+    "id": "data-sensor-normalizer",
+    "category": "data workflow",
+    "why": "Checks local-first data normalization with records, fields, and verification but no network calls.",
+    "idea": "Create a local data workflow that normalizes sample sensor records, preserves field provenance, and produces a reusable dataset manifest for analysts.",
+    "expected": {
+      "phase_count": 5,
+      "first_slice_title": "CLI data-source planning proof",
+      "blocking_decisions": [],
+      "role_map_traits": [
+        "data-model executor",
+        "provenance reviewer",
+        "schema verifier"
+      ]
+    }
+  },
+  {
+    "id": "library-config-diff",
+    "category": "library",
+    "why": "Covers package/library planning without adding dependencies or a browser surface.",
+    "idea": "Design a small JavaScript library module that compares two local configuration objects, reports meaningful changes, and provides deterministic test fixtures.",
+    "expected": {
+      "phase_count": 4,
+      "first_slice_title": "CLI planning proof",
+      "blocking_decisions": [],
+      "role_map_traits": [
+        "quality reviewer",
+        "test executor",
+        "readiness verifier"
+      ]
+    }
+  },
+  {
+    "id": "library-sdk-wrapper",
+    "category": "library",
+    "why": "Represents SDK work where external API use must stay gated by explicit approval.",
+    "idea": "Plan a package that wraps an external REST API SDK with typed request builders, local mock fixtures, and no live access until approved.",
+    "expected": {
+      "phase_count": 4,
+      "first_slice_title": "CLI data-source planning proof",
+      "blocking_decisions": [
+        "Can the agent call external APIs during implementation?"
+      ],
+      "role_map_traits": [
+        "boundary executor",
+        "security reviewer",
+        "policy verifier"
+      ]
+    }
+  },
+  {
+    "id": "migration-json-to-sqlite",
+    "category": "migration",
+    "why": "Exercises migration planning with costly persistence decisions and reversible local artifacts.",
+    "idea": "Migrate a repo-local JSON manifest store to SQLite while preserving rollback notes, schema verification, and unchanged fixture data.",
+    "expected": {
+      "phase_count": 4,
+      "first_slice_title": "CLI data-source planning proof",
+      "blocking_decisions": [],
+      "role_map_traits": [
+        "data planner",
+        "schema verifier",
+        "handoff planner"
+      ]
+    }
+  },
+  {
+    "id": "migration-browser-build",
+    "category": "migration",
+    "why": "Combines browser delivery with build migration language and deterministic tests.",
+    "idea": "Move a static browser app from handwritten asset copying to a simple build workflow, keeping local sample data and reviewer-visible rollback instructions.",
+    "expected": {
+      "phase_count": 6,
+      "first_slice_title": "single-screen browser workflow proof",
+      "blocking_decisions": [],
+      "role_map_traits": [
+        "frontend executor",
+        "UX reviewer",
+        "checkpoint executor"
+      ]
+    }
+  },
+  {
+    "id": "ambiguous-product-ops-copilot",
+    "category": "ambiguous product brief",
+    "why": "Validates that vague copilot language turns into scope decisions before implementation.",
+    "idea": "Make an ops copilot that helps teams know what to do next, with a useful first version for a weekly review.",
+    "expected": {
+      "phase_count": 4,
+      "first_slice_title": "CLI planning proof",
+      "blocking_decisions": [],
+      "role_map_traits": [
+        "lead planner",
+        "scope reviewer",
+        "DoD verifier"
+      ]
+    }
+  },
+  {
+    "id": "ambiguous-ai-knowledge-base",
+    "category": "ambiguous product brief",
+    "why": "Checks that AI/product ambiguity still blocks external provider and network assumptions.",
+    "idea": "Create an AI knowledge base that searches external docs, stores reusable records, and gives teams quality answers without provider access or network calls until approved.",
+    "expected": {
+      "phase_count": 6,
+      "first_slice_title": "CLI data-source planning proof",
+      "blocking_decisions": [
+        "Can the agent call external APIs during implementation?"
+      ],
+      "role_map_traits": [
+        "risk planner",
+        "security reviewer",
+        "quality reviewer"
+      ]
+    }
+  }
+]
