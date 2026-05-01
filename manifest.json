@@ -301,16 +301,16 @@
       "bytes": 3736
     },
     {
-      "path": "tests/compatibility-matrix.test.mjs",
-      "bytes": 4042
-    },
-    {
       "path": "tests/agents-task.test.mjs",
       "bytes": 18899
     },
     {
       "path": "tests/assemble.test.mjs",
       "bytes": 20798
+    },
+    {
+      "path": "tests/compatibility-matrix.test.mjs",
+      "bytes": 4040
     },
     {
       "path": "tests/handoff-bridge.test.mjs",

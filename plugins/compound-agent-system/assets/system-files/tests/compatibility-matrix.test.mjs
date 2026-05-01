@@ -54,7 +54,7 @@ test("manifest paths are normalized with forward slashes for cross-platform vali
   const manifest = JSON.parse(readFileSync(join(REPO_ROOT, "manifest.json"), "utf-8"));
   assert.ok(Array.isArray(manifest.system_files));
   for (const entry of manifest.system_files) {
-    assert.equal(entry.path.includes("\\\\"), false, entry.path);
+    assert.equal(entry.path.includes("\\"), false, entry.path);
     assert.equal(entry.path.startsWith("/"), false, entry.path);
     assert.equal(entry.path.includes(".."), false, entry.path);
   }
