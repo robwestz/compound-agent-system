@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -80,6 +80,48 @@ test("uninstall refuses changed owned files", () => {
     assert.notEqual(uninstall.status, 0);
     assert.match(uninstall.stderr, /Refusing uninstall; unsafe files require review/);
     assert.ok(existsSync(join(dir, ".agents", "task.mjs")));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("uninstall refuses manifest paths outside target directory boundary", () => {
+  const dir = mkdtempSync(join(tmpdir(), "compound-install-boundary-"));
+  try {
+    mkdirSync(join(dir, ".agents"), { recursive: true });
+    const outside = `${dir}-data`;
+    mkdirSync(outside, { recursive: true });
+    writeFileSync(join(outside, "secret.txt"), "do not touch\n");
+    writeFileSync(join(dir, ".agents", "install-manifest.json"), JSON.stringify({
+      owner: "compound-agent-system",
+      files: [{ path: "../" + outside.split("/").pop() + "/secret.txt", action: "create", before: { existed: false } }],
+    }, null, 2));
+    const uninstall = runInstall(dir, ["--uninstall"]);
+    assert.notEqual(uninstall.status, 0);
+    assert.match(uninstall.stderr, /Refusing uninstall; unsafe files require review/);
+    assert.equal(readFileSync(join(outside, "secret.txt"), "utf-8"), "do not touch\n");
+    rmSync(outside, { recursive: true, force: true });
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("rollback refuses manifest paths outside target directory boundary", () => {
+  const dir = mkdtempSync(join(tmpdir(), "compound-rollback-boundary-"));
+  try {
+    const outside = `${dir}-data`;
+    mkdirSync(outside, { recursive: true });
+    writeFileSync(join(outside, "secret.txt"), "do not touch\n");
+    const manifest = join(dir, "rollback.json");
+    writeFileSync(manifest, JSON.stringify({
+      owner: "compound-agent-system",
+      files: [{ path: "../" + outside.split("/").pop() + "/secret.txt", action: "create", before: { existed: false } }],
+    }, null, 2));
+    const rollback = runInstall(dir, ["--rollback", manifest]);
+    assert.notEqual(rollback.status, 0);
+    assert.match(rollback.stderr, /Refusing rollback outside target/);
+    assert.equal(readFileSync(join(outside, "secret.txt"), "utf-8"), "do not touch\n");
+    rmSync(outside, { recursive: true, force: true });
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

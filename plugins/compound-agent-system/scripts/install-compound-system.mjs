@@ -3,7 +3,7 @@
 // Copies the bundled Compound Agent System files into a target repository.
 
 import { existsSync, mkdirSync, readdirSync, statSync, copyFileSync, readFileSync, writeFileSync, renameSync, unlinkSync, rmSync } from "node:fs";
-import { dirname, join, resolve, relative } from "node:path";
+import { dirname, isAbsolute, join, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const pluginRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -91,6 +91,11 @@ function writeJsonAtomic(path, data) {
   renameSync(tmp, path);
 }
 
+function isInsideTarget(targetRoot, candidate) {
+  const rel = relative(targetRoot, candidate);
+  return rel === "" || (rel && !rel.startsWith("..") && !isAbsolute(rel));
+}
+
 export function buildInstallPlan(args) {
   const targetRoot = resolve(args.target);
   const files = walk(sourceRoot);
@@ -146,7 +151,7 @@ function buildUninstallPlan(args) {
   const plan = { version: 1, target: targetRoot, dry_run: Boolean(args.dryRun), uninstall: true, files_to_remove: [], files_to_restore: [], refusals: [] };
   for (const file of manifest.files) {
     const target = resolve(targetRoot, file.path);
-    if (!target.startsWith(targetRoot)) {
+    if (!isInsideTarget(targetRoot, target)) {
       plan.refusals.push({ path: file.path, reason: "target escapes repo" });
       continue;
     }
@@ -167,7 +172,7 @@ function applyRollback(targetRoot, manifestFile) {
   if (manifest.owner !== OWNERSHIP_MARKER || !Array.isArray(manifest.files)) throw new Error("Rollback manifest is not owned by compound-agent-system.");
   for (const file of manifest.files.toReversed()) {
     const target = resolve(targetRoot, file.path);
-    if (!target.startsWith(targetRoot)) throw new Error(`Refusing rollback outside target: ${file.path}`);
+    if (!isInsideTarget(targetRoot, target)) throw new Error(`Refusing rollback outside target: ${file.path}`);
     if (file.before?.existed) {
       mkdirSync(dirname(target), { recursive: true });
       writeFileSync(target, file.before.content);
@@ -183,11 +188,15 @@ function applyUninstall(targetRoot, plan) {
     throw new Error(`Refusing uninstall; unsafe files require review: ${plan.refusals.map((item) => item.path).join(", ")}`);
   }
   for (const entry of plan.files_to_restore) {
+    if (!isInsideTarget(targetRoot, resolve(entry.target))) throw new Error(`Refusing restore outside target: ${entry.path}`);
     const manifest = lastManifest(targetRoot);
     const original = manifest.files.find((file) => file.path === entry.path);
     writeFileSync(entry.target, original.before.content);
   }
-  for (const entry of plan.files_to_remove) unlinkSync(entry.target);
+  for (const entry of plan.files_to_remove) {
+    if (!isInsideTarget(targetRoot, resolve(entry.target))) throw new Error(`Refusing removal outside target: ${entry.path}`);
+    unlinkSync(entry.target);
+  }
   rmSync(installedManifestPath(targetRoot), { force: true });
   console.log(`Uninstalled ${plan.files_to_remove.length} file(s), restored ${plan.files_to_restore.length} file(s).`);
 }
