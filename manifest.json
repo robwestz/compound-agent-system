@@ -261,6 +261,10 @@
       "bytes": 18112
     },
     {
+      "path": "docs/compatibility-matrix.md",
+      "bytes": 5221
+    },
+    {
       "path": "docs/plugin-size-budget.md",
       "bytes": 2276
     },
@@ -303,6 +307,10 @@
     {
       "path": "tests/assemble.test.mjs",
       "bytes": 20798
+    },
+    {
+      "path": "tests/compatibility-matrix.test.mjs",
+      "bytes": 4040
     },
     {
       "path": "tests/handoff-bridge.test.mjs",
