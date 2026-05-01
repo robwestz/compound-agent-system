@@ -3,7 +3,7 @@
 // Zero runtime dependencies. Node 18+.
 // See .agents/PROTOCOL.md, .agents/DOD.md, .agents/SKILL_SELECT.md, .agents/PLAN_MARKERS.md
 
-import { readFileSync, writeFileSync, existsSync, statSync, renameSync, mkdirSync, unlinkSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, statSync, renameSync, mkdirSync, unlinkSync, copyFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -13,6 +13,33 @@ import { runPortableNodeCommand } from "./node-runtime.mjs";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..");
 const TASKS_PATH = process.env.COMPOUND_TASKS_PATH || join(__dirname, "TASKS.json");
+const CURRENT_LEDGER_VERSION = "1";
+const SUPPORTED_LEDGER_VERSIONS = new Set(["1"]);
+const MODE_POLICY = {
+  observe: {
+    blocks: "nothing",
+    state_changing: "logs fact-forcing guidance and continues",
+    hooks: "emit structured context and continue",
+    exit_code: 0,
+  },
+  warn: {
+    blocks: "nothing",
+    state_changing: "prints fact-forcing warning and continues",
+    hooks: "emit structured warning and continue",
+    exit_code: 0,
+  },
+  enforce: {
+    blocks: "state-changing actions without task or grounding",
+    state_changing: "requires grounding before mutation",
+    hooks: "block invalid edits with exit code 2",
+    exit_code: 2,
+  },
+};
+const EXPECTED_HOOKS = {
+  SessionStart: [{ matcher: null, command: "node .agents/task.mjs hook session-start" }],
+  PreToolUse: [{ matcher: "Edit|Write", command: "node .agents/task.mjs hook pre-edit" }],
+  Stop: [{ matcher: null, command: "node .agents/task.mjs hook stop" }],
+};
 
 const COLORS = process.stdout.isTTY
   ? { red: "\x1b[31m", green: "\x1b[32m", yellow: "\x1b[33m", cyan: "\x1b[36m", dim: "\x1b[2m", reset: "\x1b[0m" }
@@ -30,10 +57,13 @@ function complianceMode() {
 
 function complianceInfo() {
   const mode = complianceMode();
+  const policy = MODE_POLICY[mode];
   return {
     mode,
-    blocks: mode === "enforce" ? "state-changing actions without task/grounding" : "nothing",
+    blocks: policy.blocks,
     does_not_block: mode === "observe" ? "all actions; logs only" : mode === "warn" ? "actions after warning" : "read-only commands",
+    state_changing: policy.state_changing,
+    hooks: policy.hooks,
     switch: "export COMPOUND_MODE=enforce",
     recommended: "Switch after the first smoke test passes and before unattended execution.",
   };
@@ -59,8 +89,10 @@ function factForceMessage() {
     "This prevents agents from acting on stale or assumed context. Quote the current instruction verbatim, set COMPOUND_GROUNDED to that quote, then retry.";
 }
 
+const STATE_CHANGING_COMMANDS = new Set(["ack", "open", "park", "resume", "block", "abandon", "update", "done", "verify", "import", "migrate"]);
+
 function requireGrounding(command) {
-  const stateChanging = new Set(["ack", "open", "park", "resume", "block", "abandon", "update", "done", "verify", "import", "register"]);
+  const stateChanging = STATE_CHANGING_COMMANDS;
   if (!stateChanging.has(command)) return;
   if (process.env.COMPOUND_GROUNDED || existsSync(groundedPath())) {
     if (process.env.COMPOUND_GROUNDED) writeFileSync(groundedPath(), JSON.stringify({ grounded_at: nowISO(), quote: process.env.COMPOUND_GROUNDED }, null, 2) + "\n");
@@ -83,11 +115,45 @@ function loadLedger() {
   return JSON.parse(readFileSync(TASKS_PATH, "utf-8"));
 }
 
+function safeReadLedger() {
+  if (!existsSync(TASKS_PATH)) {
+    return { ok: true, exists: false, ledger: { version: CURRENT_LEDGER_VERSION, schema_url: ".agents/PROTOCOL.md", current: null, tasks: [], agents_active: [], log: [] } };
+  }
+  try {
+    const raw = readFileSync(TASKS_PATH, "utf-8");
+    return { ok: true, exists: true, raw, ledger: JSON.parse(raw) };
+  } catch (error) {
+    return { ok: false, exists: true, error: error.message };
+  }
+}
+
 function saveLedger(ledger) {
   const tmp = TASKS_PATH + ".tmp";
   mkdirSync(dirname(TASKS_PATH), { recursive: true });
   writeFileSync(tmp, JSON.stringify(ledger, null, 2) + "\n");
   renameSync(tmp, TASKS_PATH);
+}
+
+function workspaceRoot() {
+  const ledgerDir = dirname(resolve(TASKS_PATH));
+  return ledgerDir.endsWith(`${"/"}.agents`) || ledgerDir.endsWith(`${"\\"}.agents`) ? dirname(ledgerDir) : ledgerDir;
+}
+
+function backupPath(kind = "backup") {
+  return `${TASKS_PATH}.${kind}-${nowISO().replace(/[:.]/g, "-")}`;
+}
+
+function normalizeLedgerV1(ledger) {
+  return {
+    version: CURRENT_LEDGER_VERSION,
+    schema_url: ledger.schema_url || ".agents/PROTOCOL.md",
+    current: ledger.current || null,
+    tasks: Array.isArray(ledger.tasks) ? ledger.tasks : [],
+    agents_active: Array.isArray(ledger.agents_active) ? ledger.agents_active : [],
+    agent_profiles: ledger.agent_profiles && typeof ledger.agent_profiles === "object" ? ledger.agent_profiles : {},
+    log: Array.isArray(ledger.log) ? ledger.log : [],
+    ...Object.fromEntries(Object.entries(ledger).filter(([key]) => !["version", "schema_url", "current", "tasks", "agents_active", "agent_profiles", "log"].includes(key))),
+  };
 }
 
 function nextId(ledger) {
@@ -149,6 +215,7 @@ async function prompt(question) {
 
 function cmdStatus() {
   const ledger = loadLedger();
+  const version = ledgerVersionStatus(ledger);
   const cur = ledger.current ? findTask(ledger, ledger.current) : null;
   const open = ledger.tasks.filter((t) => t.state === "in_progress" || t.state === "open").length;
   const blocked = ledger.tasks.filter((t) => t.state === "blocked").length;
@@ -183,6 +250,8 @@ function cmdStatus() {
   console.log(`  does not block: ${compliance.does_not_block}`);
   console.log(`  switch: ${compliance.switch}`);
   console.log(`  recommended switch point: ${compliance.recommended}`);
+  console.log(`Ledger schema: ${version.version} (${version.status})`);
+  if (version.status === "migration_needed") console.log("  next: node .agents/task.mjs migrate --apply");
   if (blocked > 0) {
     console.log(c("yellow", "Blocked tasks:"));
     for (const t of ledger.tasks.filter((t) => t.state === "blocked")) {
@@ -194,6 +263,168 @@ function cmdStatus() {
 function cmdCurrent() {
   const ledger = loadLedger();
   process.stdout.write(ledger.current || "");
+}
+
+function duplicateTaskIds(ledger) {
+  const seen = new Set();
+  const dupes = new Set();
+  for (const task of ledger.tasks || []) {
+    if (!task?.id) continue;
+    if (seen.has(task.id)) dupes.add(task.id);
+    seen.add(task.id);
+  }
+  return [...dupes];
+}
+
+function ledgerVersionStatus(ledger) {
+  const version = String(ledger.version || "0");
+  if (version === CURRENT_LEDGER_VERSION) return { status: "current", version };
+  if (version === "0" || !ledger.version) return { status: "migration_needed", version };
+  if (!SUPPORTED_LEDGER_VERSIONS.has(version)) return { status: "unsupported_version", version };
+  return { status: "migration_needed", version };
+}
+
+function hookStatus() {
+  const settingsPath = join(workspaceRoot(), ".claude", "settings.json");
+  if (!existsSync(settingsPath)) {
+    return {
+      status: "missing",
+      settings_path: settingsPath,
+      client_support: { claude: "missing settings", codex: "no hook file required", shared: "task CLI available" },
+      missing: Object.entries(EXPECTED_HOOKS).flatMap(([event, hooks]) => hooks.map((hook) => `${event}:${hook.command}`)),
+      next_action: "Run node .agents/activate.mjs to install Claude hooks.",
+    };
+  }
+  let settings;
+  try {
+    settings = JSON.parse(readFileSync(settingsPath, "utf-8"));
+  } catch (error) {
+    return {
+      status: "invalid",
+      settings_path: settingsPath,
+      error: error.message,
+      client_support: { claude: "settings JSON invalid", codex: "no hook file required", shared: "task CLI available" },
+      missing: [],
+      next_action: "Fix .claude/settings.json syntax, then run node .agents/activate.mjs.",
+    };
+  }
+  const missing = [];
+  const duplicates = [];
+  for (const [event, expected] of Object.entries(EXPECTED_HOOKS)) {
+    const configs = Array.isArray(settings.hooks?.[event]) ? settings.hooks[event] : [];
+    for (const hook of expected) {
+      const matches = configs.filter((config) => {
+        if ((config.matcher || null) !== hook.matcher) return false;
+        return Array.isArray(config.hooks) && config.hooks.some((entry) => entry.command === hook.command);
+      });
+      if (!matches.length) missing.push(`${event}:${hook.command}`);
+      if (matches.length > 1) duplicates.push(`${event}:${hook.command}`);
+    }
+  }
+  return {
+    status: missing.length || duplicates.length ? "needs_attention" : "ok",
+    settings_path: settingsPath,
+    client_support: { claude: "hooks in .claude/settings.json", codex: "uses shared CLI/config fallback", shared: "task CLI available" },
+    missing,
+    duplicates,
+    next_action: missing.length || duplicates.length ? "Run node .agents/activate.mjs; inspect duplicates before editing user hooks." : "No hook action required.",
+  };
+}
+
+function doctorReport() {
+  const ledgerResult = safeReadLedger();
+  const nodeVersion = process.env.COMPOUND_DOCTOR_NODE_VERSION || process.version;
+  const nodeMajor = Number(/^v?(\d+)/.exec(nodeVersion)?.[1] || 0);
+  const compliance = complianceInfo();
+  const hooks = hookStatus();
+  const checks = {
+    node: {
+      ok: nodeMajor >= 18,
+      version: nodeVersion,
+      next_action: nodeMajor >= 18 ? "No Node action required." : "Install Node 18 or newer.",
+    },
+    mode: {
+      ok: ["observe", "warn", "enforce"].includes(compliance.mode),
+      current: compliance.mode,
+      policy: MODE_POLICY[compliance.mode],
+      next_action: compliance.mode === "enforce" ? "Mode is ready for unattended execution." : compliance.recommended,
+    },
+    ledger: {
+      ok: false,
+      path: TASKS_PATH,
+      exists: ledgerResult.exists,
+      status: "invalid",
+      version: null,
+      current_task: null,
+      task_count: 0,
+      duplicate_task_ids: [],
+      migration_needed: false,
+      next_action: "Repair ledger before continuing.",
+    },
+    hooks,
+  };
+  if (!ledgerResult.ok) {
+    checks.ledger.error = ledgerResult.error;
+    checks.ledger.next_action = "Restore from a known-good TASKS.json backup or manually fix JSON syntax; doctor will not overwrite corrupt ledgers.";
+  } else {
+    const ledger = ledgerResult.ledger;
+    const version = ledgerVersionStatus(ledger);
+    const dupes = duplicateTaskIds(ledger);
+    checks.ledger = {
+      ok: Array.isArray(ledger.tasks) && version.status === "current" && dupes.length === 0,
+      path: TASKS_PATH,
+      exists: ledgerResult.exists,
+      status: dupes.length ? "duplicate_task_ids" : version.status,
+      version: version.version,
+      current_task: ledger.current || null,
+      task_count: Array.isArray(ledger.tasks) ? ledger.tasks.length : 0,
+      duplicate_task_ids: dupes,
+      migration_needed: version.status === "migration_needed",
+      next_action: dupes.length
+        ? "Resolve duplicate task ids manually before continuing."
+        : version.status === "current"
+          ? "No ledger action required."
+          : version.status === "migration_needed"
+            ? "Run node .agents/task.mjs migrate --apply to write a backed-up v1 ledger."
+            : "Downgrade or export this ledger with a supported Compound Agent System version.",
+    };
+  }
+  checks.hooks.ok = hooks.status === "ok";
+  const ok = Object.values(checks).every((check) => check.ok);
+  const next_actions = Object.values(checks).filter((check) => !check.ok).map((check) => check.next_action);
+  return { ok, status: ok ? "PASS" : "FAIL", generated_at: nowISO(), checks, next_actions };
+}
+
+function cmdDoctor() {
+  const report = doctorReport();
+  console.log(`Compound doctor: ${report.status}`);
+  for (const action of report.next_actions) console.log(`- next: ${action}`);
+  if (!report.next_actions.length) console.log("- next: No action required.");
+  console.log(JSON.stringify(report, null, 2));
+}
+
+function cmdMigrate(args) {
+  const ledgerResult = safeReadLedger();
+  if (!ledgerResult.ok) throw new Error(`Cannot migrate invalid ledger JSON: ${ledgerResult.error}`);
+  const ledger = ledgerResult.ledger;
+  const version = ledgerVersionStatus(ledger);
+  if (version.status === "unsupported_version") throw new Error(`Refusing to downgrade unsupported ledger version ${version.version}.`);
+  if (version.status === "current") {
+    console.log("Ledger schema already current.");
+    return;
+  }
+  const migrated = normalizeLedgerV1(ledger);
+  console.log(`Ledger migration: ${version.version} -> ${CURRENT_LEDGER_VERSION}`);
+  if (!args.apply) {
+    console.log("Dry-run. Re-run with --apply to write a backed-up migration.");
+    return;
+  }
+  const backup = backupPath("pre-migrate");
+  mkdirSync(dirname(TASKS_PATH), { recursive: true });
+  if (existsSync(TASKS_PATH)) copyFileSync(TASKS_PATH, backup);
+  saveLedger(migrated);
+  console.log(`Backup: ${backup}`);
+  console.log("Ledger migration applied.");
 }
 
 function normalizeIdentity(agentId, args, existing = {}) {
@@ -660,6 +891,8 @@ Usage:
   task.mjs abandon <id> --reason "<text>"
   task.mjs update <id> [--skill <id>] [--dod <spec>] [--remove-dod <i> --reason <r>]
   task.mjs import <plan-file> [--apply]
+  task.mjs doctor                               Diagnose ledger, hooks, mode, runtime
+  task.mjs migrate [--apply]                    Migrate ledger with backup
 
   task.mjs hook <event>                          (internal — invoked by Claude hooks)
 
@@ -687,6 +920,8 @@ async function main() {
     if (cmd === "abandon") return cmdAbandon(args);
     if (cmd === "update") return cmdUpdate(args);
     if (cmd === "import") return cmdImport(args);
+    if (cmd === "doctor") return cmdDoctor(args);
+    if (cmd === "migrate") return cmdMigrate(args);
     if (cmd === "hook") {
       const ev = args._[1];
       if (ev === "session-start") return hookSessionStart();
