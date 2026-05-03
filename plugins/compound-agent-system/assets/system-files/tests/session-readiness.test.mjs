@@ -131,7 +131,7 @@ test("unsafe false-ready scenario refuses unresolved blockers without checkpoint
   const dir = mkdtempSync(join(tmpdir(), "readiness-false-ready-"));
   try {
     const path = makeLedger(dir, {
-      tasks: [baseTask({ blocked_by: "Need operator decision", handoffs: [{ checkpoint_id: "cp-missing", path: ".omc/state/checkpoints/missing.json" }] })],
+      tasks: [baseTask({ state: "blocked", blocked_by: "Need operator decision", handoffs: [{ checkpoint_id: "cp-missing", path: ".omc/state/checkpoints/missing.json" }] })],
     });
     const r = run(path, "enforce");
     assert.equal(r.status, 0, r.stderr);
@@ -142,6 +142,24 @@ test("unsafe false-ready scenario refuses unresolved blockers without checkpoint
     assert.equal(result.checks.handoff_checkpoint, false);
     assert.equal(result.checks.handoff_contract, false);
     assert.equal(result.checks.known_blockers_clear, false);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("resumed task with historical string blocked_by is not an active blocker", () => {
+  const dir = mkdtempSync(join(tmpdir(), "readiness-resumed-blocker-"));
+  try {
+    writeCheckpoint(dir);
+    const path = makeLedger(dir, {
+      tasks: [baseTask({ blocked_by: "Historical blocker retained by resume" })],
+    });
+    const r = run(path, "enforce");
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stdout, /Long-session readiness: READY/);
+    const result = jsonFrom(r.stdout);
+    assert.equal(result.checks.known_blockers_clear, true);
+    assert.deepEqual(result.blockers, []);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

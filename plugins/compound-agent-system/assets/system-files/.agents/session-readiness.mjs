@@ -94,7 +94,7 @@ function manualDodSafe(dod) {
 }
 
 function blockers(ledger) {
-  return (ledger.tasks || []).filter((task) => task.state === "blocked" || normalizeList(task.blocked_by).length);
+  return (ledger.tasks || []).filter((task) => task.state === "blocked" || (Array.isArray(task.blocked_by) && task.blocked_by.filter(Boolean).length));
 }
 
 function questions(ledger) {
