@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -10,6 +10,25 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const CHECKER = join(ROOT, ".agents", "check-planning-quality.mjs");
 const IDEA = join(ROOT, ".agents", "idea-intake.mjs");
+const QUALITY_FIXTURES = join(ROOT, "fixtures", "planning-quality");
+
+const RED_TEAM_CASES = [
+  ["generic-two-phase-plan.md", ["missing-first-vertical-slice", "generic-phase-plan", "generic-only-phase-names"]],
+  ["missing-phase-dod.md", ["missing-phase-dod"]],
+  ["missing-role-ownership.md", ["missing-role-ownership"]],
+  ["duplicate-phase-id.md", ["duplicate-phase-id"]],
+  ["duplicate-phase-goal.md", ["duplicate-phase-goal"]],
+  ["duplicate-planning-section.md", ["duplicate-planning-section"]],
+  ["missing-blocker-recommended-default.md", ["missing-blocker-recommended-default"]],
+  ["missing-blocker-priority.md", ["missing-blocker-priority"]],
+  ["missing-blocker-reversibility.md", ["missing-blocker-reversibility"]],
+  ["missing-blocker-proceed-policy.md", ["missing-blocker-proceed-policy"]],
+  ["missing-blocker-unlock-condition.md", ["missing-blocker-unlock-condition"]],
+  ["unimportable-phase-marker.md", ["unimportable-phase-marker", "missing-importable-markers"]],
+  ["frontmatter-marker-mismatch.md", ["phase-frontmatter-marker-mismatch"]],
+  ["role-owner-mismatch.md", ["role-owner-mismatch"]],
+  ["unsafe-external-api-default.md", ["unsafe-external-api-default"]],
+];
 
 function workspace() {
   const dir = mkdtempSync(join(tmpdir(), "planning-quality-"));
@@ -19,12 +38,20 @@ function workspace() {
   return dir;
 }
 
-test("generic two-phase plans fail planning quality", () => {
-  const r = spawnSync(process.execPath, [CHECKER, "fixtures/planning-quality/generic-two-phase-plan.md"], { cwd: ROOT, encoding: "utf-8" });
-  assert.equal(r.status, 1);
-  const out = JSON.parse(r.stderr);
-  assert.ok(out.issues.some((issue) => issue.type === "missing-first-vertical-slice"));
-  assert.ok(out.issues.some((issue) => issue.type === "generic-phase-plan"));
+test("red-team planning corpus maps each fixture to specific issue types", () => {
+  const fixtureNames = new Set(readdirSync(QUALITY_FIXTURES).filter((name) => name.endsWith(".md")));
+  assert.equal(fixtureNames.size, RED_TEAM_CASES.length);
+  const distinctIssueTypes = new Set(RED_TEAM_CASES.flatMap(([, issueTypes]) => issueTypes));
+  assert.ok(distinctIssueTypes.size >= 10);
+
+  for (const [fixture, issueTypes] of RED_TEAM_CASES) {
+    const r = spawnSync(process.execPath, [CHECKER, join("fixtures", "planning-quality", fixture)], { cwd: ROOT, encoding: "utf-8" });
+    assert.equal(r.status, 1, `${fixture} should fail`);
+    const out = JSON.parse(r.stderr);
+    for (const issueType of issueTypes) {
+      assert.ok(out.issues.some((issue) => issue.type === issueType), `${fixture} should report ${issueType}`);
+    }
+  }
 });
 
 test("idea-intake output passes planning quality", () => {

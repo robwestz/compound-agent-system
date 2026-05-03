@@ -76,7 +76,9 @@ Expected checks:
 - Long API/data fixtures should produce `local source-to-dataset manifest proof`, `phase-2-local-source-to-dataset-slice`, and `phase-3-adapter-registry-provenance`.
 - `node .agents/check-planning-quality.mjs phase-0/PHASE_PLAN.md phase-0/GAP_SCAN.md` should print JSON with `"ok": true` and `"issues": []`.
 - `task.mjs import ... --apply` should import the generated phase count once; if COMPOUND_MODE is warn, a Fact-Forcing Gate message may appear on stderr without blocking.
-- The generic planning-quality fixture should exit non-zero and include `missing-first-vertical-slice` plus `generic-phase-plan`.
+- The planning-quality red-team corpus should exit non-zero per fixture, with named issue types rather than a generic failure bucket.
+
+When adding new planning quality checks, add a focused `fixtures/planning-quality/*.md` case first, assert the exact issue type in `tests/check-planning-quality.test.mjs`, and keep generated good output green. Prefer structure checks (phase marker attributes, DoD fields, blocker metadata, role-owner keys, duplicate ids/sections) over brittle prose-only assertions so the checker does not overfit one wording.
 
 ## Devin Secrets Needed
 
