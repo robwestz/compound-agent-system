@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
@@ -68,6 +68,14 @@ test("role plan rejects missing role assignments", () => {
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("role plan can be imported without running the CLI", () => {
+  const importCheck = spawnSync(process.execPath, ["--input-type=module", "--eval", `import { exportRolePlan } from ${JSON.stringify(pathToFileURL(ROLE_PLAN).href)}; console.log(typeof exportRolePlan);`], {
+    encoding: "utf-8",
+  });
+  assert.equal(importCheck.status, 0, importCheck.stderr);
+  assert.equal(importCheck.stdout, "function\n");
 });
 
 test("generated AGENT_ROLES.md remains phase-linked and static", () => {

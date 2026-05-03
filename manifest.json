@@ -46,7 +46,7 @@
     },
     {
       "path": ".agents/role-plan.mjs",
-      "bytes": 3832
+      "bytes": 3898
     },
     {
       "path": ".agents/skills/SkiLLBuilDr/SKILL.md",
@@ -342,7 +342,7 @@
     },
     {
       "path": "tests/role-plan.test.mjs",
-      "bytes": 3769
+      "bytes": 4200
     },
     {
       "path": "tests/token-budget-trigger-sim.mjs",

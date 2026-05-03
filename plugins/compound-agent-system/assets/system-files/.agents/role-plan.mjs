@@ -88,4 +88,4 @@ function main() {
   else process.stdout.write(renderText(plan));
 }
 
-main();
+if (process.argv[1] && process.argv[1].endsWith("role-plan.mjs")) main();
