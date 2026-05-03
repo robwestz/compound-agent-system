@@ -189,7 +189,9 @@ node .agents\task.mjs status
 
 Idea intake immediately creates an intake/planning task, records the original idea text, runs deterministic GAP SCAN, proposes recommended defaults, assigns planner/executor/reviewer/verifier roles, and writes Phase 0 artifacts. Blocker questions do not prevent the intake task from opening; implementation tasks wait for accepted scope.
 
-Generated planning output must pass `.agents/check-output-quality.mjs` and `.agents/check-planning-quality.mjs` before it is treated as an artifact. The planning quality gate rejects generic foundation/verification-only plans, missing `first_vertical_slice`, missing phase DoD, missing role ownership, missing blocker defaults, and missing import markers.
+Generated planning output must pass `.agents/check-output-quality.mjs` and `.agents/check-planning-quality.mjs` before it is treated as an artifact. The planning quality gate rejects generic foundation/verification-only plans, missing `first_vertical_slice`, missing phase DoD, missing role ownership, missing blocker metadata, duplicate or mismatched phase markers, repeated planning sections, role-owner mismatches, unsafe external-call defaults, and missing import markers.
+
+To add a planning quality check, first add one concise fixture under `fixtures/planning-quality/` that isolates the structural failure and assert its named issue type in `tests/check-planning-quality.test.mjs`. Prefer markers, phase ids, DoD fields, blocker metadata fields, and role-owner keys over fragile prose matching. Good idea-intake output must keep passing; if a new check fails generated output, tighten the detector or improve the generator instead of snapshotting exact prose.
 
 ## Phase 0 plan artifacts
 

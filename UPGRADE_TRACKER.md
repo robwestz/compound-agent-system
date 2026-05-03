@@ -338,6 +338,28 @@ Verification command(s):
 Notes:
 - Full suite now passes with new benchmark coverage (`pass 119`, `fail 0`).
 
+## Premium Production Task 16: Planning-quality red-team corpus
+
+Status: DONE
+
+DoD checklist:
+- [x] Red-team corpus covers at least 10 distinct failure types.
+- [x] Each failure has a specific issue type.
+- [x] Good generated outputs still pass.
+- [x] Docs explain how to add new quality checks without overfitting.
+- [x] Two evaluator feedback rounds are completed and addressed.
+
+Verification command(s):
+- `node plugins/compound-agent-system/scripts/validate-package.mjs`
+- `node --test plugins/compound-agent-system/assets/system-files/tests/check-planning-quality.test.mjs`
+- `cd plugins/compound-agent-system/assets/system-files && node --test tests/*.test.mjs`
+
+Notes:
+- Added 15 planning-quality red-team fixtures with 17 named issue types, covering generic phases, missing DoD, role mismatch, repeated sections, missing blocker metadata, unsafe defaults, and unimportable markers.
+- Round 1 review tightened unsafe-default detection so good generated real-world benchmark output still passes.
+- Round 2 review added the new corpus files to package validation and refreshed manifest byte metadata.
+- Validator passes; full system-file suite passes (`pass 167`, `fail 0`).
+
 ## Upgrade Package 2 Final DoD
 
 Status: DONE
