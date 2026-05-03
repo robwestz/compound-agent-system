@@ -13,7 +13,7 @@ function workspaceRoot() {
   if (ledgerDir === here) return resolve(here, "..");
   if (existsSync(join(ledgerDir, ".agents"))) return ledgerDir;
   if (existsSync(join(ledgerDir, ".omc"))) return ledgerDir;
-  return dirname(ledgerDir);
+  return ledgerDir;
 }
 
 function mode() {

@@ -73,6 +73,23 @@ test("ready scenario reports READY only when every premium condition is met", ()
   }
 });
 
+test("bare ledger directory remains the workspace root", () => {
+  const dir = mkdtempSync(join(tmpdir(), "readiness-bare-ledger-"));
+  try {
+    mkdirSync(join(dir, ".omc", "state", "checkpoints"), { recursive: true });
+    writeFileSync(join(dir, ".omc", "state", "checkpoints", "cp-1.json"), "{}");
+    const path = makeLedger(dir);
+    const r = run(path, "enforce");
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stdout, /Long-session readiness: READY/);
+    const result = jsonFrom(r.stdout);
+    assert.equal(result.checks.handoff_checkpoint, true);
+    assert.equal(result.checks.handoff_contract, true);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("empty checkpoint directory does not satisfy readiness", () => {
   const dir = mkdtempSync(join(tmpdir(), "readiness-empty-checkpoint-"));
   try {
