@@ -50,7 +50,7 @@ export function scanPlanningQuality(inputs) {
   if (phases.length && phases.every((p) => GENERIC_PHASE_RE.test(`${p.id} ${p.goal}`))) issues.push({ type: "generic-phase-plan" });
   if (phases.length && phases.every((p) => /foundation|verification/i.test(p.id))) issues.push({ type: "generic-only-phase-names" });
   if (/TODO|TBD|\{\{[^}]+\}\}/i.test(combined)) issues.push({ type: "unresolved-placeholder" });
-  if (/default:\s*(ask the user|none|tbd|n\/a)/i.test(combined)) issues.push({ type: "unsafe-default" });
+  if (/\bdefault:\s*(ask the user|none|tbd|n\/a)/i.test(combined)) issues.push({ type: "unsafe-default" });
   for (const phase of phases) {
     if (!phase.dod) issues.push({ type: "missing-phase-dod", phase: phase.id });
     if (!phase.skills) issues.push({ type: "missing-role-ownership", phase: phase.id });

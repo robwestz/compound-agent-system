@@ -55,6 +55,7 @@ test("red-team corpus covers named planning failure types", () => {
     const r = runFixture(`fixtures/planning-quality/red-team/${fixture}`);
     assert.equal(r.status, 1, `${fixture} should fail`);
     const types = issues(r).map((issue) => issue.type);
+    if (fixture === "missing-blocker-metadata.md") assert.ok(!types.includes("unsafe-default"), `${fixture} should not fail on can_default: none`);
     for (const expectedType of expectedTypes) {
       assert.ok(types.includes(expectedType), `${fixture} missing ${expectedType}; got ${types.join(", ")}`);
       seen.add(expectedType);
