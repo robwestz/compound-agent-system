@@ -361,3 +361,24 @@ Verification command(s):
 Notes:
 - Package validation passes.
 - Full suite passes (`pass 119`, `fail 0`).
+
+## Premium Production Task 17: Agent Role Orchestration Runtime
+
+Status: DONE
+
+DoD checklist:
+- [x] Role maps can be exported as a batch assignment plan.
+- [x] Each role has task IDs, artifacts, autonomy level, and handoff condition.
+- [x] Core only handles static plan export unless spawning is explicitly approved.
+- [x] Tests cover export shape and missing-role failures.
+- [x] Two evaluator/self-review feedback rounds are recorded in `docs/premium-production/tasks/17-agent-role-orchestration-runtime.md`.
+
+Verification command(s):
+- `node --test plugins/compound-agent-system/assets/system-files/tests/role-assignment-plan.test.mjs`
+- `node --test plugins/compound-agent-system/assets/system-files/tests/idea-intake.test.mjs plugins/compound-agent-system/assets/system-files/tests/role-assignment-plan.test.mjs`
+- `node plugins/compound-agent-system/scripts/validate-package.mjs`
+- `cd plugins/compound-agent-system/assets/system-files && node --test tests/*.test.mjs`
+
+Notes:
+- `.agents/role-assignment-plan.mjs` exports generated planner/executor/reviewer/verifier maps as static JSON only.
+- Exported plans explicitly preserve human approval for multi-agent execution and set automatic subagent spawning to false.

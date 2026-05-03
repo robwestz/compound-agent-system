@@ -117,7 +117,10 @@ After creating `idea.md`, run `node .agents/first-session-wizard.mjs` and follow
 
 1. `node .agents/idea-intake.mjs --input idea.md --apply`
 2. `node .agents/task.mjs import phase-0/PHASE_PLAN.md --apply`
-3. `node .agents/session-readiness.mjs`
+3. `node .agents/role-assignment-plan.mjs --input phase-0/AGENT_ROLES.md --out phase-0/BATCH_ASSIGNMENT_PLAN.json`
+4. `node .agents/session-readiness.mjs`
+
+`role-assignment-plan.mjs` exports planner/executor/reviewer/verifier maps into a static JSON batch assignment plan with task IDs, artifacts, autonomy levels, and handoff conditions. It does not spawn agents or start multi-agent execution; human approval remains required before assigning work to multiple agents.
 
 To skip the guide:
 
