@@ -361,3 +361,26 @@ Verification command(s):
 Notes:
 - Package validation passes.
 - Full suite passes (`pass 119`, `fail 0`).
+
+---
+
+## Premium Production Task 21: Session Readiness Premium Gate
+
+Status: DONE
+
+DoD checklist:
+- [x] Readiness checks active task, DoD, mode, checkpoint, blockers, questions, handoff, env contract, and clean/known-dirty state.
+- [x] It reports READY only when every required condition is met.
+- [x] It prints structured unlock steps for NOT_READY.
+- [x] Tests cover ready, partially ready, and unsafe false-ready scenarios.
+- [x] Two evaluator feedback rounds are completed and addressed.
+
+Verification command(s):
+- `node plugins/compound-agent-system/scripts/validate-package.mjs`
+- `node --test plugins/compound-agent-system/assets/system-files/tests/session-readiness.test.mjs`
+- `node --test plugins/compound-agent-system/assets/system-files/tests/*.test.mjs`
+
+Notes:
+- Session readiness now refuses unattended READY unless every premium preflight condition is true.
+- NOT_READY output includes structured unlock step IDs, requirements, and commands.
+- Full suite passes (`pass 169`, `fail 0`).

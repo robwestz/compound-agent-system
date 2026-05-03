@@ -87,8 +87,11 @@ test("premium golden path bootstraps, plans, imports, readies, and checkpoints",
     const ledgerReady = readJson(join(dir, ".agents", "TASKS.json"));
     const active = ledgerReady.tasks.find((task) => task.id === ledgerReady.current);
     active.blocked_by = [];
-    ledgerReady.log.push({ event: "context-refresh", ts: "2026-05-01T00:00:00.000Z" });
-    ledgerReady.log.push({ event: "compound-register", ts: "2026-05-01T00:01:00.000Z" });
+    active.handoffs = [{ checkpoint_id: "cp-golden", path: ".omc/state/checkpoints/cp-golden.json" }];
+    active.env_contract = { status: "ready", node: ">=18", runtime_dependencies: "zero" };
+    active.worktree_state = { status: "known-dirty", files: [".agents/TASKS.json"], reason: "Golden path test intentionally mutates fixture ledger." };
+    ledgerReady.log.push({ event: "context-refresh", ts: "2026-05-01T00:00:00.000Z", task: active.id });
+    ledgerReady.log.push({ event: "compound-register", ts: "2026-05-01T00:01:00.000Z", task: active.id });
     writeFileSync(join(dir, ".agents", "TASKS.json"), JSON.stringify(ledgerReady, null, 2) + "\n");
 
     const ready = runNode([".agents/session-readiness.mjs"], { cwd: dir, env: { COMPOUND_MODE: "enforce" } });
