@@ -30,11 +30,19 @@
     },
     {
       "path": ".agents/TASKS.json",
-      "bytes": 23971
+      "bytes": 26606
     },
     {
       "path": ".agents/activate.mjs",
-      "bytes": 3677
+      "bytes": 4071
+    },
+    {
+      "path": ".agents/agent-activate.mjs",
+      "bytes": 4423
+    },
+    {
+      "path": ".agents/event-log.mjs",
+      "bytes": 5773
     },
     {
       "path": ".agents/first-session-wizard.mjs",
@@ -43,6 +51,10 @@
     {
       "path": ".agents/node-runtime.mjs",
       "bytes": 5166
+    },
+    {
+      "path": ".agents/session-readiness.mjs",
+      "bytes": 6119
     },
     {
       "path": ".agents/skills/SkiLLBuilDr/SKILL.md",
@@ -54,7 +66,7 @@
     },
     {
       "path": ".agents/task.mjs",
-      "bytes": 42183
+      "bytes": 44359
     },
     {
       "path": ".claude/commands/add-new-workspace-or-prototype.md",
@@ -269,6 +281,10 @@
       "bytes": 5221
     },
     {
+      "path": "docs/event-log.md",
+      "bytes": 2642
+    },
+    {
       "path": "docs/plugin-size-budget.md",
       "bytes": 2276
     },
@@ -286,7 +302,7 @@
     },
     {
       "path": "handoff-bridge.mjs",
-      "bytes": 23865
+      "bytes": 24508
     },
     {
       "path": "lib/token-budget.mjs",
@@ -299,6 +315,10 @@
     {
       "path": "package.json",
       "bytes": 1395
+    },
+    {
+      "path": "schemas/event-log.v1.json",
+      "bytes": 1528
     },
     {
       "path": "schemas/handoff-contract.v1.json",
@@ -321,12 +341,20 @@
       "bytes": 4040
     },
     {
+      "path": "tests/event-log.test.mjs",
+      "bytes": 6692
+    },
+    {
       "path": "tests/handoff-bridge.test.mjs",
-      "bytes": 13945
+      "bytes": 14073
     },
     {
       "path": "tests/handoff-roundtrip-sim.mjs",
       "bytes": 3874
+    },
+    {
+      "path": "tests/install-rollback-uninstall.test.mjs",
+      "bytes": 5897
     },
     {
       "path": "tests/node-runtime.test.mjs",

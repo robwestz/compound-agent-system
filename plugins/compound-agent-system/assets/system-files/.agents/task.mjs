@@ -8,6 +8,7 @@ import { spawnSync } from "node:child_process";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline";
+import { appendEvent, eventLogPathFromLedgerPath, sanitizeLedgerExtra, taskEventContext } from "./event-log.mjs";
 import { runPortableNodeCommand } from "./node-runtime.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -166,7 +167,23 @@ function nextId(ledger) {
 }
 
 function appendLog(ledger, event, taskId, agent, extra = {}) {
-  ledger.log.push({ ts: nowISO(), event, task: taskId, agent: agent || null, ...extra });
+  ledger.log.push({ ts: nowISO(), event, task: taskId, agent: agent || null, ...sanitizeLedgerExtra(extra) });
+}
+
+function logEvent(event, command, { task = null, result = { status: "ok" }, context = {}, timestamp } = {}) {
+  const contextExtras = { ...context };
+  delete contextExtras.goal;
+  delete contextExtras.reason;
+  delete contextExtras.source;
+  delete contextExtras.identity;
+  appendEvent({
+    logPath: eventLogPathFromLedgerPath(TASKS_PATH),
+    event,
+    command,
+    result,
+    context: task ? { ...taskEventContext(task, context), ...contextExtras } : contextExtras,
+    timestamp,
+  });
 }
 
 function findTask(ledger, id) {
@@ -533,6 +550,15 @@ function cmdAck(args) {
   const profile = normalizeIdentity(agentId, args, ledger.agent_profiles[agentId]);
   ledger.agent_profiles[agentId] = profile;
   appendLog(ledger, "ack", null, agentId, { identity: profile });
+  logEvent("ack", "task.mjs ack", {
+    context: {
+      agent_id: agentId,
+      identity_client: profile.client,
+      identity_model: profile.model,
+      identity_role: profile.role,
+      skill_count: Array.isArray(profile.skills) ? profile.skills.length : 0,
+    },
+  });
   saveLedger(ledger);
   console.log(c("green", `✓ Agent "${agentId}" signed in.`));
   console.log(`Identity: client=${profile.client} model=${profile.model} role=${profile.role} session_id=${profile.session_id}`);
@@ -574,6 +600,7 @@ function cmdOpen(args) {
   ledger.tasks.push(task);
   ledger.current = id;
   appendLog(ledger, "open", id, task.agent, { goal });
+  logEvent("task-open", "task.mjs open", { task, context: { goal } });
   saveLedger(ledger);
   console.log(c("green", `✓ Opened ${id}: ${goal}`));
   console.log(`  State: ${task.state}`);
@@ -662,6 +689,16 @@ async function cmdVerify(args) {
   }
   t.updated_at = nowISO();
   appendLog(ledger, "verify", id, t.agent, { allPass });
+  logEvent("quality-check", "task.mjs verify", {
+    task: t,
+    result: { status: allPass ? "pass" : "fail" },
+    context: {
+      allPass,
+      checks_total: t.dod.length,
+      checks_passed: t.dod.filter((d) => d.passed_at).length,
+      failed_checks: t.dod.filter((d) => !d.passed_at).map((d) => d.check),
+    },
+  });
   saveLedger(ledger);
   if (allPass) console.log(c("green", `\n✓ All DoD checks passed. Run: task.mjs done ${id}`));
   else { console.log(c("red", `\n✗ Verification failed. Fix and re-run: task.mjs verify ${id}`)); process.exit(1); }
@@ -685,6 +722,7 @@ async function cmdDone(args) {
   t.updated_at = nowISO();
   if (ledger.current === id) ledger.current = null;
   appendLog(ledger, "done", id, t.agent);
+  logEvent("task-done", "task.mjs done", { task: t, timestamp: t.completed_at });
   saveLedger(ledger);
   console.log(c("green", `✓ ${id} done.`));
   console.log(c("cyan", "\nNow log the COMPOUND register per .agents/COMPOUND.md."));
@@ -702,6 +740,7 @@ function cmdPark(args) {
   t.updated_at = nowISO();
   if (ledger.current === id) ledger.current = null;
   appendLog(ledger, "park", id, t.agent, { reason });
+  logEvent("task-park", "task.mjs park", { task: t, context: { reason } });
   saveLedger(ledger);
   console.log(c("yellow", `⏸ Parked ${id}: ${reason}`));
 }
@@ -721,6 +760,7 @@ function cmdResume(args) {
   t.updated_at = nowISO();
   ledger.current = id;
   appendLog(ledger, "resume", id, t.agent);
+  logEvent("task-resume", "task.mjs resume", { task: t });
   saveLedger(ledger);
   console.log(c("green", `▶ Resumed ${id}: ${t.goal}`));
 }
@@ -737,6 +777,7 @@ function cmdBlock(args) {
   t.unlock_command = args.unlock;
   t.updated_at = nowISO();
   appendLog(ledger, "block", id, t.agent, { reason });
+  logEvent("task-block", "task.mjs block", { task: t, result: { status: "blocked" }, context: { reason, unlock_command_present: Boolean(args.unlock) } });
   saveLedger(ledger);
   console.log(c("red", `⛔ Blocked ${id}: ${reason}`));
   console.log(c("yellow", `   Unlock: ${args.unlock}`));
@@ -754,6 +795,7 @@ function cmdAbandon(args) {
   t.updated_at = nowISO();
   if (ledger.current === id) ledger.current = null;
   appendLog(ledger, "abandon", id, t.agent, { reason });
+  logEvent("task-abandon", "task.mjs abandon", { task: t, result: { status: "abandoned" }, context: { reason } });
   saveLedger(ledger);
   console.log(c("dim", `✗ Abandoned ${id}: ${reason}`));
 }
@@ -774,6 +816,15 @@ function cmdUpdate(args) {
     appendLog(ledger, "remove-dod", id, t.agent, { reason: args.reason, removed });
   }
   t.updated_at = nowISO();
+  logEvent("task-update", "task.mjs update", {
+    task: t,
+    context: {
+      added_skills: args.skill?.length || 0,
+      added_dod: args.dod?.length || 0,
+      removed_dod: args.removeDod != null,
+      reason: args.reason,
+    },
+  });
   saveLedger(ledger);
   console.log(c("green", `✓ Updated ${id}.`));
 }
@@ -912,6 +963,10 @@ function cmdImport(args) {
       parent: p.parent, agent: null, started_at: nowISO(), updated_at: nowISO(),
     });
     appendLog(ledger, "import", p.id, null, { source: file });
+    logEvent("task-import", "task.mjs import", {
+      task: ledger.tasks.at(-1),
+      context: { source: file, goal: p.goal },
+    });
   }
   saveLedger(ledger);
   console.log(c("green", `✓ Imported ${toAdd.length} task(s).`));

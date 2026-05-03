@@ -6,6 +6,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { appendEvent, eventLogPathFromLedgerPath } from "./event-log.mjs";
 import { printFirstSessionWizard } from "./first-session-wizard.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -82,6 +83,19 @@ function main() {
   settings.hooks = mergeHooks(settings.hooks || {}, HOOKS_TO_INSTALL);
   const changed = JSON.stringify(settings.hooks) !== before;
   if (changed) saveSettings(settings);
+  const mode = process.env.COMPOUND_MODE || (process.env.COMPOUND_ENFORCE === "1" ? "enforce" : "warn");
+  appendEvent({
+    logPath: eventLogPathFromLedgerPath(TASKS_PATH),
+    event: "activate",
+    command: "activate.mjs",
+    result: { status: "ok" },
+    context: {
+      created_ledger: created,
+      hooks_changed: changed,
+      hook_events: Object.keys(HOOKS_TO_INSTALL),
+      compliance_mode: mode,
+    },
+  });
   console.log("Compound Protocol — activation");
   console.log("  Settings: " + SETTINGS_PATH);
   console.log("  Tasks ledger: " + TASKS_PATH + (created ? " (created)" : " (already present)"));
@@ -90,7 +104,6 @@ function main() {
   console.log("Installed hooks:");
   for (const ev of Object.keys(HOOKS_TO_INSTALL)) console.log(`  - ${ev}: node .agents/task.mjs hook ...`);
   console.log("");
-  const mode = process.env.COMPOUND_MODE || (process.env.COMPOUND_ENFORCE === "1" ? "enforce" : "warn");
   console.log("Compliance level: " + mode.toUpperCase());
   console.log("Observe: log only; Warn: warn but do not block; Enforce: block invalid state-changing actions.");
   console.log("To enable enforcement: export COMPOUND_MODE=enforce");

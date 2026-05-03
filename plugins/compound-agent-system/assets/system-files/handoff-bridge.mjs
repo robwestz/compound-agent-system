@@ -15,6 +15,7 @@ import {
 } from "node:fs";
 import { dirname, isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { appendEvent, eventLogPathFromLedgerPath, summarizeText } from "./.agents/event-log.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = __dirname;
@@ -488,6 +489,22 @@ export function writeCheckpoint(options = {}) {
     checkpoint_id: contract.checkpoint_id,
     to: contract.to_agent.target,
     path: normalizeRelativePath(outPath, cwd),
+  });
+  appendEvent({
+    logPath: eventLogPathFromLedgerPath(ledgerPath),
+    event: "handoff-checkpoint",
+    command: "handoff-bridge.mjs checkpoint",
+    result: { status: "ok" },
+    timestamp: contract.created_at,
+    context: {
+      task_id: task.id,
+      agent_id: contract.from_agent.id,
+      checkpoint_id: contract.checkpoint_id,
+      target_agent: contract.to_agent.target,
+      trigger: contract.trigger.type,
+      path: normalizeRelativePath(outPath, cwd),
+      ...summarizeText(contract.context_summary, "summary"),
+    },
   });
   saveLedger(ledger, ledgerPath);
 
