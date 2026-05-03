@@ -30,8 +30,8 @@ function assertTemplate(stdout) {
   assert.doesNotMatch(proseLines, /GAP SCAN|DoD|COMPOUND REGISTER|Phase 0|jargon|ledger/i);
   const nextLines = wizard.split("\n").filter((line) => /^Next:/.test(line));
   assert.equal(nextLines.length, 1, "one clear next action");
-  assert.match(nextLines[0], /node .agents\/agent-activate\.mjs --id <agent-id>|create idea\.md|node .agents\/idea-intake\.mjs --input idea\.md --apply|node .agents\/task\.mjs import phase-0\/PHASE_PLAN\.md --apply|node .agents\/session-readiness\.mjs/);
-  const stepLines = wizard.split("\n").filter((line) => /^Step \d of 5:/.test(line));
+  assert.match(nextLines[0], /node .agents\/agent-activate\.mjs --id <agent-id>|create idea\.md|node .agents\/idea-intake\.mjs --input idea\.md --apply|node .agents\/task\.mjs import phase-0\/PHASE_PLAN\.md --apply|node .agents\/role-assignment-plan\.mjs --input phase-0\/AGENT_ROLES\.md --out phase-0\/BATCH_ASSIGNMENT_PLAN\.json|node .agents\/session-readiness\.mjs/);
+  const stepLines = wizard.split("\n").filter((line) => /^Step \d of 6:/.test(line));
   assert.equal(stepLines.length, 1, "one guided step");
   assert.match(wizard, /Skip: node .agents\/first-session-wizard\.mjs skip/);
 }
@@ -104,21 +104,21 @@ test("wizard advances one primary next action at a time", () => {
     let r = runWizard(dir);
     assert.equal(r.status, 0, r.stderr);
     assertTemplate(r.stdout);
-    assert.match(r.stdout, /Step 1 of 5/);
+    assert.match(r.stdout, /Step 1 of 6/);
     assert.match(r.stdout, /Next: node .agents\/agent-activate\.mjs --id <agent-id>/);
 
     writeLedger(dir, { agents_active: ["devin-demo"], agent_profiles: { "devin-demo": { id: "devin-demo", role: "planner" } } });
     r = runWizard(dir);
     assert.equal(r.status, 0, r.stderr);
     assertTemplate(r.stdout);
-    assert.match(r.stdout, /Step 2 of 5/);
+    assert.match(r.stdout, /Step 2 of 6/);
     assert.match(r.stdout, /Next: create idea\.md/);
 
     writeFileSync(join(dir, "idea.md"), "Build a small CLI helper.\n");
     r = runWizard(dir);
     assert.equal(r.status, 0, r.stderr);
     assertTemplate(r.stdout);
-    assert.match(r.stdout, /Step 3 of 5/);
+    assert.match(r.stdout, /Step 3 of 6/);
     assert.match(r.stdout, /Next: node .agents\/idea-intake\.mjs --input idea\.md --apply/);
 
     mkdirSync(join(dir, "phase-0"), { recursive: true });
@@ -126,7 +126,7 @@ test("wizard advances one primary next action at a time", () => {
     r = runWizard(dir);
     assert.equal(r.status, 0, r.stderr);
     assertTemplate(r.stdout);
-    assert.match(r.stdout, /Step 4 of 5/);
+    assert.match(r.stdout, /Step 4 of 6/);
     assert.match(r.stdout, /Next: node .agents\/task\.mjs import phase-0\/PHASE_PLAN\.md --apply/);
 
     writeLedger(dir, {
@@ -137,7 +137,14 @@ test("wizard advances one primary next action at a time", () => {
     r = runWizard(dir);
     assert.equal(r.status, 0, r.stderr);
     assertTemplate(r.stdout);
-    assert.match(r.stdout, /Step 5 of 5/);
+    assert.match(r.stdout, /Step 5 of 6/);
+    assert.match(r.stdout, /Next: node .agents\/role-assignment-plan\.mjs --input phase-0\/AGENT_ROLES\.md --out phase-0\/BATCH_ASSIGNMENT_PLAN\.json/);
+
+    writeFileSync(join(dir, "phase-0", "BATCH_ASSIGNMENT_PLAN.json"), JSON.stringify({ schema: "compound-role-assignment-plan.v1" }, null, 2) + "\n");
+    r = runWizard(dir);
+    assert.equal(r.status, 0, r.stderr);
+    assertTemplate(r.stdout);
+    assert.match(r.stdout, /Step 6 of 6/);
     assert.match(r.stdout, /Next: node .agents\/session-readiness\.mjs/);
   } finally {
     rmSync(dir, { recursive: true, force: true });

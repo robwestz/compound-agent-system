@@ -68,10 +68,11 @@ function phaseTasksImported(ledger) {
 function nextStep({ root = workspaceRoot(), ledger = loadLedger(), complianceMode = mode() } = {}) {
   const profile = activeProfile(ledger);
   const planPath = join(root, "phase-0", "PHASE_PLAN.md");
+  const assignmentPlanPath = join(root, "phase-0", "BATCH_ASSIGNMENT_PLAN.json");
   const ideaPath = join(root, "idea.md");
   if (!profile) {
     return {
-      step: "1 of 5",
+      step: "1 of 6",
       title: "sign in the agent",
       agent: "not signed in",
       next: "node .agents/agent-activate.mjs --id <agent-id>",
@@ -81,7 +82,7 @@ function nextStep({ root = workspaceRoot(), ledger = loadLedger(), complianceMod
   const agent = `${profile.id || profile.display_name || "agent"} signed in as ${profile.role || "agent"}`;
   if (!existsSync(ideaPath) && !existsSync(planPath)) {
     return {
-      step: "2 of 5",
+      step: "2 of 6",
       title: "capture your idea",
       agent,
       next: "create idea.md with your raw idea",
@@ -90,7 +91,7 @@ function nextStep({ root = workspaceRoot(), ledger = loadLedger(), complianceMod
   }
   if (!existsSync(planPath)) {
     return {
-      step: "3 of 5",
+      step: "3 of 6",
       title: "turn the idea into a plan",
       agent,
       next: "node .agents/idea-intake.mjs --input idea.md --apply",
@@ -99,15 +100,24 @@ function nextStep({ root = workspaceRoot(), ledger = loadLedger(), complianceMod
   }
   if (!phaseTasksImported(ledger)) {
     return {
-      step: "4 of 5",
+      step: "4 of 6",
       title: "import planned tasks",
       agent,
       next: "node .agents/task.mjs import phase-0/PHASE_PLAN.md --apply",
       mode: modeLabel(complianceMode),
     };
   }
+  if (!existsSync(assignmentPlanPath)) {
+    return {
+      step: "5 of 6",
+      title: "export role assignment plan",
+      agent,
+      next: "node .agents/role-assignment-plan.mjs --input phase-0/AGENT_ROLES.md --out phase-0/BATCH_ASSIGNMENT_PLAN.json",
+      mode: modeLabel(complianceMode),
+    };
+  }
   return {
-    step: "5 of 5",
+    step: "6 of 6",
     title: "check readiness",
     agent,
     next: "node .agents/session-readiness.mjs",
