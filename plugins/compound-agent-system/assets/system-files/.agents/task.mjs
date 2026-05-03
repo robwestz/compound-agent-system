@@ -171,19 +171,23 @@ function appendLog(ledger, event, taskId, agent, extra = {}) {
 }
 
 function logEvent(event, command, { task = null, result = { status: "ok" }, context = {}, timestamp } = {}) {
-  const contextExtras = { ...context };
-  delete contextExtras.goal;
-  delete contextExtras.reason;
-  delete contextExtras.source;
-  delete contextExtras.identity;
-  appendEvent({
-    logPath: eventLogPathFromLedgerPath(TASKS_PATH),
-    event,
-    command,
-    result,
-    context: task ? { ...taskEventContext(task, context), ...contextExtras } : contextExtras,
-    timestamp,
-  });
+  try {
+    const contextExtras = { ...context };
+    delete contextExtras.goal;
+    delete contextExtras.reason;
+    delete contextExtras.source;
+    delete contextExtras.identity;
+    appendEvent({
+      logPath: eventLogPathFromLedgerPath(TASKS_PATH),
+      event,
+      command,
+      result,
+      context: task ? { ...taskEventContext(task, context), ...contextExtras } : contextExtras,
+      timestamp,
+    });
+  } catch {
+    // Observability must never block task state transitions.
+  }
 }
 
 function findTask(ledger, id) {

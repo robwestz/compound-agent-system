@@ -84,18 +84,22 @@ function main() {
   const changed = JSON.stringify(settings.hooks) !== before;
   if (changed) saveSettings(settings);
   const mode = process.env.COMPOUND_MODE || (process.env.COMPOUND_ENFORCE === "1" ? "enforce" : "warn");
-  appendEvent({
-    logPath: eventLogPathFromLedgerPath(TASKS_PATH),
-    event: "activate",
-    command: "activate.mjs",
-    result: { status: "ok" },
-    context: {
-      created_ledger: created,
-      hooks_changed: changed,
-      hook_events: Object.keys(HOOKS_TO_INSTALL),
-      compliance_mode: mode,
-    },
-  });
+  try {
+    appendEvent({
+      logPath: eventLogPathFromLedgerPath(TASKS_PATH),
+      event: "activate",
+      command: "activate.mjs",
+      result: { status: "ok" },
+      context: {
+        created_ledger: created,
+        hooks_changed: changed,
+        hook_events: Object.keys(HOOKS_TO_INSTALL),
+        compliance_mode: mode,
+      },
+    });
+  } catch {
+    // Observability must never block activation.
+  }
   console.log("Compound Protocol — activation");
   console.log("  Settings: " + SETTINGS_PATH);
   console.log("  Tasks ledger: " + TASKS_PATH + (created ? " (created)" : " (already present)"));

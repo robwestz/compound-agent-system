@@ -271,7 +271,6 @@ function main() {
     console.log(`Rollback manifest: ${rollbackPath}`);
     writeInstallEvent(targetRoot, plan, { status: "ok" });
   }
-  if (args.dryRun) writeInstallEvent(targetRoot, plan, { status: "dry-run" });
 
   console.log(`\nCompound system install ${args.dryRun ? "dry-run" : "complete"}: ${plan.files_to_create.length + plan.files_to_modify.length} copied, ${plan.files_to_skip.length} skipped.`);
   console.log(`Install plan: ${planPath(targetRoot)}`);

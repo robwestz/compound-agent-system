@@ -34,11 +34,11 @@
     },
     {
       "path": ".agents/activate.mjs",
-      "bytes": 4071
+      "bytes": 4169
     },
     {
       "path": ".agents/agent-activate.mjs",
-      "bytes": 4423
+      "bytes": 4531
     },
     {
       "path": ".agents/event-log.mjs",
@@ -54,7 +54,7 @@
     },
     {
       "path": ".agents/session-readiness.mjs",
-      "bytes": 6119
+      "bytes": 6227
     },
     {
       "path": ".agents/skills/SkiLLBuilDr/SKILL.md",
@@ -66,7 +66,7 @@
     },
     {
       "path": ".agents/task.mjs",
-      "bytes": 44359
+      "bytes": 44471
     },
     {
       "path": ".claude/commands/add-new-workspace-or-prototype.md",
@@ -302,7 +302,7 @@
     },
     {
       "path": "handoff-bridge.mjs",
-      "bytes": 24508
+      "bytes": 24629
     },
     {
       "path": "lib/token-budget.mjs",
@@ -342,7 +342,7 @@
     },
     {
       "path": "tests/event-log.test.mjs",
-      "bytes": 6692
+      "bytes": 7218
     },
     {
       "path": "tests/handoff-bridge.test.mjs",

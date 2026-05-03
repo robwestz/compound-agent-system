@@ -490,22 +490,26 @@ export function writeCheckpoint(options = {}) {
     to: contract.to_agent.target,
     path: normalizeRelativePath(outPath, cwd),
   });
-  appendEvent({
-    logPath: eventLogPathFromLedgerPath(ledgerPath),
-    event: "handoff-checkpoint",
-    command: "handoff-bridge.mjs checkpoint",
-    result: { status: "ok" },
-    timestamp: contract.created_at,
-    context: {
-      task_id: task.id,
-      agent_id: contract.from_agent.id,
-      checkpoint_id: contract.checkpoint_id,
-      target_agent: contract.to_agent.target,
-      trigger: contract.trigger.type,
-      path: normalizeRelativePath(outPath, cwd),
-      ...summarizeText(contract.context_summary, "summary"),
-    },
-  });
+  try {
+    appendEvent({
+      logPath: eventLogPathFromLedgerPath(ledgerPath),
+      event: "handoff-checkpoint",
+      command: "handoff-bridge.mjs checkpoint",
+      result: { status: "ok" },
+      timestamp: contract.created_at,
+      context: {
+        task_id: task.id,
+        agent_id: contract.from_agent.id,
+        checkpoint_id: contract.checkpoint_id,
+        target_agent: contract.to_agent.target,
+        trigger: contract.trigger.type,
+        path: normalizeRelativePath(outPath, cwd),
+        ...summarizeText(contract.context_summary, "summary"),
+      },
+    });
+  } catch {
+    // Observability must never block handoff checkpoint writes.
+  }
   saveLedger(ledger, ledgerPath);
 
   return { contract, outPath, ledger };

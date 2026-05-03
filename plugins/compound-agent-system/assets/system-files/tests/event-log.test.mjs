@@ -99,6 +99,20 @@ test("task CLI logs representative task transitions and quality checks", () => {
   }
 });
 
+test("task commands still persist ledger state when event log append fails", () => {
+  const { dir, ledger, events } = workspace();
+  try {
+    mkdirSync(events);
+    const r = run(TASK, ["ack", "devin-event-test"], dir, ledger);
+    assert.equal(r.status, 0, r.stderr);
+    const data = JSON.parse(readFileSync(ledger, "utf-8"));
+    assert.equal(data.agents_active.includes("devin-event-test"), true);
+    assert.equal(data.log.at(-1).event, "ack");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("agent activation, readiness, handoff, and install emit audit events", () => {
   const { dir, ledger, events } = workspace();
   try {

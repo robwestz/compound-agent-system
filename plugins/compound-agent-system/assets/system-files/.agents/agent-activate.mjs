@@ -81,20 +81,24 @@ function main() {
   const profile = normalizeIdentity(args, ledger.agent_profiles[args.id]);
   ledger.agent_profiles[args.id] = profile;
   ledger.log.push({ ts: new Date().toISOString(), event: "agent-activate", task: null, agent: args.id, identity: profile });
-  appendEvent({
-    logPath: eventLogPathFromLedgerPath(ledgerPath),
-    event: "agent-activate",
-    command: "agent-activate.mjs",
-    result: { status: "ok" },
-    timestamp: profile.activated_at,
-    context: {
-      agent_id: profile.id,
-      client: profile.client,
-      model: profile.model,
-      role: profile.role,
-      skill_count: profile.skills.length,
-    },
-  });
+  try {
+    appendEvent({
+      logPath: eventLogPathFromLedgerPath(ledgerPath),
+      event: "agent-activate",
+      command: "agent-activate.mjs",
+      result: { status: "ok" },
+      timestamp: profile.activated_at,
+      context: {
+        agent_id: profile.id,
+        client: profile.client,
+        model: profile.model,
+        role: profile.role,
+        skill_count: profile.skills.length,
+      },
+    });
+  } catch {
+    // Observability must never block agent activation.
+  }
   saveLedger(ledger);
 
   printFirstSessionWizard({ ledger });
