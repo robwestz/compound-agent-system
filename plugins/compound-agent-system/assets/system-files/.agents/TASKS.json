@@ -377,12 +377,51 @@
       "started_at": "2026-05-01T16:34:04.274Z",
       "updated_at": "2026-05-01T16:53:30.222Z",
       "completed_at": "2026-05-01T16:53:30.222Z"
+    },
+    {
+      "id": "t-007",
+      "goal": "Task 21 session readiness premium gate",
+      "state": "parked",
+      "dod": [
+        {
+          "check": "test",
+          "command": "node ../../scripts/validate-package.mjs",
+          "passed_at": null
+        },
+        {
+          "check": "test",
+          "command": "node --test tests/*.test.mjs",
+          "passed_at": null
+        },
+        {
+          "check": "artifact",
+          "path": "docs/premium-production/tasks/21-session-readiness-premium-gate.md",
+          "passed_at": null
+        },
+        {
+          "check": "test",
+          "command": "node --test tests/session-readiness.test.mjs",
+          "passed_at": null
+        }
+      ],
+      "skills": [
+        "compound-agent-system",
+        "agent-onboarding"
+      ],
+      "blocked_by": null,
+      "unlock_command": null,
+      "park_reason": "Implementation task belongs to this PR authoring session only; bundled fixture ledger must install with no active task.",
+      "parent": null,
+      "agent": "devin-e12973d3-task21",
+      "started_at": "2026-05-03T15:16:14.257Z",
+      "updated_at": "2026-05-03T15:16:35.617Z"
     }
   ],
   "agents_active": [
     "codex-gpt-5-codex",
     "claude-opus-4.7",
-    "claude-opus-4-7-resume"
+    "claude-opus-4-7-resume",
+    "devin-e12973d3-task21"
   ],
   "log": [
     {
@@ -699,6 +738,36 @@
       "event": "done",
       "task": "t-006",
       "agent": "devin-1c412d1728754940b9c8947c268a9ead"
+    },
+    {
+      "ts": "2026-05-03T15:15:16.883Z",
+      "event": "ack",
+      "task": null,
+      "agent": "devin-e12973d3-task21",
+      "identity": {
+        "id": "devin-e12973d3-task21",
+        "client": "devin",
+        "model": "e12973d3-task21",
+        "role": "agent",
+        "display_name": "devin e12973d3-task21",
+        "session_id": "2026-05-03T15-15-16-882Z-vvomxv",
+        "skills": [],
+        "activated_at": "2026-05-03T15:15:16.883Z"
+      }
+    },
+    {
+      "ts": "2026-05-03T15:16:14.257Z",
+      "event": "open",
+      "task": "t-007",
+      "agent": "devin-e12973d3-task21",
+      "goal": "Task 21 session readiness premium gate"
+    },
+    {
+      "ts": "2026-05-03T15:16:35.617Z",
+      "event": "park",
+      "task": "t-007",
+      "agent": "devin-e12973d3-task21",
+      "reason": "Implementation task belongs to this PR authoring session only; bundled fixture ledger must install with no active task."
     }
   ],
   "agent_profiles": {
@@ -711,6 +780,16 @@
       "session_id": "2026-05-01T16-33-32-847Z-h3fdgw",
       "skills": [],
       "activated_at": "2026-05-01T16:33:32.848Z"
+    },
+    "devin-e12973d3-task21": {
+      "id": "devin-e12973d3-task21",
+      "client": "devin",
+      "model": "e12973d3-task21",
+      "role": "agent",
+      "display_name": "devin e12973d3-task21",
+      "session_id": "2026-05-03T15-15-16-882Z-vvomxv",
+      "skills": [],
+      "activated_at": "2026-05-03T15:15:16.883Z"
     }
   }
 }
