@@ -191,6 +191,12 @@ Idea intake immediately creates an intake/planning task, records the original id
 
 Generated planning output must pass `.agents/check-output-quality.mjs` and `.agents/check-planning-quality.mjs` before it is treated as an artifact. The planning quality gate rejects generic foundation/verification-only plans, missing `first_vertical_slice`, missing phase DoD, missing role ownership, missing blocker defaults, and missing import markers.
 
+`AGENT_ROLES.md` is operational, not decorative. It contains a static JSON role map with task IDs, artifacts, autonomy level, handoff condition, and `spawn_policy: static-export-only` for each planner/executor/reviewer/verifier assignment. Export it without spawning agents:
+
+```powershell
+node .agents\role-plan.mjs phase-0\AGENT_ROLES.md --json
+```
+
 ## Phase 0 plan artifacts
 
 Idea intake writes these standard artifacts under `phase-0/`:

@@ -45,6 +45,10 @@
       "bytes": 5166
     },
     {
+      "path": ".agents/role-plan.mjs",
+      "bytes": 3832
+    },
+    {
       "path": ".agents/skills/SkiLLBuilDr/SKILL.md",
       "bytes": 3651
     },
@@ -258,7 +262,7 @@
     },
     {
       "path": "README.md",
-      "bytes": 11955
+      "bytes": 12307
     },
     {
       "path": "assemble.mjs",
@@ -335,6 +339,10 @@
     {
       "path": "tests/package-integrity.test.mjs",
       "bytes": 3903
+    },
+    {
+      "path": "tests/role-plan.test.mjs",
+      "bytes": 3769
     },
     {
       "path": "tests/token-budget-trigger-sim.mjs",
