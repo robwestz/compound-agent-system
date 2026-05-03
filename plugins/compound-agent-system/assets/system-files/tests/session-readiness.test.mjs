@@ -155,6 +155,7 @@ test("partially ready scenario prints structured unlock steps", () => {
 
     const result = parseResult(r.stdout);
     assert.equal(result.ready, false);
+    assert.deepEqual(result.pending_questions, ["Choose API scope", "Confirm export format"]);
     assert.deepEqual(
       result.unlock_steps.map((step) => step.id),
       [

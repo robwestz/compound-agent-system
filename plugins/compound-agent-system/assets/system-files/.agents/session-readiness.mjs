@@ -246,7 +246,9 @@ function openQuestionsFromMarkdown() {
 }
 
 function questionStatus(ledger, current, handoff) {
-  const taskQuestions = (ledger.tasks || []).flatMap((task) => normalizeList(task.open_questions || task.pending_questions || task.questions));
+  const taskQuestions = (ledger.tasks || [])
+    .filter((task) => task !== current)
+    .flatMap((task) => normalizeList(task.open_questions || task.pending_questions || task.questions));
   const ledgerQuestions = normalizeList(ledger.open_questions || ledger.pending_questions || ledger.questions);
   const activeQuestions = normalizeList(current?.open_questions || current?.pending_questions || current?.questions);
   const all = [...taskQuestions, ...ledgerQuestions, ...activeQuestions, ...openQuestionsFromMarkdown(), ...handoff.pending_decisions]
