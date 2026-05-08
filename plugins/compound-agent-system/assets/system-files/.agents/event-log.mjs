@@ -12,7 +12,7 @@ export const DEFAULT_EVENT_LOG = ".agents/events.jsonl";
 
 const REDACTED = "[REDACTED]";
 const SECRET_KEY_RE = /(secret|token|password|passwd|pwd|api[_-]?key|authorization|cookie|credential|private[_-]?key|access[_-]?key|refresh[_-]?token|client[_-]?secret|session[_-]?key)/i;
-const SECRET_VALUE_RE = /(sk-[a-z0-9_-]{12,}|gsk_[a-z0-9_-]{12,}|sbp_[a-z0-9_-]{12,}|gh[pousr]_[a-z0-9_]{12,}|xox[baprs]-[a-z0-9-]{12,}|bearer\s+[a-z0-9._~+/-]{12,}|authorization:\s*\S+|api[_-]?key\s*[:=]\s*\S+|password\s*[:=]\s*\S+)/gi;
+const SECRET_VALUE_RE = /(sk-[a-z0-9_-]{12,}|gsk_[a-z0-9_-]{12,}|sbp_[a-z0-9_-]{12,}|gh[pousr]_[a-z0-9_]{12,}|xox[baprs]-[a-z0-9-]{12,}|authorization:\s*(?:bearer\s+)?[a-z0-9._~+/-]{12,}|bearer\s+[a-z0-9._~+/-]{12,}|api[_-]?key\s*[:=]\s*\S+|password\s*[:=]\s*\S+)/gi;
 const ABSOLUTE_USER_PATH_RE = /([A-Za-z]:\\Users\\|\/home\/|\/Users\/)([^/\s\\]+)/g;
 
 function nowISO() {
