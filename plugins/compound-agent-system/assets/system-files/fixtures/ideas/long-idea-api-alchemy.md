@@ -1,5 +1,8 @@
 # API Alchemy Engine — sanitized fixture
 
+Fixture purpose: Long-form idea for idea-intake, blocker, first-slice, role-map, and golden-path regression tests.
+Not-to-build: This is a sanitized fixture-only product idea; do not implement the API Alchemy Engine while working on the plugin.
+
 ## Vision
 
 Build a local-first planning tool that helps a developer discover useful public data sources, evaluate their reliability, and convert them into reusable dataset definitions. This is fixture content for testing Compound Agent System idea intake only; do not build this product as part of plugin work.

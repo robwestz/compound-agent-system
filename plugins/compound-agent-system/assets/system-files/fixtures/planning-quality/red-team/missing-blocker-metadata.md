@@ -15,6 +15,8 @@ phases:
 
 # Phase Plan
 
+Fixture purpose: Red-team planning fixture proving incomplete blocker metadata is rejected.
+
 first_vertical_slice: import one fixture and record provenance locally.
 
 [COMPOUND-PHASE id=phase-1-local-proof goal="Prove local import with fixture provenance" dod="artifact:docs/local-proof.md" skills="planner,executor,reviewer,verifier"]
