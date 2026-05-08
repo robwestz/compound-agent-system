@@ -2,6 +2,35 @@
 
 This folder contains a Claude- and Codex-compatible plugin package plus a curated repo bundle for the Compound Agent System. The payload is the same for both clients; only plugin registration differs.
 
+Do not build the API Alchemy Engine. It appears only as sanitized fixture material for idea-intake tests; this repository upgrades the plugin/harness.
+
+## Start here by intent
+
+| I want to... | Start here | Then use |
+|---|---|---|
+| Install the harness into a repo | [`docs/install.md`](docs/install.md) | [`docs/first-run.md`](docs/first-run.md) |
+| Run the package for the first time | [`docs/first-run.md`](docs/first-run.md) | [`docs/troubleshooting.md`](docs/troubleshooting.md) |
+| Understand the mental model | [`docs/concepts.md`](docs/concepts.md) | [`docs/plugin-size-budget.md`](docs/plugin-size-budget.md) |
+| Operate an installed workspace | [`docs/operations.md`](docs/operations.md) | [`docs/troubleshooting.md`](docs/troubleshooting.md) |
+| Debug a failure | [`docs/troubleshooting.md`](docs/troubleshooting.md) | [`docs/operations.md`](docs/operations.md) |
+| Contribute safely | [`docs/development.md`](docs/development.md) | [`docs/plugin-size-budget.md`](docs/plugin-size-budget.md) |
+| Prepare a release | [`docs/release.md`](docs/release.md) | [`docs/compatibility-matrix.md`](docs/compatibility-matrix.md) |
+| Review security or optional AI behavior | [`docs/security-boundary-model.md`](docs/security-boundary-model.md) | [`docs/secrets-and-ai-policy.md`](docs/secrets-and-ai-policy.md) |
+
+## Documentation map
+
+| Section | Doc | Covers |
+|---|---|---|
+| Install | [`docs/install.md`](docs/install.md) | Validation, dry-run, write install, rollback/uninstall, plugin registration. |
+| First run | [`docs/first-run.md`](docs/first-run.md) | Guided wizard, agent sign-in, idea intake, phase import, readiness gate. |
+| Concepts | [`docs/concepts.md`](docs/concepts.md) | Ledger, DoD, GAP SCAN, Fact-Forcing Gate, compliance modes, fixtures. |
+| Operations | [`docs/operations.md`](docs/operations.md) | Daily health commands, event log, readiness, support bundles, handoffs. |
+| Troubleshooting | [`docs/troubleshooting.md`](docs/troubleshooting.md) | Error-to-command recovery table using doctor/readiness/support-bundle. |
+| Development | [`docs/development.md`](docs/development.md) | Local verification, docs mirroring, manifest maintenance, no-runtime-deps rule. |
+| Release | [`docs/release.md`](docs/release.md) | Release gates, compatibility, package validation, marketplace handoff. |
+| Historical handoff | `SESSION.md` | Legacy packaging-session notes are not bundled into installed target repos. |
+| Historical prompt | `upgrade_package_2.md` | Legacy upgrade prompts are not bundled into installed target repos. |
+
 ## Layout
 
 | Path | Purpose |
