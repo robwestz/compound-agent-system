@@ -82,7 +82,7 @@
     },
     {
       "path": ".agents/task.mjs",
-      "bytes": 49471
+      "bytes": 51258
     },
     {
       "path": ".agents/templates/AGENT_ROLES.md",
@@ -334,7 +334,7 @@
     },
     {
       "path": "docs/manual-approval-boundaries.md",
-      "bytes": 4911
+      "bytes": 4961
     },
     {
       "path": "docs/planning-quality-red-team.md",
@@ -518,7 +518,7 @@
     },
     {
       "path": "tests/agents-task.test.mjs",
-      "bytes": 21525
+      "bytes": 23711
     },
     {
       "path": "tests/assemble.test.mjs",
@@ -598,7 +598,7 @@
     },
     {
       "path": "tests/session-readiness.test.mjs",
-      "bytes": 10505
+      "bytes": 11269
     },
     {
       "path": "tests/support-bundle.test.mjs",

@@ -197,6 +197,27 @@ test("must-ask approval policy blocks long-session readiness until approved", ()
   }
 });
 
+test("resolved must-ask approval policy allows readiness check to pass approval gate", () => {
+  const dir = mkdtempSync(join(tmpdir(), "readiness-approval-resolved-"));
+  try {
+    writeCheckpoint(dir);
+    const path = makeLedger(dir, {
+      tasks: [baseTask({
+        approval_policy: "must-ask",
+        approval_category: "external-apis",
+        approval_state: "approved",
+        human_approval: { required: true, approved_at: "2026-05-03T16:00:00.000Z", approver: "operator" },
+      })],
+    });
+    const r = run(path, "enforce");
+    assert.equal(r.status, 0, r.stderr);
+    const result = parseResult(r.stdout);
+    assert.equal(result.checks.must_ask_approvals_clear, true);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("unsafe false-ready scenario refuses malformed handoff and unresolved manual DoD", () => {
   const dir = mkdtempSync(join(tmpdir(), "readiness-unsafe-"));
   try {

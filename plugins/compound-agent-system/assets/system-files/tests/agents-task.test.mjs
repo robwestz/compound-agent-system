@@ -242,6 +242,36 @@ test("block records unlock_command", () => {
   }
 });
 
+test("ordinary block and resume do not require manual approval", () => {
+  const { ledger, dir } = freshLedger();
+  try {
+    run(ledger, ["open", "ordinary-block", "--dod", "test:echo ok"]);
+    const id = readLedger(ledger).current;
+    const blocked = run(ledger, [
+      "block",
+      id,
+      "--reason",
+      "Waiting on CI",
+      "--unlock",
+      "Re-run CI",
+    ]);
+    assert.equal(blocked.status, 0, blocked.stderr);
+    assert.doesNotMatch(blocked.stdout, /approval=must-ask/);
+    let data = readLedger(ledger);
+    assert.equal(data.tasks[0].state, "blocked");
+    assert.equal(data.tasks[0].approval_policy, undefined);
+    assert.equal(data.tasks[0].human_approval, undefined);
+
+    const resumed = run(ledger, ["resume", id]);
+    assert.equal(resumed.status, 0, resumed.stderr);
+    data = readLedger(ledger);
+    assert.equal(data.tasks[0].state, "in_progress");
+    assert.equal(data.tasks[0].approval_policy, undefined);
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
 test("must-ask approval blockers remain blocked and preserve read-only inspection", () => {
   const { ledger, dir } = freshLedger();
   try {
@@ -279,6 +309,36 @@ test("must-ask approval blockers remain blocked and preserve read-only inspectio
     const list = run(ledger, ["list"], { COMPOUND_MODE: "enforce", COMPOUND_GROUNDED: "" });
     assert.equal(list.status, 0, list.stderr);
     assert.match(list.stdout, /approval=must-ask/);
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
+test("must-ask approval can be explicitly approved", () => {
+  const { ledger, dir } = freshLedger();
+  try {
+    run(ledger, ["open", "approval-test", "--dod", "test:echo ok"]);
+    const id = readLedger(ledger).current;
+    run(ledger, [
+      "block",
+      id,
+      "--reason",
+      "Need approval before requesting a secret",
+      "--unlock",
+      "Human approves secret scope.",
+      "--approval-category",
+      "secrets",
+    ]);
+    const approved = run(ledger, ["approve", id, "--by", "operator", "--scope", "Use TEST_API_KEY for this session only"]);
+    assert.equal(approved.status, 0, approved.stderr);
+    assert.match(approved.stdout, /state=approved/);
+    const data = readLedger(ledger);
+    assert.equal(data.tasks[0].approval_policy, "must-ask");
+    assert.equal(data.tasks[0].approval_category, "secrets");
+    assert.equal(data.tasks[0].approval_state, "approved");
+    assert.equal(data.tasks[0].human_approval.approver, "operator");
+    assert.equal(data.tasks[0].human_approval.scope, "Use TEST_API_KEY for this session only");
+    assert.ok(data.tasks[0].human_approval.approved_at);
   } finally {
     rmSync(dir, { recursive: true });
   }

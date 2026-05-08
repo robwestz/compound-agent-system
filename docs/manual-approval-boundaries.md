@@ -27,7 +27,7 @@ In the task ledger, use `approval_policy` (`must-ask`, `defaultable`, or `defer`
 ## How to proceed after approval
 
 1. Record the approval in the task report or ledger with category, approver, timestamp, exact scope, and any limits.
-2. Update the blocked task from `must-ask` only after the approval covers the pending action. If scope is partial, keep the unapproved portion blocked.
+2. Record approval with `task.mjs approve <id> --by "<approver>" --scope "<approved scope>"` only after the approval covers the pending action. If scope is partial, keep the unapproved portion blocked.
 3. Run only the approved command or workflow. Do not generalize one approval to a different provider, path, branch, credential, or child-agent count.
 4. Capture evidence: command, exit status, affected files/refs, and any rollback or cleanup notes.
 5. Return to the safe default when the approved action finishes, the stop condition is reached, or the user revokes approval.
