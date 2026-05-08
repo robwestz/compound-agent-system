@@ -29,8 +29,28 @@
       "bytes": 3677
     },
     {
+      "path": ".agents/agent-activate.mjs",
+      "bytes": 3966
+    },
+    {
+      "path": ".agents/check-output-quality.mjs",
+      "bytes": 4398
+    },
+    {
+      "path": ".agents/check-planning-quality.mjs",
+      "bytes": 4655
+    },
+    {
+      "path": ".agents/eval-loop.mjs",
+      "bytes": 3917
+    },
+    {
       "path": ".agents/first-session-wizard.mjs",
       "bytes": 5475
+    },
+    {
+      "path": ".agents/idea-intake.mjs",
+      "bytes": 26814
     },
     {
       "path": ".agents/node-runtime.mjs",
@@ -39,6 +59,10 @@
     {
       "path": ".agents/role-plan.mjs",
       "bytes": 3898
+    },
+    {
+      "path": ".agents/session-readiness.mjs",
+      "bytes": 5516
     },
     {
       "path": ".agents/skills/SkiLLBuilDr/SKILL.md",
@@ -51,6 +75,34 @@
     {
       "path": ".agents/task.mjs",
       "bytes": 42183
+    },
+    {
+      "path": ".agents/templates/AGENT_ROLES.md",
+      "bytes": 244
+    },
+    {
+      "path": ".agents/templates/DECISIONS.md",
+      "bytes": 373
+    },
+    {
+      "path": ".agents/templates/DOD_MATRIX.md",
+      "bytes": 146
+    },
+    {
+      "path": ".agents/templates/GAP_SCAN.md",
+      "bytes": 733
+    },
+    {
+      "path": ".agents/templates/OPEN_QUESTIONS.md",
+      "bytes": 264
+    },
+    {
+      "path": ".agents/templates/PHASE_PLAN.md",
+      "bytes": 697
+    },
+    {
+      "path": ".agents/templates/PROJECT_BRIEF.md",
+      "bytes": 467
     },
     {
       "path": ".claude/commands/add-new-workspace-or-prototype.md",
@@ -254,11 +306,15 @@
     },
     {
       "path": "README.md",
-      "bytes": 12529
+      "bytes": 13267
     },
     {
       "path": "assemble.mjs",
       "bytes": 18222
+    },
+    {
+      "path": "data.public.js",
+      "bytes": 842
     },
     {
       "path": "docs/compatibility-matrix.md",
@@ -283,6 +339,62 @@
     {
       "path": "docs/troubleshooting.md",
       "bytes": 2204
+    },
+    {
+      "path": "factory/v2-personas/README.md",
+      "bytes": 3
+    },
+    {
+      "path": "factory/v2-personas/debate.mjs",
+      "bytes": 53
+    },
+    {
+      "path": "factory/v2-personas/operator-ask.config.json",
+      "bytes": 3
+    },
+    {
+      "path": "factory/v2-personas/personas.md",
+      "bytes": 3
+    },
+    {
+      "path": "factory/v2-personas/planner.config.json",
+      "bytes": 3
+    },
+    {
+      "path": "factory/v2-personas/reviewer.config.json",
+      "bytes": 3
+    },
+    {
+      "path": "fixtures/ideas/long-idea-api-alchemy.md",
+      "bytes": 1811
+    },
+    {
+      "path": "fixtures/ideas/medium-feature-idea.md",
+      "bytes": 418
+    },
+    {
+      "path": "fixtures/ideas/realworld-benchmarks.json",
+      "bytes": 7455
+    },
+    {
+      "path": "fixtures/ideas/simple-idea.md",
+      "bytes": 90
+    },
+    {
+      "path": "fixtures/output-quality/clean-gap-scan.md",
+      "bytes": 764
+    },
+    {
+      "path": "fixtures/output-quality/duplicated-sections.md",
+      "bytes": 141
+    },
+    {
+      "path": "fixtures/output-quality/repeated-blockers.md",
+      "bytes": 476
+    },
+    {
+      "path": "fixtures/planning-quality/generic-two-phase-plan.md",
+      "bytes": 747
     },
     {
       "path": "fixtures/planning-quality/red-team/generic-two-phase-plan.md",
@@ -325,12 +437,48 @@
       "bytes": 862
     },
     {
+      "path": "frameworks/AGENT_ONBOARDING.md",
+      "bytes": 71
+    },
+    {
+      "path": "frameworks/COMPOUND.md",
+      "bytes": 63
+    },
+    {
+      "path": "frameworks/DOD.md",
+      "bytes": 58
+    },
+    {
+      "path": "frameworks/FRAMEWORKS.md",
+      "bytes": 65
+    },
+    {
+      "path": "frameworks/PROTOCOL.md",
+      "bytes": 63
+    },
+    {
+      "path": "frameworks/QUALITY_GATE.md",
+      "bytes": 67
+    },
+    {
+      "path": "frameworks/SKILL_SELECT.md",
+      "bytes": 67
+    },
+    {
       "path": "handoff-bridge.mjs",
       "bytes": 23865
     },
     {
+      "path": "kickoff-template.mjs",
+      "bytes": 5618
+    },
+    {
       "path": "lib/token-budget.mjs",
       "bytes": 4382
+    },
+    {
+      "path": "llm-client.mjs",
+      "bytes": 244
     },
     {
       "path": "package-lock.json",
@@ -357,8 +505,36 @@
       "bytes": 20798
     },
     {
+      "path": "tests/bootstrap-install-plan.test.mjs",
+      "bytes": 3100
+    },
+    {
+      "path": "tests/check-output-quality.test.mjs",
+      "bytes": 1988
+    },
+    {
+      "path": "tests/check-planning-quality.test.mjs",
+      "bytes": 4116
+    },
+    {
       "path": "tests/compatibility-matrix.test.mjs",
       "bytes": 4040
+    },
+    {
+      "path": "tests/doctor-recovery.test.mjs",
+      "bytes": 10760
+    },
+    {
+      "path": "tests/eval-loop.test.mjs",
+      "bytes": 3216
+    },
+    {
+      "path": "tests/first-session-output.test.mjs",
+      "bytes": 7851
+    },
+    {
+      "path": "tests/golden-path-e2e.test.mjs",
+      "bytes": 5401
     },
     {
       "path": "tests/handoff-bridge.test.mjs",
@@ -367,6 +543,22 @@
     {
       "path": "tests/handoff-roundtrip-sim.mjs",
       "bytes": 3874
+    },
+    {
+      "path": "tests/hook-idempotency.test.mjs",
+      "bytes": 3210
+    },
+    {
+      "path": "tests/idea-intake.test.mjs",
+      "bytes": 13639
+    },
+    {
+      "path": "tests/install-rollback-uninstall.test.mjs",
+      "bytes": 5823
+    },
+    {
+      "path": "tests/mode-policy.test.mjs",
+      "bytes": 4176
     },
     {
       "path": "tests/node-runtime.test.mjs",
@@ -381,12 +573,20 @@
       "bytes": 4200
     },
     {
+      "path": "tests/session-readiness.test.mjs",
+      "bytes": 3844
+    },
+    {
       "path": "tests/token-budget-trigger-sim.mjs",
       "bytes": 2251
     },
     {
       "path": "tests/token-budget.test.mjs",
       "bytes": 6650
+    },
+    {
+      "path": "zip-builder.mjs",
+      "bytes": 3959
     }
   ]
 }

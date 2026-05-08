@@ -197,6 +197,26 @@ Generated planning output must pass `.agents/check-output-quality.mjs` and `.age
 node .agents\role-plan.mjs phase-0\AGENT_ROLES.md --json
 ```
 
+## Evaluator feedback loop
+
+Premium-production tasks must not be accepted after a single implementation pass. Record the task report with:
+
+1. first completion,
+2. self-review,
+3. evaluator feedback round 1,
+4. improvement 1,
+5. evaluator feedback round 2,
+6. improvement 2,
+7. final signoff.
+
+Validate the evidence before marking a task done:
+
+```powershell
+node .agents\eval-loop.mjs docs\premium-production\tasks\18-evaluator-feedback-loop-runner.md
+```
+
+The runner checks for the two feedback rounds, both improvement rounds, final signoff, implementer/evaluator identity, and disclosure when one agent performs both roles. It does not call external agent APIs and must not claim independent review for same-session self-evaluation.
+
 ## Phase 0 plan artifacts
 
 Idea intake writes these standard artifacts under `phase-0/`:
