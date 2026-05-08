@@ -1,5 +1,7 @@
 # GAP SCAN
 
+Fixture purpose: Negative output-quality fixture proving repeated blocker text is rejected.
+
 ## Blockers
 
 ### Decision: source scope

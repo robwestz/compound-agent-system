@@ -1,5 +1,10 @@
 [
   {
+    "id": "__corpus_note",
+    "purpose": "Fixture purpose: Benchmark corpus for idea-intake coverage across CLI, browser, data, library, migration, and ambiguous product briefs. Each case has its own why note and expected planning traits.",
+    "not_to_build": "These are fixture-only product ideas for Compound Agent System tests; do not implement the benchmark products while working on the plugin."
+  },
+  {
     "id": "cli-log-summarizer",
     "category": "CLI tool",
     "why": "Covers a local terminal utility with deterministic file input and no service dependency.",

@@ -13,6 +13,8 @@ phases:
 
 # Phase Plan
 
+Fixture purpose: Red-team planning fixture proving frontmatter and marker role ownership must match.
+
 first_vertical_slice: transform one local source fixture into a reviewed prototype artifact.
 
 [COMPOUND-PHASE id=phase-1-data-prototype goal="Create local data prototype for reviewer handoff" dod="artifact:docs/prototype.md" skills="executor"]

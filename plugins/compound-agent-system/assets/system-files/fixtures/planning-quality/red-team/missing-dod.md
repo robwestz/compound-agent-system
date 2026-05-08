@@ -12,6 +12,8 @@ phases:
 
 # Phase Plan
 
+Fixture purpose: Red-team planning fixture proving phases without verification checks are rejected.
+
 first_vertical_slice: migrate one representative record through a local dry-run proof.
 
 [COMPOUND-PHASE id=phase-1-specific-scope goal="Specific scope lock for the migration pilot" skills="planner,executor,reviewer,verifier"]
