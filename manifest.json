@@ -45,6 +45,10 @@
       "bytes": 5166
     },
     {
+      "path": ".agents/role-plan.mjs",
+      "bytes": 3898
+    },
+    {
       "path": ".agents/session-readiness.mjs",
       "bytes": 6227
     },
@@ -262,7 +266,7 @@
     },
     {
       "path": "README.md",
-      "bytes": 12177
+      "bytes": 12529
     },
     {
       "path": "assemble.mjs",
@@ -399,6 +403,10 @@
     {
       "path": "tests/package-integrity.test.mjs",
       "bytes": 3903
+    },
+    {
+      "path": "tests/role-plan.test.mjs",
+      "bytes": 4200
     },
     {
       "path": "tests/token-budget-trigger-sim.mjs",

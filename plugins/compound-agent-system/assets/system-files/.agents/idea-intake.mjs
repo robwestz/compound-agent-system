@@ -228,16 +228,46 @@ function makePhases(analysis, slice) {
 
 function roleMarkdown(phases) {
   const machine = phases.map((p) => ({
+    schema: "compound-role-map-phase.v1",
     phase_id: p.id,
-    planner: p.roles.planner,
-    executor: p.roles.executor,
-    reviewer: p.roles.reviewer,
-    verifier: p.roles.verifier,
+    task_ids: [p.id],
     expected_artifacts: p.artifacts,
     handoff_condition: `${p.id} DoD is recorded, blockers are updated, and the next agent can resume from ${p.artifacts[0]}.`,
     autonomy_level: p.proceedWithoutUser ? "autonomous-with-defaults" : "requires-user-approval",
+    spawn_policy: "static-export-only",
+    roles: [
+      roleAssignment("planner", p.roles.planner, p),
+      roleAssignment("executor", p.roles.executor, p),
+      roleAssignment("reviewer", p.roles.reviewer, p),
+      roleAssignment("verifier", p.roles.verifier, p),
+    ],
   }));
-  return ["- planner: Owns Phase 0 regrounding, GAP SCAN, decisions, and phase plan.", "- executor: Starts implementation only after blockers marked no-proceed are resolved.", "- reviewer: Checks scope, output quality, security boundaries, and regression risk.", "- verifier: Runs DoD commands, imports PHASE_PLAN.md, and records verification evidence.", "", "## Phase role map", "", "```json", JSON.stringify(machine, null, 2), "```"].join("\n");
+  return ["- planner: Owns Phase 0 regrounding, GAP SCAN, decisions, and phase plan.", "- executor: Starts implementation only after blockers marked no-proceed are resolved.", "- reviewer: Checks scope, output quality, security boundaries, and regression risk.", "- verifier: Runs DoD commands, imports PHASE_PLAN.md, and records verification evidence.", "- spawn_policy: static-export-only; no agents are spawned unless a human explicitly approves execution.", "", "## Phase role map", "", "```json", JSON.stringify(machine, null, 2), "```", "", "Export with `node .agents/role-plan.mjs phase-0/AGENT_ROLES.md` to produce an auditable batch assignment plan."].join("\n");
+}
+
+function roleSummary(phases) {
+  return [
+    "- planner: Owns Phase 0 regrounding, GAP SCAN, decisions, and phase plan.",
+    "- executor: Starts implementation only after blockers marked no-proceed are resolved.",
+    "- reviewer: Checks scope, output quality, security boundaries, and regression risk.",
+    "- verifier: Runs DoD commands, imports PHASE_PLAN.md, and records verification evidence.",
+    "- spawn_policy: static-export-only; no agents are spawned unless a human explicitly approves execution.",
+    "- export: `node .agents/role-plan.mjs phase-0/AGENT_ROLES.md --json` for task IDs, artifacts, autonomy, and handoff conditions.",
+    "",
+    ...phases.map((p) => `- ${p.id}: planner=${p.roles.planner}; executor=${p.roles.executor}; reviewer=${p.roles.reviewer}; verifier=${p.roles.verifier}; handoff=${p.artifacts[0]}`),
+  ].join("\n");
+}
+
+function roleAssignment(role, assigneeHint, phaseInfo) {
+  const handoff = `${phaseInfo.id} DoD is recorded, blockers are updated, and the next agent can resume from ${phaseInfo.artifacts[0]}.`;
+  return {
+    role,
+    assignee_hint: assigneeHint,
+    task_ids: [phaseInfo.id],
+    artifacts: phaseInfo.artifacts,
+    autonomy_level: phaseInfo.proceedWithoutUser ? "autonomous-with-defaults" : "requires-user-approval",
+    handoff_condition: handoff,
+  };
 }
 
 function template(name) {
@@ -329,7 +359,7 @@ function renderArtifacts(idea) {
     "{{SUMMARY}}": analysis.summary,
     "{{TITLE}}": analysis.title,
     "{{BLOCKERS}}": blockersMd,
-    "{{ROLES}}": roles,
+    "{{ROLES}}": roleSummary(phases),
     "{{BLOCKING_NOW}}": renderQuestions(blockers, "blocking_now"),
     "{{CAN_DEFAULT}}": renderQuestions(blockers, "can_default"),
     "{{DEFER}}": renderQuestions(blockers, "defer"),
@@ -348,6 +378,7 @@ function renderArtifacts(idea) {
   const artifacts = {};
   for (const name of names) {
     let body = template(name);
+    if (name === "AGENT_ROLES.md") body = body.replaceAll("{{ROLES}}", roles);
     for (const [needle, value] of Object.entries(replacements)) body = body.replaceAll(needle, value);
     artifacts[name] = body;
   }
@@ -380,6 +411,7 @@ function createIntakeTask(ledger, idea, rendered) {
 function verifyArtifacts(artifacts) {
   const issues = [];
   for (const [name, content] of Object.entries(artifacts)) {
+    if (name === "AGENT_ROLES.md") continue;
     issues.push(...scanMarkdown(content, { file: name }).issues);
   }
   issues.push(...scanPlanningQuality([
