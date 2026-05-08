@@ -15,6 +15,8 @@ phases:
 
 # Phase Plan
 
+Fixture purpose: Red-team planning fixture proving unresolved template placeholders are rejected.
+
 first_vertical_slice: produce {{PRODUCT}} proof from one local fixture.
 
 [COMPOUND-PHASE id=phase-1-placeholder-proof goal="Create {{PRODUCT}} proof artifact" dod="artifact:docs/proof.md" skills="planner,executor,reviewer,verifier"]

@@ -15,6 +15,8 @@ phases:
 
 # Phase Plan
 
+Fixture purpose: Red-team planning fixture proving credential-seeking defaults are rejected.
+
 first_vertical_slice: call one external API endpoint with production-like credentials.
 
 [COMPOUND-PHASE id=phase-1-secret-api-proof goal="Probe external API behavior before local fallback" dod="artifact:docs/api-proof.md" skills="planner,executor,reviewer,verifier"]

@@ -1,5 +1,7 @@
 # Example: Activate Existing Repo
 
+Purpose: Release-checklist example for manually smoke-checking install, activation, status, ack, and DoD-backed task creation in an existing target repository.
+
 POSIX:
 
 ```bash

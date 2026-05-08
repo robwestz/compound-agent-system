@@ -102,4 +102,5 @@ Before any release, verify:
 - [ ] No docs or README claim support for environments not listed as "Supported" in this matrix.
 - [ ] `doctor` correctly reports unsupported Node versions (test with `COMPOUND_DOCTOR_NODE_VERSION=v16.20.0`).
 - [ ] Path assumptions are validated by the `compatibility-matrix.test.mjs` test suite.
+- [ ] Run `plugins/compound-agent-system/examples/activate-existing-repo/README.md` commands against a disposable target repo; confirm the documented expected result.
 - [ ] External Claude/Codex marketplace install behavior is manually smoke-checked before publishing.

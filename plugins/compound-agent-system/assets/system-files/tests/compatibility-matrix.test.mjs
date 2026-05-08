@@ -90,6 +90,7 @@ test("release checklist requires matrix verification", () => {
   assert.match(matrix, /compatibility matrix doc matches the actual CI matrix/);
   assert.match(matrix, /No docs or README claim support for environments not listed as "Supported"/);
   assert.match(matrix, /COMPOUND_DOCTOR_NODE_VERSION=v16\.20\.0/);
+  assert.match(matrix, /examples\/activate-existing-repo\/README\.md/);
 });
 
 test("README documents POSIX and PowerShell command pairs plus Windows limitations", () => {
