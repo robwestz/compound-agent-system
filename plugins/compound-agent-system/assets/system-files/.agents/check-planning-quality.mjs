@@ -2,6 +2,8 @@
 import { readFileSync } from "node:fs";
 
 const GENERIC_PHASE_RE = /\b(foundation|verification)\b/i;
+const REQUIRED_BLOCKER_FIELDS = ["recommended-default", "priority", "reversibility", "proceed-policy", "unlock-condition"];
+const ROLE_NAMES = ["planner", "executor", "reviewer", "verifier"];
 
 function readAll(files) {
   return files.map((file) => ({ file, content: readFileSync(file, "utf-8") }));
@@ -9,9 +11,30 @@ function readAll(files) {
 
 function phaseNames(plan) {
   const names = [];
+  const yamlSkills = new Map();
+  let currentId = null;
+  let inSkills = false;
+  for (const line of plan.split(/\r?\n/)) {
+    const idMatch = line.match(/^\s*-\s+id:\s*["']?([^"'\s]+)["']?/);
+    if (idMatch) {
+      currentId = idMatch[1];
+      inSkills = false;
+      if (!yamlSkills.has(currentId)) yamlSkills.set(currentId, []);
+      continue;
+    }
+    if (currentId && /^\s*skills:\s*$/.test(line)) {
+      inSkills = true;
+      continue;
+    }
+    if (inSkills) {
+      const skillMatch = line.match(/^\s*-\s+["']?([^"']+)["']?\s*$/);
+      if (skillMatch) yamlSkills.get(currentId).push(skillMatch[1]);
+      else if (!/^\s*$/.test(line)) inSkills = false;
+    }
+  }
   for (const match of plan.matchAll(/\[COMPOUND-PHASE\s+([^\]]+)\]/g)) {
     const attrs = Object.fromEntries([...match[1].matchAll(/(\w+)="([^"]*)"|(\w+)=(\S+)/g)].map((m) => [m[1] || m[3], m[2] || m[4]]));
-    names.push({ id: attrs.id || "", goal: attrs.goal || "", dod: attrs.dod || "", skills: attrs.skills || "" });
+    names.push({ id: attrs.id || "", goal: attrs.goal || "", dod: attrs.dod || "", skills: attrs.skills || "", frontmatterSkills: yamlSkills.get(attrs.id || "") || [] });
   }
   return names;
 }
@@ -26,12 +49,25 @@ export function scanPlanningQuality(inputs) {
   if (!phases.length) issues.push({ type: "missing-importable-markers" });
   if (phases.length && phases.every((p) => GENERIC_PHASE_RE.test(`${p.id} ${p.goal}`))) issues.push({ type: "generic-phase-plan" });
   if (phases.length && phases.every((p) => /foundation|verification/i.test(p.id))) issues.push({ type: "generic-only-phase-names" });
+  if (/TODO|TBD|\{\{[^}]+\}\}/i.test(combined)) issues.push({ type: "unresolved-placeholder" });
+  if (/\bdefault:\s*(ask the user|none|tbd|n\/a)/i.test(combined)) issues.push({ type: "unsafe-default" });
   for (const phase of phases) {
     if (!phase.dod) issues.push({ type: "missing-phase-dod", phase: phase.id });
-    if (!phase.skills || !/(planner|executor|reviewer|verifier)/.test(phase.skills)) issues.push({ type: "missing-role-ownership", phase: phase.id });
+    if (!phase.skills) issues.push({ type: "missing-role-ownership", phase: phase.id });
+    if (phase.skills && !ROLE_NAMES.some((role) => new RegExp(`\\b${role}\\b`, "i").test(phase.skills))) issues.push({ type: "role-mismatch", phase: phase.id });
+    if (phase.frontmatterSkills.length && phase.skills) {
+      const markerSkills = phase.skills.split(/[;,]/).map((skill) => skill.trim()).filter(Boolean);
+      const missingFromMarker = phase.frontmatterSkills.filter((skill) => !markerSkills.includes(skill));
+      const extraInMarker = markerSkills.filter((skill) => !phase.frontmatterSkills.includes(skill));
+      if (missingFromMarker.length || extraInMarker.length) issues.push({ type: "role-mismatch", phase: phase.id });
+    }
+    if (!phase.goal || phase.goal.length < 8 || /^(do it|fix it|build it|verify it)$/i.test(phase.goal.trim())) issues.push({ type: "thin-phase-goal", phase: phase.id });
   }
-  for (const field of ["recommended-default", "priority", "reversibility", "proceed-policy", "unlock-condition"]) {
+  for (const field of REQUIRED_BLOCKER_FIELDS) {
     if (!combined.includes(field)) issues.push({ type: "missing-blocker-defaults", field });
+  }
+  for (const bucket of ["blocking_now", "can_default", "defer"]) {
+    if (!new RegExp(`\\b${bucket}\\b`).test(combined)) issues.push({ type: "missing-question-buckets", bucket });
   }
 
   return { ok: issues.length === 0, issues };
