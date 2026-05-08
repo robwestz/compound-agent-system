@@ -46,7 +46,7 @@
     },
     {
       "path": ".agents/event-log.mjs",
-      "bytes": 5773
+      "bytes": 5803
     },
     {
       "path": ".agents/first-session-wizard.mjs",
@@ -75,6 +75,10 @@
     {
       "path": ".agents/skills/SkiLLBuilDr/agents/openai.yaml",
       "bytes": 277
+    },
+    {
+      "path": ".agents/support-bundle.mjs",
+      "bytes": 9298
     },
     {
       "path": ".agents/task.mjs",
@@ -310,7 +314,7 @@
     },
     {
       "path": "README.md",
-      "bytes": 13557
+      "bytes": 14256
     },
     {
       "path": "assemble.mjs",
@@ -591,6 +595,10 @@
     {
       "path": "tests/session-readiness.test.mjs",
       "bytes": 9516
+    },
+    {
+      "path": "tests/support-bundle.test.mjs",
+      "bytes": 5950
     },
     {
       "path": "tests/token-budget-trigger-sim.mjs",
