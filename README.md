@@ -219,6 +219,8 @@ The generated plan is idea-derived: short, medium, and long idea fixtures should
 
 The premium-production hardening catalog lives in `docs/premium-production/`. It breaks the remaining commercial-readiness work into small task files with DoD, constraints, quality bar, dependencies, skill guidance, and implementer/evaluator feedback-loop expectations. Use that catalog before starting broad hardening work so the core plugin stays focused and optional workflows can remain skills, docs/playbooks, external workbench work, or test-only assets.
 
+For parallel premium waves, use `docs/subagent-batch-execution-playbook.md`. It defines which tasks can be batched, how branches/PRs/evidence are named, when to stop the batch, and how to validate task reports with the evaluator feedback-loop runner.
+
 ## Fact-Forcing Gate
 
 The first state-changing action in a session requires grounding in the user's exact instruction. Set `COMPOUND_GROUNDED` to a verbatim quote before retrying. This prevents agents from acting on stale or assumed context. Read-only commands such as `status`, `list`, `show`, and `current` do not require grounding.

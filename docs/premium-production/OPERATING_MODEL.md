@@ -39,6 +39,8 @@ Run up to 10 implementer/evaluator pairs at once, but only for tasks with no unr
 
 If a task discovers missing foundation, it must open a blocker against the dependency instead of silently expanding scope.
 
+Use `../subagent-batch-execution-playbook.md` for the operational checklist before launching a batch. The playbook defines eligibility, branch and PR naming, evidence requirements, merge ordering, conflict rules, and stop-batch conditions.
+
 ## Branching policy
 
 Use one branch per task unless a wave is intentionally bundled. Avoid long-lived mega-branches. Each PR must reference the task file it completes.
