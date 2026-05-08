@@ -11,6 +11,10 @@
 
 {{BLOCKERS}}
 
+## Manual approval matrix
+
+{{APPROVAL_MATRIX}}
+
 ## First vertical slice
 
 - title: {{FIRST_VERTICAL_SLICE_TITLE}}
@@ -20,4 +24,4 @@
 
 ## Closing
 
-Ask only `blocking_now` questions in user-facing output. Use recommended defaults only where proceed-policy is `proceed-with-default`.
+Ask only `blocking_now` / `must-ask` questions in user-facing output. Use recommended defaults only where proceed-policy is `proceed-with-default` or the ledger approval policy is `defaultable`. Deferred items stay out of scope until explicitly resumed.

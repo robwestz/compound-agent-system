@@ -38,7 +38,7 @@
     },
     {
       "path": ".agents/idea-intake.mjs",
-      "bytes": 26814
+      "bytes": 30446
     },
     {
       "path": ".agents/node-runtime.mjs",
@@ -58,7 +58,7 @@
     },
     {
       "path": ".agents/session-readiness.mjs",
-      "bytes": 19987
+      "bytes": 21061
     },
     {
       "path": ".agents/SKILL_SELECT.md",
@@ -78,7 +78,7 @@
     },
     {
       "path": ".agents/task.mjs",
-      "bytes": 44883
+      "bytes": 51670
     },
     {
       "path": ".agents/TASKS.json",
@@ -98,7 +98,7 @@
     },
     {
       "path": ".agents/templates/GAP_SCAN.md",
-      "bytes": 733
+      "bytes": 900
     },
     {
       "path": ".agents/templates/OPEN_QUESTIONS.md",
@@ -337,6 +337,10 @@
       "bytes": 2421
     },
     {
+      "path": "docs/manual-approval-boundaries.md",
+      "bytes": 4961
+    },
+    {
       "path": "docs/operations.md",
       "bytes": 2238
     },
@@ -526,7 +530,7 @@
     },
     {
       "path": "README.md",
-      "bytes": 20236
+      "bytes": 20428
     },
     {
       "path": "schemas/event-log.v1.json",
@@ -542,7 +546,7 @@
     },
     {
       "path": "tests/agents-task.test.mjs",
-      "bytes": 20102
+      "bytes": 24914
     },
     {
       "path": "tests/assemble.test.mjs",
@@ -586,7 +590,7 @@
     },
     {
       "path": "tests/golden-path-e2e.test.mjs",
-      "bytes": 6797
+      "bytes": 6914
     },
     {
       "path": "tests/handoff-bridge.test.mjs",
@@ -602,7 +606,7 @@
     },
     {
       "path": "tests/idea-intake.test.mjs",
-      "bytes": 15150
+      "bytes": 15376
     },
     {
       "path": "tests/install-rollback-uninstall.test.mjs",
@@ -626,7 +630,7 @@
     },
     {
       "path": "tests/session-readiness.test.mjs",
-      "bytes": 9753
+      "bytes": 11506
     },
     {
       "path": "tests/subagent-batch-playbook.test.mjs",

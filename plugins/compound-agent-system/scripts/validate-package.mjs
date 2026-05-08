@@ -106,6 +106,7 @@ const required = [
   "assets/system-files/docs/development.md",
   "assets/system-files/docs/release.md",
   "assets/system-files/docs/security-boundary-model.md",
+  "assets/system-files/docs/manual-approval-boundaries.md",
   "assets/system-files/docs/secrets-and-ai-policy.md",
   "assets/system-files/docs/plugin-size-budget.md",
   "assets/system-files/docs/event-log.md",
