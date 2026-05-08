@@ -314,7 +314,7 @@
     },
     {
       "path": "README.md",
-      "bytes": 14256
+      "bytes": 14606
     },
     {
       "path": "assemble.mjs",
@@ -347,6 +347,10 @@
     {
       "path": "docs/security-boundary-model.md",
       "bytes": 3134
+    },
+    {
+      "path": "docs/subagent-batch-execution-playbook.md",
+      "bytes": 5193
     },
     {
       "path": "docs/troubleshooting.md",
@@ -595,6 +599,10 @@
     {
       "path": "tests/session-readiness.test.mjs",
       "bytes": 9516
+    },
+    {
+      "path": "tests/subagent-batch-playbook.test.mjs",
+      "bytes": 2239
     },
     {
       "path": "tests/support-bundle.test.mjs",

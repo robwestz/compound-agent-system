@@ -236,6 +236,10 @@ node .agents\eval-loop.mjs docs\premium-production\tasks\18-evaluator-feedback-l
 
 The runner checks for the two feedback rounds, both improvement rounds, final signoff, implementer/evaluator identity, and disclosure when one agent performs both roles. It does not call external agent APIs and must not claim independent review for same-session self-evaluation.
 
+## Subagent batch execution
+
+Use `docs/subagent-batch-execution-playbook.md` before running multiple premium-production tasks in parallel. The playbook defines eligibility, branch and PR naming, evidence requirements, merge ordering, conflict handling, stop-batch conditions, and how each task report must be validated with `.agents/eval-loop.mjs`.
+
 ## Phase 0 plan artifacts
 
 Idea intake writes these standard artifacts under `phase-0/`:

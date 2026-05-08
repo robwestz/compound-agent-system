@@ -96,12 +96,14 @@ const required = [
   "assets/system-files/tests/first-session-output.test.mjs",
   "assets/system-files/tests/session-readiness.test.mjs",
   "assets/system-files/tests/support-bundle.test.mjs",
+  "assets/system-files/tests/subagent-batch-playbook.test.mjs",
   "assets/system-files/tests/package-integrity.test.mjs",
   "assets/system-files/docs/security-boundary-model.md",
   "assets/system-files/docs/secrets-and-ai-policy.md",
   "assets/system-files/docs/plugin-size-budget.md",
   "assets/system-files/docs/event-log.md",
   "assets/system-files/docs/planning-quality-red-team.md",
+  "assets/system-files/docs/subagent-batch-execution-playbook.md",
   "assets/system-files/docs/troubleshooting.md",
   "AGENT_HANDOFF.md"
 ];
