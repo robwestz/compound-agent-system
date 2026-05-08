@@ -46,10 +46,12 @@ test("README routes supported user intents to docs", () => {
 
 test("root and bundled intent docs stay mirrored", () => {
   const mirrored = [
+    "docs/compatibility-matrix.md",
     "docs/install.md",
     "docs/first-run.md",
     "docs/concepts.md",
     "docs/operations.md",
+    "docs/release.md",
     "docs/troubleshooting.md",
     "docs/plugin-size-budget.md",
     "docs/secrets-and-ai-policy.md",

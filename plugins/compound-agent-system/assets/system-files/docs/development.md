@@ -30,7 +30,12 @@ Some docs exist at the repository root and inside `plugins/compound-agent-system
 Currently mirrored:
 
 - `docs/compatibility-matrix.md`
+- `docs/concepts.md`
+- `docs/first-run.md`
+- `docs/install.md`
+- `docs/operations.md`
 - `docs/plugin-size-budget.md`
+- `docs/release.md`
 - `docs/secrets-and-ai-policy.md`
 - `docs/security-boundary-model.md`
 - `docs/troubleshooting.md`
