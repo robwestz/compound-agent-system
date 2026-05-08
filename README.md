@@ -125,7 +125,8 @@ Installed hooks:
 
 Compliance level: WARN
 Observe: log only; Warn: warn but do not block; Enforce: block invalid state-changing actions.
-To enable enforcement: export COMPOUND_MODE=enforce
+To enable enforcement (POSIX): export COMPOUND_MODE=enforce
+To enable enforcement (PowerShell): $env:COMPOUND_MODE = 'enforce'
 Recommended switch point: after the first smoke test passes, before unattended execution.
 
 First-session guided wizard
@@ -133,7 +134,9 @@ Step 1 of 5: sign in the agent.
 System: installed; mode WARN (guides without blocking).
 Agent: not signed in.
 Next: node .agents/agent-activate.mjs --id <agent-id>
+Next (PowerShell): node .agents\agent-activate.mjs --id <agent-id>
 Skip: node .agents/first-session-wizard.mjs skip
+Skip (PowerShell): node .agents\first-session-wizard.mjs skip
 
 > /usr/bin/node /tmp/demo-repo/.agents/agent-activate.mjs --id devin-demo --role planner --skill compound-agent-system
 First-session guided wizard
@@ -142,6 +145,7 @@ System: installed; mode WARN (guides without blocking).
 Agent: devin-demo signed in as planner.
 Next: create idea.md with your raw idea
 Skip: node .agents/first-session-wizard.mjs skip
+Skip (PowerShell): node .agents\first-session-wizard.mjs skip
 
 Identity: id=devin-demo client=devin model=demo role=planner session_id=2026-05-01T16-45-00-000Z-demo00
 Skills: compound-agent-system

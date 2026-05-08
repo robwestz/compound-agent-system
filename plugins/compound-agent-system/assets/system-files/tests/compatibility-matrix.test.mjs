@@ -104,6 +104,10 @@ test("README documents POSIX and PowerShell command pairs plus Windows limitatio
     assert.match(readme, /PowerShell:[\s\S]*node \.agents\\task\.mjs import phase-0\\PHASE_PLAN\.md --apply/);
     assert.match(readme, /export COMPOUND_MODE=enforce/);
     assert.match(readme, /\$env:COMPOUND_MODE = 'enforce'/);
+    assert.match(readme, /To enable enforcement \(POSIX\): export COMPOUND_MODE=enforce/);
+    assert.match(readme, /To enable enforcement \(PowerShell\): \$env:COMPOUND_MODE = 'enforce'/);
+    assert.match(readme, /Next \(PowerShell\): node \.agents\\agent-activate\.mjs --id <agent-id>/);
+    assert.match(readme, /Skip \(PowerShell\): node \.agents\\first-session-wizard\.mjs skip/);
     assert.match(readme, /does not require WSL/);
     assert.match(readme, /Windows CI is not automated/);
   }
