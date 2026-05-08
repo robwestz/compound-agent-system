@@ -2,12 +2,13 @@
 import { readFileSync } from "node:fs";
 
 const REQUIRED_MILESTONES = [
-  { type: "missing-first-completion", label: "first completion", pattern: /\b(first completion|initial implementation|first complete implementation)\b/i },
-  { type: "missing-eval-round-1", label: "evaluator round 1", pattern: /\b(evaluator (feedback |review )?round 1|eval round 1)\b/i },
-  { type: "missing-improvement-1", label: "improvement 1", pattern: /\b(improvement 1|round 1 (fix|improvement|addressed)|fixes from round 1)\b/i },
-  { type: "missing-eval-round-2", label: "evaluator round 2", pattern: /\b(evaluator (feedback |review )?round 2|eval round 2)\b/i },
-  { type: "missing-improvement-2", label: "improvement 2", pattern: /\b(improvement 2|round 2 (fix|improvement|addressed)|fixes from round 2)\b/i },
-  { type: "missing-final-signoff", label: "final signoff", pattern: /\b(final signoff|final evaluator signoff)\b/i },
+  { type: "missing-first-completion", label: "first completion", headingPattern: /\b(first completion|initial implementation|first complete implementation)\b/i },
+  { type: "missing-self-review", label: "self-review", headingPattern: /\bself[- ]review\b/i },
+  { type: "missing-eval-round-1", label: "evaluator round 1", headingPattern: /\b(evaluator (feedback |review )?round 1|eval round 1)\b/i },
+  { type: "missing-improvement-1", label: "improvement 1", headingPattern: /\b(improvement 1|round 1 (fix|improvement|addressed)|fixes from round 1)\b/i },
+  { type: "missing-eval-round-2", label: "evaluator round 2", headingPattern: /\b(evaluator (feedback |review )?round 2|eval round 2)\b/i },
+  { type: "missing-improvement-2", label: "improvement 2", headingPattern: /\b(improvement 2|round 2 (fix|improvement|addressed)|fixes from round 2)\b/i },
+  { type: "missing-final-signoff", label: "final signoff", headingPattern: /\b(final signoff|final evaluator signoff)\b/i },
 ];
 
 function identity(content, label) {
@@ -15,9 +16,17 @@ function identity(content, label) {
   return match ? match[1].trim().toLowerCase() : "";
 }
 
+function sectionHeadings(content) {
+  return [...content.matchAll(/^#{2,6}\s+(.+)$/gm)].map((match) => ({
+    heading: match[1].trim(),
+    index: match.index,
+  }));
+}
+
 function milestoneIndexes(content) {
+  const headings = sectionHeadings(content);
   return REQUIRED_MILESTONES.map((milestone) => {
-    const match = milestone.pattern.exec(content);
+    const match = headings.find((heading) => milestone.headingPattern.test(heading.heading));
     return { ...milestone, index: match ? match.index : -1 };
   });
 }
@@ -42,7 +51,6 @@ export function scanEvalLoop(inputs) {
     issues.push({ type: "out-of-order-feedback-loop" });
   }
 
-  if (!/\bself[- ]review\b/i.test(content)) issues.push({ type: "missing-self-review" });
   if (!/\bevaluator (review|feedback|round|signoff)\b/i.test(content)) issues.push({ type: "missing-evaluator-review" });
 
   const implementer = identity(content, "implementer");

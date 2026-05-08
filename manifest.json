@@ -42,7 +42,7 @@
     },
     {
       "path": ".agents/eval-loop.mjs",
-      "bytes": 3917
+      "bytes": 4223
     },
     {
       "path": ".agents/first-session-wizard.mjs",
@@ -526,7 +526,7 @@
     },
     {
       "path": "tests/eval-loop.test.mjs",
-      "bytes": 3216
+      "bytes": 4472
     },
     {
       "path": "tests/first-session-output.test.mjs",

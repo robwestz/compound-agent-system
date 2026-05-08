@@ -117,3 +117,66 @@ Evaluator signoff: accepted.
   assert.ok(types.includes("false-independent-review"));
   assert.ok(types.includes("evaluator-independence-undisclosed"));
 });
+
+test("eval loop runner orders milestones by headings, not incidental text", () => {
+  const result = run(`
+# Task report
+
+Implementer: devin
+Evaluator: reviewer-bot
+
+## First completion
+Initial implementation is complete.
+
+## Self-review
+The implementer checked the work.
+
+## Evaluator feedback round 1
+Finding: cannot give final signoff until gaps are closed.
+
+## Improvement 1
+Round 1 fix: addressed it.
+
+## Evaluator feedback round 2
+Finding: no blockers.
+
+## Improvement 2
+Round 2 fix: final polish.
+
+## Final signoff
+Evaluator signoff: accepted.
+`);
+  assert.equal(result.status, 0, result.stderr);
+});
+
+test("eval loop runner rejects self-review after final signoff", () => {
+  const result = run(`
+# Task report
+
+Implementer: devin
+Evaluator: reviewer-bot
+
+## First completion
+Initial implementation is complete.
+
+## Evaluator feedback round 1
+Finding: add a regression.
+
+## Improvement 1
+Round 1 fix: added it.
+
+## Evaluator feedback round 2
+Finding: no blockers.
+
+## Improvement 2
+Round 2 fix: final polish.
+
+## Final signoff
+Evaluator signoff: accepted.
+
+## Self-review
+The implementer checked the work too late.
+`);
+  assert.equal(result.status, 1);
+  assert.ok(issues(result).some((issue) => issue.type === "out-of-order-feedback-loop"));
+});
