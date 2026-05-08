@@ -314,7 +314,7 @@
     },
     {
       "path": "docs/compatibility-matrix.md",
-      "bytes": 5221
+      "bytes": 5388
     },
     {
       "path": "docs/concepts.md",
@@ -361,6 +361,10 @@
       "bytes": 3134
     },
     {
+      "path": "docs/subagent-batch-execution-playbook.md",
+      "bytes": 5193
+    },
+    {
       "path": "docs/troubleshooting.md",
       "bytes": 4278
     },
@@ -390,75 +394,75 @@
     },
     {
       "path": "fixtures/ideas/long-idea-api-alchemy.md",
-      "bytes": 1811
+      "bytes": 2057
     },
     {
       "path": "fixtures/ideas/medium-feature-idea.md",
-      "bytes": 418
+      "bytes": 641
     },
     {
       "path": "fixtures/ideas/realworld-benchmarks.json",
-      "bytes": 7455
+      "bytes": 7867
     },
     {
       "path": "fixtures/ideas/simple-idea.md",
-      "bytes": 90
+      "bytes": 302
     },
     {
       "path": "fixtures/output-quality/clean-gap-scan.md",
-      "bytes": 764
+      "bytes": 868
     },
     {
       "path": "fixtures/output-quality/duplicated-sections.md",
-      "bytes": 141
+      "bytes": 242
     },
     {
       "path": "fixtures/output-quality/repeated-blockers.md",
-      "bytes": 476
+      "bytes": 569
     },
     {
       "path": "fixtures/planning-quality/generic-two-phase-plan.md",
-      "bytes": 747
+      "bytes": 859
     },
     {
       "path": "fixtures/planning-quality/red-team/generic-two-phase-plan.md",
-      "bytes": 747
+      "bytes": 854
     },
     {
       "path": "fixtures/planning-quality/red-team/missing-blocker-metadata.md",
-      "bytes": 658
+      "bytes": 751
     },
     {
       "path": "fixtures/planning-quality/red-team/missing-dod.md",
-      "bytes": 678
+      "bytes": 779
     },
     {
       "path": "fixtures/planning-quality/red-team/missing-first-vertical-slice.md",
-      "bytes": 674
+      "bytes": 787
     },
     {
       "path": "fixtures/planning-quality/red-team/missing-question-buckets.md",
-      "bytes": 719
+      "bytes": 818
     },
     {
       "path": "fixtures/planning-quality/red-team/role-mismatch.md",
-      "bytes": 736
+      "bytes": 838
     },
     {
       "path": "fixtures/planning-quality/red-team/thin-phase-goal.md",
-      "bytes": 642
+      "bytes": 726
     },
     {
       "path": "fixtures/planning-quality/red-team/unimportable-markers.md",
-      "bytes": 384
+      "bytes": 500
     },
     {
       "path": "fixtures/planning-quality/red-team/unresolved-placeholder.md",
-      "bytes": 731
+      "bytes": 830
     },
     {
       "path": "fixtures/planning-quality/red-team/unsafe-default.md",
-      "bytes": 862
+      "bytes": 956
     },
     {
       "path": "frameworks/AGENT_ONBOARDING.md",
@@ -522,7 +526,7 @@
     },
     {
       "path": "README.md",
-      "bytes": 16807
+      "bytes": 17157
     },
     {
       "path": "schemas/event-log.v1.json",
@@ -558,7 +562,7 @@
     },
     {
       "path": "tests/compatibility-matrix.test.mjs",
-      "bytes": 4040
+      "bytes": 4112
     },
     {
       "path": "tests/docs-ia.test.mjs",
@@ -598,7 +602,7 @@
     },
     {
       "path": "tests/idea-intake.test.mjs",
-      "bytes": 13639
+      "bytes": 13976
     },
     {
       "path": "tests/install-rollback-uninstall.test.mjs",
@@ -614,7 +618,7 @@
     },
     {
       "path": "tests/package-integrity.test.mjs",
-      "bytes": 3903
+      "bytes": 5164
     },
     {
       "path": "tests/role-plan.test.mjs",
@@ -623,6 +627,10 @@
     {
       "path": "tests/session-readiness.test.mjs",
       "bytes": 9516
+    },
+    {
+      "path": "tests/subagent-batch-playbook.test.mjs",
+      "bytes": 2239
     },
     {
       "path": "tests/support-bundle.test.mjs",

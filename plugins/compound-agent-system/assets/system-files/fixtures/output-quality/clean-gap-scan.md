@@ -1,5 +1,7 @@
 # GAP SCAN
 
+Fixture purpose: Positive output-quality fixture proving a clean GAP SCAN passes the markdown checker.
+
 ## Intent reground
 
 The user wants the harness to turn a raw idea into a tracked planning task.

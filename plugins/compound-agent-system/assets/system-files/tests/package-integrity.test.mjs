@@ -1,9 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, cpSync, rmSync, unlinkSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, cpSync, rmSync, unlinkSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve, sep } from "node:path";
+import { dirname, extname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -26,6 +26,16 @@ function cloneRepo() {
     },
   });
   return dir;
+}
+
+function walk(dir) {
+  const out = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const p = join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...walk(p));
+    else if (entry.isFile()) out.push(p);
+  }
+  return out;
 }
 
 test("cloneRepo preserves root dot-git-prefixed metadata files", () => {
@@ -88,4 +98,23 @@ test("committed fixtures contain no real-looking secrets", () => {
   const report = JSON.parse(r.stdout.slice(jsonStart));
   assert.equal(report.checks.security.fixture_secrets.ok, true);
   assert.equal(report.checks.security.fixture_secrets.findings.length, 0);
+});
+
+test("curated fixtures document purpose and fixture-only product ideas", () => {
+  const fixtureFiles = walk(join(SYSTEM_ROOT, "fixtures")).filter((file) => [".md", ".json"].includes(extname(file)));
+  assert.ok(fixtureFiles.length > 0);
+  for (const file of fixtureFiles) {
+    const rel = file.slice(SYSTEM_ROOT.length + 1).replaceAll(sep, "/");
+    const text = readFileSync(file, "utf-8");
+    if (rel === "fixtures/ideas/realworld-benchmarks.json") {
+      const corpus = JSON.parse(text);
+      assert.match(corpus[0].purpose, /Fixture purpose:/, `${rel} needs a corpus purpose note`);
+      assert.match(corpus[0].not_to_build, /fixture-only product ideas/, `${rel} needs fixture-only marking`);
+      continue;
+    }
+    assert.match(text, /Fixture purpose:/, `${rel} needs a short purpose note`);
+    if (rel.startsWith("fixtures/ideas/")) {
+      assert.match(text, /Not-to-build:.*fixture-only product idea/i, `${rel} needs fixture-only product marking`);
+    }
+  }
 });
