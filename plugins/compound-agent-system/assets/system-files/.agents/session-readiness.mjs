@@ -22,6 +22,10 @@ function mode() {
   return "warn";
 }
 
+function commandVariants(posix, powershell = null) {
+  return powershell ? { posix, powershell } : posix;
+}
+
 function loadLedger() {
   if (!existsSync(ledgerPath)) return { current: null, tasks: [], log: [] };
   return JSON.parse(readFileSync(ledgerPath, "utf-8"));
@@ -318,7 +322,13 @@ export function assessReadiness({ ledger = loadLedger(), complianceMode = mode()
   if (checks.checkpoint_present && !checks.handoff_contract_valid) unlock_steps.push(unlock("handoff_contract_valid", "Create a valid shareable handoff contract for the active task.", `node handoff-bridge.mjs checkpoint --task ${current?.id || "<task-id>"} --from-agent <agent-id> --summary "<state>" --out .agents/checkpoints/${current?.id || "task"}.handoff.json`));
   if (!checks.env_contract_present) unlock_steps.push(unlock("env_contract_present", "Document the environment contract for the unattended run.", "Create .agents/env-contract.json or add env_contract to the active task."));
   if (!checks.workspace_clean_or_known_dirty) unlock_steps.push(unlock("workspace_clean_or_known_dirty", "Confirm git state is clean or document known-dirty files with a reason.", "git status --short"));
-  if (!checks.compliance_mode_enforce) unlock_steps.push(unlock("compliance_mode_enforce", "Set COMPOUND_MODE=enforce before unattended execution.", "export COMPOUND_MODE=enforce"));
+  if (!checks.compliance_mode_enforce) {
+    unlock_steps.push(unlock(
+      "compliance_mode_enforce",
+      "Set COMPOUND_MODE=enforce before unattended execution.",
+      commandVariants("export COMPOUND_MODE=enforce", "$env:COMPOUND_MODE = 'enforce'")
+    ));
+  }
   const ready = Object.values(checks).every(Boolean);
   return {
     ready,
@@ -382,7 +392,12 @@ function main() {
     console.log("\nUnlock:");
     result.unlock_steps.forEach((step, index) => {
       console.log(`${index + 1}. [${step.id}] ${step.title}`);
-      console.log(`   command: ${step.command}`);
+      if (typeof step.command === "string") {
+        console.log(`   command: ${step.command}`);
+      } else {
+        console.log(`   POSIX: ${step.command.posix}`);
+        console.log(`   PowerShell: ${step.command.powershell}`);
+      }
     });
   }
   console.log("\nJSON:");

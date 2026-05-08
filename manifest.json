@@ -22,11 +22,11 @@
     },
     {
       "path": ".agents/TASKS.json",
-      "bytes": 26606
+      "bytes": 28073
     },
     {
       "path": ".agents/activate.mjs",
-      "bytes": 4169
+      "bytes": 4395
     },
     {
       "path": ".agents/agent-activate.mjs",
@@ -50,7 +50,7 @@
     },
     {
       "path": ".agents/first-session-wizard.mjs",
-      "bytes": 5475
+      "bytes": 6174
     },
     {
       "path": ".agents/idea-intake.mjs",
@@ -66,7 +66,7 @@
     },
     {
       "path": ".agents/session-readiness.mjs",
-      "bytes": 20674
+      "bytes": 21061
     },
     {
       "path": ".agents/skills/SkiLLBuilDr/SKILL.md",
@@ -82,7 +82,7 @@
     },
     {
       "path": ".agents/task.mjs",
-      "bytes": 51258
+      "bytes": 51670
     },
     {
       "path": ".agents/templates/AGENT_ROLES.md",
@@ -314,7 +314,7 @@
     },
     {
       "path": "README.md",
-      "bytes": 14798
+      "bytes": 17877
     },
     {
       "path": "assemble.mjs",
@@ -326,7 +326,7 @@
     },
     {
       "path": "docs/compatibility-matrix.md",
-      "bytes": 5388
+      "bytes": 6044
     },
     {
       "path": "docs/event-log.md",
@@ -522,7 +522,7 @@
     },
     {
       "path": "tests/agents-task.test.mjs",
-      "bytes": 23711
+      "bytes": 24914
     },
     {
       "path": "tests/assemble.test.mjs",
@@ -530,7 +530,7 @@
     },
     {
       "path": "tests/bootstrap-install-plan.test.mjs",
-      "bytes": 3100
+      "bytes": 4073
     },
     {
       "path": "tests/check-output-quality.test.mjs",
@@ -542,7 +542,7 @@
     },
     {
       "path": "tests/compatibility-matrix.test.mjs",
-      "bytes": 4112
+      "bytes": 5817
     },
     {
       "path": "tests/doctor-recovery.test.mjs",
@@ -558,7 +558,7 @@
     },
     {
       "path": "tests/first-session-output.test.mjs",
-      "bytes": 7851
+      "bytes": 8050
     },
     {
       "path": "tests/golden-path-e2e.test.mjs",
@@ -578,7 +578,7 @@
     },
     {
       "path": "tests/idea-intake.test.mjs",
-      "bytes": 14202
+      "bytes": 15376
     },
     {
       "path": "tests/install-rollback-uninstall.test.mjs",
@@ -586,7 +586,7 @@
     },
     {
       "path": "tests/mode-policy.test.mjs",
-      "bytes": 4176
+      "bytes": 4336
     },
     {
       "path": "tests/node-runtime.test.mjs",
@@ -602,7 +602,7 @@
     },
     {
       "path": "tests/session-readiness.test.mjs",
-      "bytes": 11269
+      "bytes": 11506
     },
     {
       "path": "tests/subagent-batch-playbook.test.mjs",

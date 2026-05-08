@@ -434,6 +434,41 @@ test("import inline markers", () => {
   }
 });
 
+test("import accepts CRLF frontmatter and Windows path separators", () => {
+  const { ledger, dir } = freshLedger();
+  try {
+    const plan = join(dir, "PHASE_PLAN.md");
+    writeFileSync(
+      plan,
+      [
+        "---",
+        "compound: active",
+        "phases:",
+        "  - id: phase-win",
+        "    goal: \"Validate Windows plan import\"",
+        "    dod:",
+        "      - check: test",
+        "        command: \"node .agents\\task.mjs status\"",
+        "    skills:",
+        "      - \"compound-agent-system\"",
+        "---",
+        "",
+        "[COMPOUND-PHASE id=phase-win-inline goal=\"Inline duplicate\" dod=\"test:node .agents\\task.mjs status\" skills=\"compound-agent-system\"]",
+        "",
+      ].join("\r\n")
+    );
+    const r = run(ledger, ["import", plan, "--apply"]);
+    assert.equal(r.status, 0, r.stderr);
+    const data = readLedger(ledger);
+    const imported = data.tasks.find((task) => task.id === "phase-win");
+    assert.ok(imported);
+    assert.equal(imported.dod[0].command, "node .agents\\task.mjs status");
+    assert.equal(data.tasks.filter((task) => task.id === "phase-win").length, 1);
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
 test("import deduplicates phases found in frontmatter and inline markers", () => {
   const { ledger, dir } = freshLedger();
   try {

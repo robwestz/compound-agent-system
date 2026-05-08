@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, rmSync, cpSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, cpSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -91,6 +91,30 @@ test("short idea dry-run previews an intake task without writing", () => {
     assert.equal(readLedger(dir).tasks.length, before, "dry-run must not write TASKS.json");
   } finally {
     rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("CRLF idea in a path with spaces applies and preserves Windows-safe commands", () => {
+  const parent = mkdtempSync(join(tmpdir(), "idea intake parent "));
+  const source = workspace();
+  const dir = join(parent, "workspace with spaces");
+  cpSync(source, dir, { recursive: true });
+  try {
+    const idea = join(dir, "ideas with spaces", "simple idea.md");
+    mkdirSync(dirname(idea), { recursive: true });
+    writeFileSync(idea, "# Windows parity\r\n\r\n- Build a CLI command\r\n- Validate path separators\r\n");
+    const r = runIdea(dir, ["--input", idea, "--apply"]);
+    assert.equal(r.status, 0, r.stderr);
+    const ledger = readLedger(dir);
+    assert.ok(ledger.tasks.some((task) => /Idea intake/.test(task.goal)));
+    const plan = readFileSync(join(dir, "phase-0", "PHASE_PLAN.md"), "utf-8");
+    assert.match(plan, /\[COMPOUND-PHASE/);
+    assert.doesNotMatch(plan, /\r/);
+    const dod = readFileSync(join(dir, "phase-0", "DOD_MATRIX.md"), "utf-8");
+    assert.match(dod, /\.agents\/check-output-quality\.mjs/);
+  } finally {
+    rmSync(source, { recursive: true, force: true });
+    rmSync(parent, { recursive: true, force: true });
   }
 });
 

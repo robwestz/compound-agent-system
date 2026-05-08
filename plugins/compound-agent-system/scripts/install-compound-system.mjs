@@ -11,6 +11,23 @@ const pluginRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const sourceRoot = join(pluginRoot, "assets", "system-files");
 const HIGH_IMPACT_ROOT_WRITES = new Set(["CLAUDE.md", "package.json", "AGENT_ONBOARDING.md", "HANDOFF.md", "FUTURE_WORK.md", "package-lock.json"]);
 const OWNERSHIP_MARKER = "compound-agent-system";
+const SAFE_ARG = /^[A-Za-z0-9_./:=@%+-]+$/;
+
+function quotePosixArg(value) {
+  const text = String(value);
+  if (SAFE_ARG.test(text)) return text;
+  return `'${text.replaceAll("'", "'\\''")}'`;
+}
+
+function quotePowerShellArg(value) {
+  const text = String(value);
+  if (SAFE_ARG.test(text)) return text;
+  return `'${text.replaceAll("'", "''")}'`;
+}
+
+function commandString(parts, quoteArg) {
+  return parts.map((part) => quoteArg(part)).join(" ");
+}
 
 function parseArgs(argv) {
   const args = { target: process.cwd(), overwrite: false, dryRun: false, uninstall: false, rollback: null };
@@ -123,6 +140,9 @@ function isInsideTarget(targetRoot, candidate) {
 export function buildInstallPlan(args) {
   const targetRoot = resolve(args.target);
   const files = walk(sourceRoot);
+  const installRel = relative(targetRoot, fileURLToPath(import.meta.url)).replaceAll("\\", "/");
+  const applyParts = ["node", installRel, "--target", targetRoot, ...(args.overwrite ? ["--overwrite"] : [])];
+  const uninstallParts = ["node", installRel, "--target", targetRoot, "--uninstall"];
   const plan = {
     version: 1,
     target: targetRoot,
@@ -142,8 +162,10 @@ export function buildInstallPlan(args) {
     ledger_init: existsSync(join(targetRoot, ".agents", "TASKS.json")) ? "preserve existing ledger" : "initialize .agents/TASKS.json during activation",
     activation_behavior: "run node .agents/activate.mjs after apply unless bootstrap used --no-activate",
     warnings: [],
-    apply_command: `node ${relative(targetRoot, fileURLToPath(import.meta.url)).replaceAll("\\", "/")} --target ${JSON.stringify(targetRoot)}${args.overwrite ? " --overwrite" : ""}`,
-    uninstall_command: `node ${relative(targetRoot, fileURLToPath(import.meta.url)).replaceAll("\\", "/")} --target ${JSON.stringify(targetRoot)} --uninstall`,
+    apply_command: commandString(applyParts, quotePosixArg),
+    apply_command_powershell: commandString(applyParts, quotePowerShellArg),
+    uninstall_command: commandString(uninstallParts, quotePosixArg),
+    uninstall_command_powershell: commandString(uninstallParts, quotePowerShellArg),
   };
 
   for (const src of files) {

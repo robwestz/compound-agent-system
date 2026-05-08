@@ -81,6 +81,8 @@ test("hook pre-edit and status/doctor expose mode policy", () => {
     assert.equal(status.status, 0, status.stderr);
     assert.match(status.stdout, /mode: observe/);
     assert.match(status.stdout, /Switch after the first smoke test passes/);
+    assert.match(status.stdout, /switch: export COMPOUND_MODE=enforce/);
+    assert.match(status.stdout, /PowerShell switch: \$env:COMPOUND_MODE = 'enforce'/);
     const doctor = run(ledger, ["doctor"], { COMPOUND_MODE: "enforce" });
     assert.equal(doctor.status, 0, doctor.stderr);
     const report = JSON.parse(doctor.stdout.slice(doctor.stdout.indexOf("{")));
