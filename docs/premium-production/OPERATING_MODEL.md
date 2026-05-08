@@ -20,6 +20,19 @@ The evaluator is not a rubber stamp. It must try to break the task outcome again
 
 No task may be marked complete after a first pass.
 
+When a task has a written report, validate the loop with:
+
+```bash
+node .agents/eval-loop.mjs <task-report.md>
+```
+
+The check is intentionally local and deterministic. It verifies the presence
+and order of first completion, self-review, evaluator round 1, improvement 1,
+evaluator round 2, improvement 2, and final signoff. It also requires
+implementer/evaluator identity and disclosure when the same agent/session is
+performing both roles; same-agent review can be useful, but it must not be
+described as independent.
+
 ## Batch policy
 
 Run up to 10 implementer/evaluator pairs at once, but only for tasks with no unresolved dependencies in earlier waves.

@@ -22,8 +22,9 @@ One concrete outcome.
 - [ ] Machine-verifiable check.
 - [ ] Documentation or UX check.
 - [ ] Regression check.
-- [ ] Evaluator round 1 completed and addressed.
-- [ ] Evaluator round 2 completed and addressed.
+- [ ] Task report records first completion, self-review, evaluator round 1, improvement 1, evaluator round 2, improvement 2, and final signoff.
+- [ ] If implementer and evaluator are the same agent/session, the report explicitly discloses that the review is not independent.
+- [ ] `node .agents/eval-loop.mjs <task-report.md>` passes for the completed task report.
 
 ## Constraints
 

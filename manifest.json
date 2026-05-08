@@ -41,6 +41,10 @@
       "bytes": 4655
     },
     {
+      "path": ".agents/eval-loop.mjs",
+      "bytes": 4223
+    },
+    {
       "path": ".agents/event-log.mjs",
       "bytes": 5803
     },
@@ -310,7 +314,7 @@
     },
     {
       "path": "README.md",
-      "bytes": 13518
+      "bytes": 14256
     },
     {
       "path": "assemble.mjs",
@@ -535,6 +539,10 @@
     {
       "path": "tests/doctor-recovery.test.mjs",
       "bytes": 10760
+    },
+    {
+      "path": "tests/eval-loop.test.mjs",
+      "bytes": 4472
     },
     {
       "path": "tests/event-log.test.mjs",
