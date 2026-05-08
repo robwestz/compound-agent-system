@@ -423,6 +423,34 @@
       "started_at": "2026-05-03T13:23:48.395Z",
       "updated_at": "2026-05-03T13:33:08.000Z",
       "completed_at": "2026-05-03T13:33:08.000Z"
+    },
+    {
+      "id": "t-008",
+      "goal": "Task 25 Windows PowerShell parity",
+      "state": "done",
+      "dod": [
+        {
+          "check": "test",
+          "command": "node plugins/compound-agent-system/scripts/validate-package.mjs",
+          "passed_at": "2026-05-08T22:45:00.000Z"
+        },
+        {
+          "check": "test",
+          "command": "node --test plugins/compound-agent-system/assets/system-files/tests/*.test.mjs",
+          "passed_at": "2026-05-08T22:45:00.000Z"
+        }
+      ],
+      "skills": [
+        "compound-agent-system"
+      ],
+      "blocked_by": null,
+      "unlock_command": null,
+      "park_reason": null,
+      "parent": null,
+      "agent": "devin-22204aff49cb466685dfae20cff2293e",
+      "started_at": "2026-05-08T22:40:51.646Z",
+      "updated_at": "2026-05-08T22:45:00.000Z",
+      "completed_at": "2026-05-08T22:45:00.000Z"
     }
   ],
   "agents_active": [
@@ -771,6 +799,28 @@
       "ts": "2026-05-03T13:33:08.000Z",
       "event": "done",
       "task": "t-007",
+      "agent": "devin-22204aff49cb466685dfae20cff2293e"
+    },
+    {
+      "ts": "2026-05-08T22:40:51.646Z",
+      "event": "open",
+      "task": "t-008",
+      "agent": "devin-22204aff49cb466685dfae20cff2293e",
+      "goal_present": true,
+      "goal_length": 33,
+      "goal_sha256_12": "094424cf1162"
+    },
+    {
+      "ts": "2026-05-08T22:45:00.000Z",
+      "event": "verify",
+      "task": "t-008",
+      "agent": "devin-22204aff49cb466685dfae20cff2293e",
+      "allPass": true
+    },
+    {
+      "ts": "2026-05-08T22:45:00.000Z",
+      "event": "done",
+      "task": "t-008",
       "agent": "devin-22204aff49cb466685dfae20cff2293e"
     }
   ],

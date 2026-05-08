@@ -31,9 +31,11 @@ function assertTemplate(stdout) {
   const nextLines = wizard.split("\n").filter((line) => /^Next:/.test(line));
   assert.equal(nextLines.length, 1, "one clear next action");
   assert.match(nextLines[0], /node .agents\/agent-activate\.mjs --id <agent-id>|create idea\.md|node .agents\/idea-intake\.mjs --input idea\.md --apply|node .agents\/task\.mjs import phase-0\/PHASE_PLAN\.md --apply|node .agents\/session-readiness\.mjs/);
+  if (/node .agents\//.test(nextLines[0])) assert.match(wizard, /^Next \(PowerShell\): node .agents\\/m);
   const stepLines = wizard.split("\n").filter((line) => /^Step \d of 5:/.test(line));
   assert.equal(stepLines.length, 1, "one guided step");
   assert.match(wizard, /Skip: node .agents\/first-session-wizard\.mjs skip/);
+  assert.match(wizard, /Skip \(PowerShell\): node .agents\\first-session-wizard\.mjs skip/);
 }
 
 function runWizard(dir, extraEnv = {}) {

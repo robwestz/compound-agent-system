@@ -29,8 +29,27 @@ test("dry-run on new target produces valid install plan", () => {
     assert.ok(plan.files_to_create.length > 0);
     assert.equal(plan.files_to_modify.length, 0);
     assert.match(plan.apply_command, /install-compound-system\.mjs/);
+    assert.match(plan.apply_command_powershell, /install-compound-system\.mjs/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("dry-run commands quote spaces in target paths for POSIX and PowerShell", () => {
+  const parent = mkdtempSync(join(tmpdir(), "compound install parent "));
+  const dir = join(parent, "repo with spaces");
+  try {
+    const r = runInstall(dir, ["--overwrite"]);
+    assert.equal(r.status, 0, r.stderr);
+    const plan = readPlan(dir);
+    assert.match(plan.apply_command, /--target '.+repo with spaces' --overwrite$/);
+    assert.match(plan.apply_command_powershell, /--target '.+repo with spaces' --overwrite$/);
+    assert.match(plan.uninstall_command, /--target '.+repo with spaces' --uninstall$/);
+    assert.match(plan.uninstall_command_powershell, /--target '.+repo with spaces' --uninstall$/);
+    assert.doesNotMatch(plan.apply_command, /"/);
+    assert.doesNotMatch(plan.apply_command_powershell, /"/);
+  } finally {
+    rmSync(parent, { recursive: true, force: true });
   }
 });
 

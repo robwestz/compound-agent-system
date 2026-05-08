@@ -53,20 +53,44 @@ Do not build the API Alchemy Engine. It appears only as sanitized fixture materi
 
 Validate package:
 
+POSIX:
+
+```bash
+node plugins/compound-agent-system/scripts/validate-package.mjs
+```
+
+PowerShell:
+
 ```powershell
 node .\plugins\compound-agent-system\scripts\validate-package.mjs
 ```
 
 Install system files into a target repo:
 
+POSIX:
+
+```bash
+node plugins/compound-agent-system/scripts/install-compound-system.mjs --target "/path/to/repo with spaces"
+```
+
+PowerShell:
+
 ```powershell
-node .\plugins\compound-agent-system\scripts\install-compound-system.mjs --target C:\path\to\repo
+node .\plugins\compound-agent-system\scripts\install-compound-system.mjs --target 'C:\path\to\repo with spaces'
 ```
 
 Bootstrap a target repo in one step:
 
+POSIX:
+
+```bash
+node bootstrap.mjs --target "/path/to/repo with spaces" --agent-id codex
+```
+
+PowerShell:
+
 ```powershell
-node .\bootstrap.mjs --target C:\path\to\repo --agent-id codex
+node .\bootstrap.mjs --target 'C:\path\to\repo with spaces' --agent-id codex
 ```
 
 Bootstrap means:
@@ -78,9 +102,20 @@ Bootstrap means:
 
 If activation should be separate:
 
+POSIX:
+
+```bash
+node bootstrap.mjs --target "/path/to/repo with spaces" --no-activate
+cd "/path/to/repo with spaces"
+node .agents/activate.mjs
+node .agents/agent-activate.mjs --id codex
+```
+
+PowerShell:
+
 ```powershell
-node .\bootstrap.mjs --target C:\path\to\repo --no-activate
-cd C:\path\to\repo
+node .\bootstrap.mjs --target 'C:\path\to\repo with spaces' --no-activate
+Set-Location 'C:\path\to\repo with spaces'
 node .agents\activate.mjs
 node .agents\agent-activate.mjs --id codex
 ```
@@ -119,7 +154,8 @@ Installed hooks:
 
 Compliance level: WARN
 Observe: log only; Warn: warn but do not block; Enforce: block invalid state-changing actions.
-To enable enforcement: export COMPOUND_MODE=enforce
+To enable enforcement (POSIX): export COMPOUND_MODE=enforce
+To enable enforcement (PowerShell): $env:COMPOUND_MODE = 'enforce'
 Recommended switch point: after the first smoke test passes, before unattended execution.
 
 First-session guided wizard
@@ -127,7 +163,9 @@ Step 1 of 5: sign in the agent.
 System: installed; mode WARN (guides without blocking).
 Agent: not signed in.
 Next: node .agents/agent-activate.mjs --id <agent-id>
+Next (PowerShell): node .agents\agent-activate.mjs --id <agent-id>
 Skip: node .agents/first-session-wizard.mjs skip
+Skip (PowerShell): node .agents\first-session-wizard.mjs skip
 
 > /usr/bin/node /tmp/demo-repo/.agents/agent-activate.mjs --id devin-demo --role planner --skill compound-agent-system
 First-session guided wizard
@@ -136,6 +174,7 @@ System: installed; mode WARN (guides without blocking).
 Agent: devin-demo signed in as planner.
 Next: create idea.md with your raw idea
 Skip: node .agents/first-session-wizard.mjs skip
+Skip (PowerShell): node .agents\first-session-wizard.mjs skip
 
 Identity: id=devin-demo client=devin model=demo role=planner session_id=2026-05-01T16-45-00-000Z-demo00
 Skills: compound-agent-system
@@ -148,7 +187,42 @@ After creating `idea.md`, run `node .agents/first-session-wizard.mjs` and follow
 2. `node .agents/task.mjs import phase-0/PHASE_PLAN.md --apply`
 3. `node .agents/session-readiness.mjs`
 
+## Support bundle export
+
+When support needs local diagnostics, create a reviewable bundle without uploading anything:
+
+POSIX:
+
+```bash
+node .agents/support-bundle.mjs
+```
+
+PowerShell:
+
+```powershell
+node .agents\support-bundle.mjs
+```
+
+The command writes `.agents/support-bundles/support-bundle-<timestamp>/` with:
+
+- `manifest.json` and `README.md` with a review-before-share warning
+- `versions.json` and `config-summary.json`
+- redacted `ledger-redacted.json`
+- recent redacted `events-recent-redacted.json`
+- `doctor.json` from `node .agents/task.mjs doctor`
+- `readiness.json` from `node .agents/session-readiness.mjs`
+
+It redacts secret-looking keys/values, summarizes task goals/reasons instead of copying raw text, and never performs an automatic upload.
+
 To skip the guide:
+
+POSIX:
+
+```bash
+node .agents/first-session-wizard.mjs skip
+```
+
+PowerShell:
 
 ```powershell
 node .agents\first-session-wizard.mjs skip
@@ -201,6 +275,18 @@ Premium hardening docs:
 
 The installed harness reads `COMPOUND_MODE=observe|warn|enforce`. `observe` logs structured guidance and never blocks. `warn` is the default: it warns but exits 0. `enforce` blocks invalid state-changing actions with exit code 2. The legacy `COMPOUND_ENFORCE=1` still maps to enforce. Switch to enforce after the first smoke test passes and before unattended multi-hour execution.
 
+POSIX:
+
+```bash
+export COMPOUND_MODE=enforce
+```
+
+PowerShell:
+
+```powershell
+$env:COMPOUND_MODE = 'enforce'
+```
+
 See `docs/compliance-mode-policy.md` for the command-by-command policy table. `node .agents/task.mjs status` and `node .agents/task.mjs doctor` report the active mode and recommended switch point.
 
 ## Identity model
@@ -211,6 +297,15 @@ Agent identity separates client, model, role, ledger id, session id, and display
 
 After installation, use idea intake instead of opening implementation work directly:
 
+POSIX:
+
+```bash
+node .agents/idea-intake.mjs --input fixtures/ideas/simple-idea.md --apply
+node .agents/task.mjs status
+```
+
+PowerShell:
+
 ```powershell
 node .agents\idea-intake.mjs --input fixtures\ideas\simple-idea.md --apply
 node .agents\task.mjs status
@@ -218,7 +313,49 @@ node .agents\task.mjs status
 
 Idea intake immediately creates an intake/planning task, records the original idea text, runs deterministic GAP SCAN, proposes recommended defaults, assigns planner/executor/reviewer/verifier roles, and writes Phase 0 artifacts. Blocker questions do not prevent the intake task from opening; implementation tasks wait for accepted scope.
 
-Generated planning output must pass `.agents/check-output-quality.mjs` and `.agents/check-planning-quality.mjs` before it is treated as an artifact. The planning quality gate rejects generic foundation/verification-only plans, missing `first_vertical_slice`, missing phase DoD, missing role ownership, missing blocker defaults, and missing import markers.
+Generated planning output must pass `.agents/check-output-quality.mjs` and `.agents/check-planning-quality.mjs` before it is treated as an artifact. The planning quality gate rejects generic foundation/verification-only plans, missing `first_vertical_slice`, missing phase DoD, role mismatch, missing blocker defaults, unsafe defaults, unresolved placeholders, missing question buckets, thin phase goals, and missing import markers. Add new deterministic checks through the red-team corpus documented in `docs/planning-quality-red-team.md`; do not add LLM judging to this gate.
+
+`AGENT_ROLES.md` is operational, not decorative. It contains a static JSON role map with task IDs, artifacts, autonomy level, handoff condition, and `spawn_policy: static-export-only` for each planner/executor/reviewer/verifier assignment. Export it without spawning agents:
+
+POSIX:
+
+```bash
+node .agents/role-plan.mjs phase-0/AGENT_ROLES.md --json
+```
+
+PowerShell:
+
+```powershell
+node .agents\role-plan.mjs phase-0\AGENT_ROLES.md --json
+```
+
+## Evaluator feedback loop
+
+Premium-production tasks must not be accepted after a single implementation pass. Record the task report with:
+
+1. first completion,
+2. self-review,
+3. evaluator feedback round 1,
+4. improvement 1,
+5. evaluator feedback round 2,
+6. improvement 2,
+7. final signoff.
+
+Validate the evidence before marking a task done:
+
+POSIX:
+
+```bash
+node .agents/eval-loop.mjs docs/premium-production/tasks/18-evaluator-feedback-loop-runner.md
+```
+
+PowerShell:
+
+```powershell
+node .agents\eval-loop.mjs docs\premium-production\tasks\18-evaluator-feedback-loop-runner.md
+```
+
+The runner checks for the two feedback rounds, both improvement rounds, final signoff, implementer/evaluator identity, and disclosure when one agent performs both roles. It does not call external agent APIs and must not claim independent review for same-session self-evaluation.
 
 ## Phase 0 plan artifacts
 
@@ -234,9 +371,26 @@ Idea intake writes these standard artifacts under `phase-0/`:
 
 `PHASE_PLAN.md` contains `compound: active` frontmatter and `[COMPOUND-PHASE]` markers so it can be imported with:
 
+POSIX:
+
+```bash
+node .agents/task.mjs import phase-0/PHASE_PLAN.md --apply
+```
+
+PowerShell:
+
 ```powershell
 node .agents\task.mjs import phase-0\PHASE_PLAN.md --apply
 ```
+
+## Windows / PowerShell parity notes
+
+Windows 10/11 with PowerShell 5.1+ or PowerShell 7+ is best-effort, not CI-supported. The harness is dependency-free and does not require WSL. Commands are designed to be invoked through `node` with arguments rather than shell-specific wrappers; quote paths containing spaces with single quotes in PowerShell and double quotes in POSIX shells. Known limitations:
+
+- Windows CI is not automated; automated CI still runs on Ubuntu only. Windows behavior is covered by deterministic path, CRLF, quoting, and command-string tests.
+- Claude hook command strings are shared (`node .agents/task.mjs ...`) and rely on the client executing them from the target repo with Node on `PATH`.
+- Shell-specific environment assignment differs: use `export COMPOUND_MODE=enforce` on POSIX and `$env:COMPOUND_MODE = 'enforce'` in PowerShell.
+- Native Windows paths are supported for documented commands, but external Claude/Codex marketplace install behavior remains a manual release-check item.
 
 ## Environment workbench boundary
 
@@ -258,11 +412,53 @@ The first state-changing action in a session requires grounding in the user's ex
 
 Before unattended execution, run:
 
+POSIX:
+
+```bash
+node .agents/session-readiness.mjs
+```
+
+PowerShell:
+
 ```powershell
 node .agents\session-readiness.mjs
 ```
 
-The command reports READY or NOT_READY, checks active task/DoD/current phase/context refresh/compound register/blockers/pending questions/handoff checkpoint/compliance mode, and prints unlock steps when the session is not safe to continue unattended.
+The command reports READY or NOT_READY and only reports READY when all premium preflight conditions pass: active in-progress task, defined DoD, unresolved manual checks explicitly confirmed, current phase, context refresh, compound register, no blockers, no pending blocking questions, checkpoint, valid handoff contract, environment contract, clean or documented known-dirty workspace state, and `COMPOUND_MODE=enforce`. NOT_READY output includes structured unlock steps with a stable check id, explanation, and concrete command or action.
+
+## Handoff contract v2
+
+`handoff-bridge.mjs` exports `handoff-contract.v2` checkpoints by default and validates them before writing. The versioned schema lives at `schemas/handoff-contract.v2.json` and requires explicit `task_state`, `completed_chunks`, `pending_decisions`, `artifacts`, `risks`, and `resume_commands` fields. The bridge still accepts existing `handoff-contract.v1` files by migrating them in memory; do not rewrite older handoff artifacts unless you are intentionally creating a new checkpoint.
+
+Checkpoint export:
+
+POSIX:
+
+```bash
+node handoff-bridge.mjs checkpoint --task t-001 --from-agent codex-gpt-5-codex --summary "What changed" --pending "Next safe step" --file handoff-bridge.mjs --decision "Open decision for next agent" --out .agents/checkpoints/t-001.handoff.json
+```
+
+PowerShell:
+
+```powershell
+node handoff-bridge.mjs checkpoint --task t-001 --from-agent codex-gpt-5-codex --summary "What changed" --pending "Next safe step" --file handoff-bridge.mjs --decision "Open decision for next agent" --out .agents\checkpoints\t-001.handoff.json
+```
+
+Resume prompt export:
+
+POSIX:
+
+```bash
+node handoff-bridge.mjs resume --from .agents/checkpoints/t-001.handoff.json --out RESUME.md
+```
+
+PowerShell:
+
+```powershell
+node handoff-bridge.mjs resume --from .agents\checkpoints\t-001.handoff.json --out RESUME.md
+```
+
+The generated resume prompt points the next agent to exact files, the ledger path, validation schema, concrete resume commands, and open decisions. Handoff artifacts must be shareable and must not include API keys, passwords, or machine-local user paths.
 
 ## Curation Notes
 

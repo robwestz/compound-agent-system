@@ -36,10 +36,17 @@ const MODE_POLICY = {
     exit_code: 2,
   },
 };
+const COMMANDS = {
+  set_enforce_posix: "export COMPOUND_MODE=enforce",
+  set_enforce_powershell: "$env:COMPOUND_MODE = 'enforce'",
+  hook_session_start: "node .agents/task.mjs hook session-start",
+  hook_pre_edit: "node .agents/task.mjs hook pre-edit",
+  hook_stop: "node .agents/task.mjs hook stop",
+};
 const EXPECTED_HOOKS = {
-  SessionStart: [{ matcher: null, command: "node .agents/task.mjs hook session-start" }],
-  PreToolUse: [{ matcher: "Edit|Write", command: "node .agents/task.mjs hook pre-edit" }],
-  Stop: [{ matcher: null, command: "node .agents/task.mjs hook stop" }],
+  SessionStart: [{ matcher: null, command: COMMANDS.hook_session_start }],
+  PreToolUse: [{ matcher: "Edit|Write", command: COMMANDS.hook_pre_edit }],
+  Stop: [{ matcher: null, command: COMMANDS.hook_stop }],
 };
 
 const COLORS = process.stdout.isTTY
@@ -65,7 +72,8 @@ function complianceInfo() {
     does_not_block: mode === "observe" ? "all actions; logs only" : mode === "warn" ? "actions after warning" : "read-only commands",
     state_changing: policy.state_changing,
     hooks: policy.hooks,
-    switch: "export COMPOUND_MODE=enforce",
+    switch: COMMANDS.set_enforce_posix,
+    switch_powershell: COMMANDS.set_enforce_powershell,
     recommended: "Switch after the first smoke test passes and before unattended execution.",
   };
 }
@@ -270,6 +278,7 @@ function cmdStatus() {
   console.log(`  blocks: ${compliance.blocks}`);
   console.log(`  does not block: ${compliance.does_not_block}`);
   console.log(`  switch: ${compliance.switch}`);
+  console.log(`  PowerShell switch: ${compliance.switch_powershell}`);
   console.log(`  recommended switch point: ${compliance.recommended}`);
   console.log(`Ledger schema: ${version.version} (${version.status})`);
   if (version.status === "migration_needed") console.log("  next: node .agents/task.mjs migrate --apply");
@@ -836,13 +845,13 @@ function cmdUpdate(args) {
 // ----- Plan-marker import -----
 
 function parseFrontmatter(content) {
-  const m = /^---\n([\s\S]*?)\n---/.exec(content);
+  const m = /^---\r?\n([\s\S]*?)\r?\n---/.exec(content);
   if (!m) return null;
   return parseSimpleYaml(m[1]);
 }
 
 function parseSimpleYaml(yaml) {
-  const lines = yaml.split("\n");
+  const lines = yaml.replace(/\r\n/g, "\n").split("\n");
   const result = {};
   const stack = [{ obj: result, indent: -1 }];
   for (let i = 0; i < lines.length; i++) {
