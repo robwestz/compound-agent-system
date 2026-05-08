@@ -119,6 +119,25 @@ After creating `idea.md`, run `node .agents/first-session-wizard.mjs` and follow
 2. `node .agents/task.mjs import phase-0/PHASE_PLAN.md --apply`
 3. `node .agents/session-readiness.mjs`
 
+## Support bundle export
+
+When support needs local diagnostics, create a reviewable bundle without uploading anything:
+
+```powershell
+node .agents\support-bundle.mjs
+```
+
+The command writes `.agents/support-bundles/support-bundle-<timestamp>/` with:
+
+- `manifest.json` and `README.md` with a review-before-share warning
+- `versions.json` and `config-summary.json`
+- redacted `ledger-redacted.json`
+- recent redacted `events-recent-redacted.json`
+- `doctor.json` from `node .agents/task.mjs doctor`
+- `readiness.json` from `node .agents/session-readiness.mjs`
+
+It redacts secret-looking keys/values, summarizes task goals/reasons instead of copying raw text, and never performs an automatic upload.
+
 To skip the guide:
 
 ```powershell
