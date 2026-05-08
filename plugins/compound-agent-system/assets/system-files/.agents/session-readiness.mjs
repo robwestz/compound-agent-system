@@ -2,6 +2,7 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { appendEvent, eventLogPathFromLedgerPath } from "./event-log.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const ledgerPath = process.env.COMPOUND_TASKS_PATH || join(here, "TASKS.json");
@@ -90,6 +91,24 @@ export function assessReadiness({ ledger = loadLedger(), complianceMode = mode()
 
 function main() {
   const result = assessReadiness();
+  try {
+    appendEvent({
+      logPath: eventLogPathFromLedgerPath(ledgerPath),
+      event: "readiness-decision",
+      command: "session-readiness.mjs",
+      result: { status: result.status },
+      context: {
+        ready: result.ready,
+        current_task: result.current_task,
+        compliance_mode: result.compliance_mode,
+        blocker_count: result.blockers.length,
+        pending_question_count: result.pending_questions.length,
+        failed_checks: Object.entries(result.checks).filter(([, ok]) => !ok).map(([name]) => name),
+      },
+    });
+  } catch {
+    // Observability must never block readiness checks.
+  }
   console.log(`Long-session readiness: ${result.status}`);
   console.log(`- current task: ${result.checks.active_task ? result.current_task : "no"}`);
   console.log(`- DoD: ${result.checks.active_task_has_dod ? "yes" : "no"}`);
