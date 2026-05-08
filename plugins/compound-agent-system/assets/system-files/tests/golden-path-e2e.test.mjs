@@ -82,14 +82,46 @@ test("premium golden path bootstraps, plans, imports, readies, and checkpoints",
     assert.equal(notReady.status, 0, notReady.stderr);
     assert.match(notReady.stdout, /Long-session readiness: NOT_READY/);
 
-    mkdirSync(join(dir, ".omc", "state", "checkpoints"), { recursive: true });
-    writeFileSync(join(dir, ".omc", "state", "checkpoints", "cp-golden.json"), "{}\n");
+    mkdirSync(join(dir, ".agents", "checkpoints"), { recursive: true });
     const ledgerReady = readJson(join(dir, ".agents", "TASKS.json"));
     const active = ledgerReady.tasks.find((task) => task.id === ledgerReady.current);
     active.blocked_by = [];
+    active.env_contract = { node: ">=18", runtime_dependencies: "none", network: "none" };
+    active.handoffs = [{ checkpoint_id: "cp-20260503T160000Z-golden", path: ".agents/checkpoints/pre-ready.handoff.json" }];
+    ledgerReady.workspace_state = { state: "clean" };
     ledgerReady.log.push({ event: "context-refresh", ts: "2026-05-01T00:00:00.000Z" });
     ledgerReady.log.push({ event: "compound-register", ts: "2026-05-01T00:01:00.000Z" });
     writeFileSync(join(dir, ".agents", "TASKS.json"), JSON.stringify(ledgerReady, null, 2) + "\n");
+    writeFileSync(join(dir, "phase-0", "OPEN_QUESTIONS.md"), "# OPEN_QUESTIONS\n\n## blocking_now\n\n- None\n\n## can_default\n\n- None\n\n## defer\n\n- None\n");
+    writeFileSync(join(dir, ".agents", "checkpoints", "pre-ready.handoff.json"), JSON.stringify({
+      schema_version: "handoff-contract.v2",
+      schema_path: "schemas/handoff-contract.v2.json",
+      checkpoint_id: "cp-20260503T160000Z-golden",
+      created_at: "2026-05-03T16:00:00.000Z",
+      trigger: { type: "manual" },
+      from_agent: { id: "devin-golden" },
+      to_agent: { target: "codex" },
+      task_state: {
+        id: active.id,
+        goal: active.goal,
+        state: active.state,
+        ledger_path: ".agents/TASKS.json",
+      },
+      context_summary: "Golden path pre-readiness checkpoint.",
+      completed_chunks: [],
+      pending_decisions: [],
+      artifacts: [],
+      risks: [],
+      resume_commands: [{
+        label: "Inspect Compound ledger state",
+        command: "node .agents/task.mjs status",
+        cwd: ".",
+        reason: "Confirms current task pointer before edits.",
+      }],
+      commands_run: [],
+      verification: [],
+      safety: { shareable: true, redactions: [] },
+    }, null, 2) + "\n");
 
     const ready = runNode([".agents/session-readiness.mjs"], { cwd: dir, env: { COMPOUND_MODE: "enforce" } });
     assert.equal(ready.status, 0, ready.stderr);
