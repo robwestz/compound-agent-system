@@ -64,6 +64,7 @@ test("uninstall removes only unchanged owned files", () => {
     const uninstall = runInstall(dir, ["--uninstall"]);
     assert.equal(uninstall.status, 0, uninstall.stderr);
     assert.equal(existsSync(join(dir, ".agents", "task.mjs")), false);
+    assert.equal(existsSync(join(dir, ".agents", "events.jsonl")), true);
     assert.equal(existsSync(join(dir, ".agents", "install-manifest.json")), false);
   } finally {
     rmSync(dir, { recursive: true, force: true });

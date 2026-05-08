@@ -5,6 +5,7 @@
 import { existsSync, mkdirSync, readdirSync, statSync, copyFileSync, readFileSync, writeFileSync, renameSync, unlinkSync, rmSync } from "node:fs";
 import { dirname, isAbsolute, join, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import { appendEvent } from "../assets/system-files/.agents/event-log.mjs";
 
 const pluginRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const sourceRoot = join(pluginRoot, "assets", "system-files");
@@ -91,6 +92,29 @@ function writeJsonAtomic(path, data) {
   renameSync(tmp, path);
 }
 
+function writeInstallEvent(targetRoot, plan, result) {
+  if (plan.dry_run) return;
+  try {
+    appendEvent({
+      logPath: join(targetRoot, ".agents", "events.jsonl"),
+      event: "install",
+      command: "install-compound-system.mjs",
+      result,
+      context: {
+        dry_run: plan.dry_run,
+        overwrite: plan.overwrite,
+        create_count: plan.files_to_create.length,
+        modify_count: plan.files_to_modify.length,
+        skip_count: plan.files_to_skip.length,
+        warning_count: plan.warnings.length,
+        refusal_count: (plan.refusals || []).length,
+      },
+    });
+  } catch {
+    // Observability must never block install recovery paths.
+  }
+}
+
 function isInsideTarget(targetRoot, candidate) {
   const rel = relative(targetRoot, candidate);
   return rel === "" || (rel && !rel.startsWith("..") && !isAbsolute(rel));
@@ -150,6 +174,7 @@ function buildUninstallPlan(args) {
   }
   const plan = { version: 1, target: targetRoot, dry_run: Boolean(args.dryRun), uninstall: true, files_to_remove: [], files_to_restore: [], refusals: [] };
   for (const file of manifest.files) {
+    if (file.path === ".agents/events.jsonl") continue;
     const target = resolve(targetRoot, file.path);
     if (!isInsideTarget(targetRoot, target)) {
       plan.refusals.push({ path: file.path, reason: "target escapes repo" });
@@ -244,6 +269,7 @@ function main() {
     writeJsonAtomic(rollbackPath, rollback);
     writeJsonAtomic(installedManifestPath(targetRoot), rollback);
     console.log(`Rollback manifest: ${rollbackPath}`);
+    writeInstallEvent(targetRoot, plan, { status: "ok" });
   }
 
   console.log(`\nCompound system install ${args.dryRun ? "dry-run" : "complete"}: ${plan.files_to_create.length + plan.files_to_modify.length} copied, ${plan.files_to_skip.length} skipped.`);

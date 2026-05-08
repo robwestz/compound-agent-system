@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://buildr.nu/schemas/event-log.v1.json",
+  "title": "Compound Agent System Event Log v1",
+  "description": "Append-only local JSONL event records for auditability without telemetry or upload.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "schema_path",
+    "timestamp",
+    "event",
+    "command",
+    "result",
+    "context"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "compound-event-log.v1"
+    },
+    "schema_path": {
+      "const": "schemas/event-log.v1.json"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "event": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable action name such as install, agent-activate, task-open, quality-check, readiness-decision, or handoff-checkpoint."
+    },
+    "command": {
+      "type": "string",
+      "minLength": 1,
+      "description": "CLI command or subsystem that produced the event. Must not include secret values."
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Safe diagnostic context only: ids, counts, booleans, relative file names, text lengths, and short hashes."
+    }
+  }
+}

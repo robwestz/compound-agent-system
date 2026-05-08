@@ -257,7 +257,7 @@ Before unattended execution, run:
 node .agents\session-readiness.mjs
 ```
 
-The command reports READY or NOT_READY, checks active task/DoD/current phase/context refresh/compound register/blockers/pending questions/handoff checkpoint/compliance mode, and prints unlock steps when the session is not safe to continue unattended.
+The command reports READY or NOT_READY and only reports READY when all premium preflight conditions pass: active in-progress task, defined DoD, unresolved manual checks explicitly confirmed, current phase, context refresh, compound register, no blockers, no pending blocking questions, checkpoint, valid handoff contract, environment contract, clean or documented known-dirty workspace state, and `COMPOUND_MODE=enforce`. NOT_READY output includes structured unlock steps with a stable check id, explanation, and concrete command or action.
 
 ## Handoff contract v2
 

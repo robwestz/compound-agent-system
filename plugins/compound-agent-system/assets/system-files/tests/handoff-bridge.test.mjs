@@ -194,6 +194,7 @@ test("checkpoint CLI accepts documented --from-agent flag", () => {
     const ledgerDir = join(dir, ".agents");
     mkdirSync(ledgerDir, { recursive: true });
     writeFileSync(cliPath, readFileSync(join(import.meta.dirname, "..", "handoff-bridge.mjs")));
+    writeFileSync(join(ledgerDir, "event-log.mjs"), readFileSync(join(import.meta.dirname, "..", ".agents", "event-log.mjs")));
     writeFileSync(join(ledgerDir, "TASKS.json"), readFileSync(ledgerPath));
     const out = join(dir, "checkpoint.json");
     const result = spawnSync(

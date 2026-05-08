@@ -81,7 +81,7 @@
         {
           "check": {
             "check": "manual",
-            "description": "Robin bekräftar en faktisk CodexClaude roundtrip",
+            "description": "Robin bekr\u00e4ftar en faktisk CodexClaude roundtrip",
             "passed_at": null
           },
           "reason": "Run automatic artifact and test DoD before manual Robin confirmation",
@@ -176,7 +176,7 @@
     },
     {
       "id": "t-002",
-      "goal": "Token Budget Tracker — heuristic detector + handoff-bridge adapter",
+      "goal": "Token Budget Tracker \u2014 heuristic detector + handoff-bridge adapter",
       "state": "parked",
       "dod": [
         {
@@ -197,7 +197,7 @@
         },
         {
           "check": "manual",
-          "description": "Robin reviews default threshold (85% used) and confirms heuristic accuracy ±15% acceptable for v1",
+          "description": "Robin reviews default threshold (85% used) and confirms heuristic accuracy \u00b115% acceptable for v1",
           "passed_at": null,
           "last_failure": {
             "ts": "2026-04-27T21:51:39.507Z",
@@ -214,7 +214,7 @@
       ],
       "blocked_by": null,
       "unlock_command": null,
-      "park_reason": "3/4 auto-DoD verified by Claude (lib/token-budget.mjs exists, both tests green, sim ran with 2.94% variance well within 5% allowed). Manual DoD awaits Robin's review of default 85% threshold + ±15% heuristic accuracy acceptance.",
+      "park_reason": "3/4 auto-DoD verified by Claude (lib/token-budget.mjs exists, both tests green, sim ran with 2.94% variance well within 5% allowed). Manual DoD awaits Robin's review of default 85% threshold + \u00b115% heuristic accuracy acceptance.",
       "parent": null,
       "agent": "claude-opus-4.7",
       "started_at": "2026-04-27T21:28:16.742Z",
@@ -222,7 +222,7 @@
     },
     {
       "id": "t-003",
-      "goal": "Repo cleanup report — Claude side for cross-review with Codex",
+      "goal": "Repo cleanup report \u2014 Claude side for cross-review with Codex",
       "state": "parked",
       "dod": [
         {
@@ -256,7 +256,7 @@
     },
     {
       "id": "t-004",
-      "goal": "Reciprocal cleanup report — Claude → Codex per Codex's prompt",
+      "goal": "Reciprocal cleanup report \u2014 Claude \u2192 Codex per Codex's prompt",
       "state": "parked",
       "dod": [
         {
@@ -377,12 +377,59 @@
       "started_at": "2026-05-01T16:34:04.274Z",
       "updated_at": "2026-05-01T16:53:30.222Z",
       "completed_at": "2026-05-01T16:53:30.222Z"
+    },
+    {
+      "id": "t-007",
+      "goal": "Task 22 observability event log",
+      "state": "done",
+      "dod": [
+        {
+          "check": "test",
+          "command": "node ../../scripts/validate-package.mjs",
+          "passed_at": "2026-05-03T13:33:08.000Z"
+        },
+        {
+          "check": "test",
+          "command": "node --test tests/*.test.mjs",
+          "passed_at": "2026-05-03T13:32:46.000Z"
+        },
+        {
+          "check": "artifact",
+          "path": "schemas/event-log.v1.json",
+          "passed_at": "2026-05-03T13:33:08.000Z",
+          "artifact_size": 1528
+        },
+        {
+          "check": "artifact",
+          "path": "docs/event-log.md",
+          "passed_at": "2026-05-03T13:33:08.000Z",
+          "artifact_size": 2644
+        },
+        {
+          "check": "artifact",
+          "path": ".agents/event-log.mjs",
+          "passed_at": "2026-05-03T13:33:08.000Z",
+          "artifact_size": 5260
+        }
+      ],
+      "skills": [
+        "compound-agent-system"
+      ],
+      "blocked_by": null,
+      "unlock_command": null,
+      "park_reason": "Implementation task is bundled as historical fixture state only; fresh installs must start with no active current task.",
+      "parent": null,
+      "agent": "devin-22204aff49cb466685dfae20cff2293e",
+      "started_at": "2026-05-03T13:23:48.395Z",
+      "updated_at": "2026-05-03T13:33:08.000Z",
+      "completed_at": "2026-05-03T13:33:08.000Z"
     }
   ],
   "agents_active": [
     "codex-gpt-5-codex",
     "claude-opus-4.7",
-    "claude-opus-4-7-resume"
+    "claude-opus-4-7-resume",
+    "devin-22204aff49cb466685dfae20cff2293e"
   ],
   "log": [
     {
@@ -430,7 +477,7 @@
       "reason": "Run automatic artifact and test DoD before manual Robin confirmation",
       "removed": {
         "check": "manual",
-        "description": "Robin bekräftar en faktisk CodexClaude roundtrip",
+        "description": "Robin bekr\u00e4ftar en faktisk CodexClaude roundtrip",
         "passed_at": null
       }
     },
@@ -522,7 +569,7 @@
       "event": "open",
       "task": "t-002",
       "agent": "claude-opus-4.7",
-      "goal": "Token Budget Tracker — heuristic detector + handoff-bridge adapter"
+      "goal": "Token Budget Tracker \u2014 heuristic detector + handoff-bridge adapter"
     },
     {
       "ts": "2026-04-27T21:51:14.898Z",
@@ -542,7 +589,7 @@
       "event": "park",
       "task": "t-002",
       "agent": "claude-opus-4.7",
-      "reason": "3/4 auto-DoD verified by Claude (lib/token-budget.mjs exists, both tests green, sim ran with 2.94% variance well within 5% allowed). Manual DoD awaits Robin's review of default 85% threshold + ±15% heuristic accuracy acceptance."
+      "reason": "3/4 auto-DoD verified by Claude (lib/token-budget.mjs exists, both tests green, sim ran with 2.94% variance well within 5% allowed). Manual DoD awaits Robin's review of default 85% threshold + \u00b115% heuristic accuracy acceptance."
     },
     {
       "ts": "2026-04-27T21:53:05.514Z",
@@ -605,7 +652,7 @@
       "event": "open",
       "task": "t-003",
       "agent": "claude-opus-4-7-resume",
-      "goal": "Repo cleanup report — Claude side for cross-review with Codex"
+      "goal": "Repo cleanup report \u2014 Claude side for cross-review with Codex"
     },
     {
       "ts": "2026-04-28T21:21:48.415Z",
@@ -626,7 +673,7 @@
       "event": "open",
       "task": "t-004",
       "agent": "claude-opus-4-7-resume",
-      "goal": "Reciprocal cleanup report — Claude → Codex per Codex's prompt"
+      "goal": "Reciprocal cleanup report \u2014 Claude \u2192 Codex per Codex's prompt"
     },
     {
       "ts": "2026-04-29T14:17:40.212Z",
@@ -699,6 +746,32 @@
       "event": "done",
       "task": "t-006",
       "agent": "devin-1c412d1728754940b9c8947c268a9ead"
+    },
+    {
+      "ts": "2026-05-03T13:20:42.142Z",
+      "event": "ack",
+      "task": null,
+      "agent": "devin-22204aff49cb466685dfae20cff2293e"
+    },
+    {
+      "ts": "2026-05-03T13:23:48.395Z",
+      "event": "open",
+      "task": "t-007",
+      "agent": "devin-22204aff49cb466685dfae20cff2293e",
+      "goal": "Task 22 observability event log"
+    },
+    {
+      "ts": "2026-05-03T13:32:46.000Z",
+      "event": "verify",
+      "task": "t-007",
+      "agent": "devin-22204aff49cb466685dfae20cff2293e",
+      "allPass": true
+    },
+    {
+      "ts": "2026-05-03T13:33:08.000Z",
+      "event": "done",
+      "task": "t-007",
+      "agent": "devin-22204aff49cb466685dfae20cff2293e"
     }
   ],
   "agent_profiles": {
@@ -711,6 +784,16 @@
       "session_id": "2026-05-01T16-33-32-847Z-h3fdgw",
       "skills": [],
       "activated_at": "2026-05-01T16:33:32.848Z"
+    },
+    "devin-22204aff49cb466685dfae20cff2293e": {
+      "id": "devin-22204aff49cb466685dfae20cff2293e",
+      "client": "devin",
+      "model": "22204aff49cb466685dfae20cff2293e",
+      "role": "agent",
+      "display_name": "devin 22204aff49cb466685dfae20cff2293e",
+      "session_id": "2026-05-03T13-20-42-142Z-l2xmap",
+      "skills": [],
+      "activated_at": "2026-05-03T13:20:42.142Z"
     }
   }
 }

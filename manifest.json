@@ -22,15 +22,15 @@
     },
     {
       "path": ".agents/TASKS.json",
-      "bytes": 23971
+      "bytes": 26606
     },
     {
       "path": ".agents/activate.mjs",
-      "bytes": 3677
+      "bytes": 4169
     },
     {
       "path": ".agents/agent-activate.mjs",
-      "bytes": 3966
+      "bytes": 4531
     },
     {
       "path": ".agents/check-output-quality.mjs",
@@ -43,6 +43,10 @@
     {
       "path": ".agents/eval-loop.mjs",
       "bytes": 4223
+    },
+    {
+      "path": ".agents/event-log.mjs",
+      "bytes": 5773
     },
     {
       "path": ".agents/first-session-wizard.mjs",
@@ -62,7 +66,7 @@
     },
     {
       "path": ".agents/session-readiness.mjs",
-      "bytes": 5516
+      "bytes": 19600
     },
     {
       "path": ".agents/skills/SkiLLBuilDr/SKILL.md",
@@ -74,7 +78,7 @@
     },
     {
       "path": ".agents/task.mjs",
-      "bytes": 42183
+      "bytes": 44471
     },
     {
       "path": ".agents/templates/AGENT_ROLES.md",
@@ -306,7 +310,7 @@
     },
     {
       "path": "README.md",
-      "bytes": 13267
+      "bytes": 13557
     },
     {
       "path": "assemble.mjs",
@@ -319,6 +323,10 @@
     {
       "path": "docs/compatibility-matrix.md",
       "bytes": 5221
+    },
+    {
+      "path": "docs/event-log.md",
+      "bytes": 2642
     },
     {
       "path": "docs/planning-quality-red-team.md",
@@ -466,7 +474,7 @@
     },
     {
       "path": "handoff-bridge.mjs",
-      "bytes": 23865
+      "bytes": 24629
     },
     {
       "path": "kickoff-template.mjs",
@@ -487,6 +495,10 @@
     {
       "path": "package.json",
       "bytes": 1395
+    },
+    {
+      "path": "schemas/event-log.v1.json",
+      "bytes": 1528
     },
     {
       "path": "schemas/handoff-contract.v1.json",
@@ -529,16 +541,20 @@
       "bytes": 4472
     },
     {
+      "path": "tests/event-log.test.mjs",
+      "bytes": 7218
+    },
+    {
       "path": "tests/first-session-output.test.mjs",
       "bytes": 7851
     },
     {
       "path": "tests/golden-path-e2e.test.mjs",
-      "bytes": 5401
+      "bytes": 6797
     },
     {
       "path": "tests/handoff-bridge.test.mjs",
-      "bytes": 13945
+      "bytes": 14073
     },
     {
       "path": "tests/handoff-roundtrip-sim.mjs",
@@ -554,7 +570,7 @@
     },
     {
       "path": "tests/install-rollback-uninstall.test.mjs",
-      "bytes": 5823
+      "bytes": 5897
     },
     {
       "path": "tests/mode-policy.test.mjs",
@@ -574,7 +590,7 @@
     },
     {
       "path": "tests/session-readiness.test.mjs",
-      "bytes": 3844
+      "bytes": 9516
     },
     {
       "path": "tests/token-budget-trigger-sim.mjs",
