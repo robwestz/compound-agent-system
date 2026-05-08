@@ -1,96 +1,58 @@
-```markdown
 # compound-agent-system Development Patterns
 
-> Auto-generated skill from repository analysis
-
 ## Overview
-This skill teaches you the key development patterns, coding conventions, and workflows used in the `compound-agent-system` TypeScript project. You'll learn how to structure files, write imports and exports, follow commit conventions, and understand the project's testing approach. This guide is ideal for contributors aiming for consistency and best practices in this codebase.
 
-## Coding Conventions
+This repository ships a zero-runtime-dependency Node.js Compound Agent System harness. Most feature work is local CLI behavior under `plugins/compound-agent-system/assets/system-files/`, plus package validation via `plugins/compound-agent-system/scripts/validate-package.mjs`.
 
-### File Naming
-- Use **snake_case** for all file names.
+## Devin Secrets Needed
 
-  **Example:**
-  ```
-  agent_manager.ts
-  compound_calculator.test.ts
-  ```
+No secrets are needed for normal local CLI development and testing. Do not use real secrets in fixtures; seed fake secret-looking values when validating redaction behavior.
 
-### Import Style
-- Use **absolute imports** throughout the codebase.
+## Required Commands
 
-  **Example:**
-  ```typescript
-  import { AgentManager } from 'src/agents/agent_manager';
-  ```
+Run from the repository root:
 
-### Export Style
-- Use **named exports** for all modules.
-
-  **Example:**
-  ```typescript
-  // In agent_manager.ts
-  export function createAgent() { ... }
-  export const AGENT_VERSION = '1.0';
-  ```
-
-### Commit Messages
-- Follow **conventional commit** format.
-- Use the `feat` prefix for new features.
-- Keep commit messages concise (average ~42 characters).
-
-  **Example:**
-  ```
-  feat: add compound interest calculation
-  ```
-
-## Workflows
-
-### Adding a New Feature
-**Trigger:** When implementing a new feature or capability  
-**Command:** `/add-feature`
-
-1. Create a new file using snake_case naming.
-2. Write your code using absolute imports and named exports.
-3. Add or update relevant test files (see Testing Patterns).
-4. Commit your changes using the `feat:` prefix and a concise description.
-5. Open a pull request for review.
-
-### Writing Tests
-**Trigger:** When adding or updating functionality  
-**Command:** `/write-test`
-
-1. Create a test file with the `.test.` infix (e.g., `compound_calculator.test.ts`).
-2. Write tests for your module or function.
-3. Ensure tests cover both typical and edge cases.
-4. Run tests to verify correctness (testing framework is currently unspecified).
-
-## Testing Patterns
-
-- Test files use the `*.test.*` naming pattern.
-- Place tests alongside or near the modules they cover.
-- The specific testing framework is not detected, so follow standard TypeScript testing practices.
-
-  **Example:**
-  ```
-  compound_calculator.test.ts
-  ```
-
-  ```typescript
-  import { calculateCompoundInterest } from 'src/finance/compound_calculator';
-
-  // Example test (framework-agnostic)
-  describe('calculateCompoundInterest', () => {
-    it('calculates correctly for annual compounding', () => {
-      // Test implementation here
-    });
-  });
-  ```
-
-## Commands
-| Command        | Purpose                                      |
-|----------------|----------------------------------------------|
-| /add-feature   | Start the workflow for adding a new feature  |
-| /write-test    | Begin writing tests for new or updated code  |
+```bash
+node plugins/compound-agent-system/scripts/validate-package.mjs
+node --test plugins/compound-agent-system/assets/system-files/tests/*.test.mjs
 ```
+
+Run focused tests directly while iterating, for example:
+
+```bash
+node --test plugins/compound-agent-system/assets/system-files/tests/support-bundle.test.mjs
+node --test plugins/compound-agent-system/assets/system-files/tests/event-log.test.mjs
+node --test plugins/compound-agent-system/assets/system-files/tests/session-readiness.test.mjs
+```
+
+The package validator checks required system files, payload size, forbidden bundled files, and `manifest.json` byte metadata. If system files change, regenerate `manifest.json` from actual files before running the validator.
+
+## CLI Testing Pattern
+
+Use shell-only tests for local CLI features. Browser recordings are unnecessary unless the feature has a visible UI.
+
+1. Create a temp workspace with `.agents/TASKS.json` and any needed fixture files.
+2. Invoke the CLI with explicit paths such as `--ledger <tmp>/.agents/TASKS.json` and `--out <tmp>/bundle`.
+3. Assert exact exit codes, stdout/stderr substrings, generated file names, and parsed JSON fields.
+4. For safety features, assert negative cases too: refused overwrites, refused paths outside workspace, malformed JSON, missing logs, or invalid arguments.
+5. Remove transient `.agents/events.jsonl` generated in the repository fixture before committing.
+
+## Support Bundle Testing Pattern
+
+For `.agents/support-bundle.mjs`, test a temp workspace rather than the real repo ledger:
+
+- Seed fake values like `sk-aaaaaaaaaaaaaaaaaaaa`, `gsk_bbbbbbbbbbbbbbbbbbbb`, `password=hidden`, `Authorization: Bearer cccccccccccccccccccc`, and `/home/alice/repo/.env`.
+- Run `node .agents/support-bundle.mjs --ledger <tmp>/.agents/TASKS.json --out <tmp>/bundle --events 1`.
+- Confirm stdout includes `Review before sharing. No upload was performed.`.
+- Confirm the bundle contains `manifest.json`, `README.md`, `versions.json`, `config-summary.json`, `ledger-redacted.json`, `events-recent-redacted.json`, `doctor.json`, and `readiness.json`.
+- Confirm seeded fake secret strings and user names are absent from exported JSON.
+- Confirm raw task goals are summarized (for example `goal_present: true`) rather than copied verbatim.
+- Confirm an existing output directory fails, an output path outside the workspace fails, and malformed `TASKS.json` still exports doctor diagnostics.
+
+## Manifest Maintenance
+
+Parallel PRs often conflict in `manifest.json`. Prefer regenerating it from `plugins/compound-agent-system/assets/system-files/` file byte counts rather than hand-editing entries. Always run the package validator afterward.
+
+## Commit and PR Notes
+
+Use conventional commit messages. Do not push directly to `main`; use a feature branch and PR. Include local verification commands in the PR body.
