@@ -98,7 +98,17 @@ function factForceMessage() {
     "This prevents agents from acting on stale or assumed context. Quote the current instruction verbatim, set COMPOUND_GROUNDED to that quote, then retry.";
 }
 
-const STATE_CHANGING_COMMANDS = new Set(["ack", "open", "park", "resume", "block", "abandon", "update", "done", "verify", "import", "migrate"]);
+const STATE_CHANGING_COMMANDS = new Set(["ack", "open", "park", "resume", "block", "approve", "abandon", "update", "done", "verify", "import", "migrate"]);
+const APPROVAL_POLICIES = new Set(["must-ask", "defaultable", "defer"]);
+const APPROVAL_CATEGORIES = new Map([
+  ["secrets", { policy: "must-ask", label: "Secrets and credentials" }],
+  ["network", { policy: "must-ask", label: "Network access" }],
+  ["destructive-git", { policy: "must-ask", label: "Destructive git operations" }],
+  ["overwrite", { policy: "must-ask", label: "Overwriting existing files" }],
+  ["uninstall", { policy: "must-ask", label: "Uninstall or rollback" }],
+  ["external-apis", { policy: "must-ask", label: "External API calls" }],
+  ["multi-agent-spawning", { policy: "must-ask", label: "Multi-agent spawning" }],
+]);
 
 function requireGrounding(command) {
   const stateChanging = STATE_CHANGING_COMMANDS;
@@ -115,6 +125,44 @@ function requireGrounding(command) {
   const msg = factForceMessage();
   if (mode === "enforce") { console.error(msg); process.exit(2); }
   console.warn(msg);
+}
+
+function normalizeApprovalPolicy(value) {
+  if (!value) return null;
+  const normalized = String(value).toLowerCase().replaceAll("_", "-");
+  if (["can-default", "can-defaults", "default", "proceed-with-default"].includes(normalized)) return "defaultable";
+  if (["blocking-now", "blocking", "requires-approval", "human-approval"].includes(normalized)) return "must-ask";
+  if (!APPROVAL_POLICIES.has(normalized)) {
+    throw new Error(`Unknown approval policy "${value}". Allowed: must-ask, defaultable, defer.`);
+  }
+  return normalized;
+}
+
+function normalizeApprovalCategory(value) {
+  if (!value) return null;
+  const normalized = String(value).toLowerCase().replaceAll("_", "-");
+  if (!APPROVAL_CATEGORIES.has(normalized)) {
+    throw new Error(`Unknown approval category "${value}". Allowed: ${[...APPROVAL_CATEGORIES.keys()].join(", ")}.`);
+  }
+  return normalized;
+}
+
+function approvalState(policy) {
+  if (policy === "must-ask") return "pending-human-approval";
+  if (policy === "defaultable") return "default-available";
+  if (policy === "defer") return "deferred";
+  return null;
+}
+
+function taskApprovalSummary(task) {
+  const policy = normalizeApprovalPolicy(task?.approval_policy || task?.approvalPolicy || "");
+  const category = task?.approval_category || task?.approvalCategory || null;
+  if (!policy && !category) return "";
+  const parts = [];
+  if (policy) parts.push(`approval=${policy}`);
+  if (category) parts.push(`category=${category}`);
+  if (task.approval_state) parts.push(`state=${task.approval_state}`);
+  return parts.join(" ");
 }
 
 function loadLedger() {
@@ -222,6 +270,8 @@ function parseArgs(argv) {
     else if (a === "--parent") args.parent = argv[++i];
     else if (a === "--reason") args.reason = argv[++i];
     else if (a === "--unlock") args.unlock = argv[++i];
+    else if (a === "--approval") args.approval = argv[++i];
+    else if (a === "--approval-category") args.approvalCategory = argv[++i];
     else if (a === "--qa") args.qa = true;
     else if (a === "--all") args.all = true;
     else if (a === "--state") args.state = argv[++i];
@@ -262,6 +312,8 @@ function cmdStatus() {
       }
     }
     if (cur.skills && cur.skills.length) console.log(`  Skills: ${cur.skills.join(", ")}`);
+    const approval = taskApprovalSummary(cur);
+    if (approval) console.log(`  Approval: ${approval}`);
   } else {
     console.log(c("dim", "No current task. Use: task.mjs open \"<goal>\" --dod \"<type>:<value>\""));
   }
@@ -285,7 +337,8 @@ function cmdStatus() {
   if (blocked > 0) {
     console.log(c("yellow", "Blocked tasks:"));
     for (const t of ledger.tasks.filter((t) => t.state === "blocked")) {
-      console.log(`  ${t.id}: ${t.goal} — unlock: ${t.unlock_command || "(none)"}`);
+      const approval = taskApprovalSummary(t);
+      console.log(`  ${t.id}: ${t.goal} — blocked_by: ${Array.isArray(t.blocked_by) ? t.blocked_by.join("; ") : t.blocked_by || "(none)"}; ${approval ? `${approval}; ` : ""}unlock: ${t.unlock_command || "(none)"}`);
     }
   }
 }
@@ -596,6 +649,9 @@ function cmdOpen(args) {
     }
   }
   const id = nextId(ledger);
+  const approvalCategory = normalizeApprovalCategory(args.approvalCategory);
+  const categoryPolicy = approvalCategory ? APPROVAL_CATEGORIES.get(approvalCategory).policy : null;
+  const approvalPolicy = normalizeApprovalPolicy(args.approval || categoryPolicy);
   const task = {
     id,
     goal,
@@ -610,6 +666,10 @@ function cmdOpen(args) {
     started_at: nowISO(),
     updated_at: nowISO(),
   };
+  if (approvalPolicy) task.approval_policy = approvalPolicy;
+  if (approvalCategory) task.approval_category = approvalCategory;
+  if (approvalPolicy) task.approval_state = approvalState(approvalPolicy);
+  if (approvalPolicy === "must-ask") task.human_approval = { required: true, approved_at: null, approver: null };
   ledger.tasks.push(task);
   ledger.current = id;
   appendLog(ledger, "open", id, task.agent, { goal });
@@ -619,6 +679,7 @@ function cmdOpen(args) {
   console.log(`  State: ${task.state}`);
   if (task.dod.length) console.log(`  DoD: ${task.dod.length} check(s)`);
   if (task.skills.length) console.log(`  Skills: ${task.skills.join(", ")}`);
+  if (approvalPolicy || approvalCategory) console.log(`  Approval: ${taskApprovalSummary(task)}`);
   if (!task.skills.length && !args.qa) {
     console.log(c("yellow", "WARN: no --skill declared. Run: task.mjs update " + id + " --skill <id>"));
     console.log(c("yellow", "      See .agents/SKILL_SELECT.md for selection rules."));
@@ -636,6 +697,8 @@ function cmdList(args) {
     const cur = ledger.current === t.id ? c("cyan", " ★") : "";
     console.log(`${t.id}${cur}  ${c(stateColor, t.state.padEnd(12))}  ${t.goal}`);
     if (t.skills && t.skills.length) console.log(c("dim", `        skills: ${t.skills.join(", ")}`));
+    const approval = taskApprovalSummary(t);
+    if (approval) console.log(c("dim", `        ${approval}`));
   }
 }
 
@@ -778,21 +841,65 @@ function cmdResume(args) {
   console.log(c("green", `▶ Resumed ${id}: ${t.goal}`));
 }
 
-function cmdBlock(args) {
+function cmdApprove(args) {
   const id = args._[1];
-  const reason = args.reason || args._[2];
-  if (!id || !reason || !args.unlock) throw new Error("Usage: task.mjs block <id> --reason \"<text>\" --unlock \"<command>\"");
+  const approver = args.by || args.approver || args._[2] || process.env.COMPOUND_AGENT_ID || "human";
+  const scope = args.scope || args.reason || null;
+  if (!id) throw new Error("Usage: task.mjs approve <id> --by \"<approver>\" [--scope \"<approved scope>\"]");
   const ledger = loadLedger();
   const t = findTask(ledger, id);
   if (!t) throw new Error(`Task ${id} not found.`);
+  const policy = normalizeApprovalPolicy(t.approval_policy);
+  if (policy !== "must-ask") throw new Error(`Task ${id} is not waiting on must-ask approval.`);
+  t.human_approval = {
+    required: true,
+    approved_at: nowISO(),
+    approver,
+    scope,
+  };
+  t.approval_state = "approved";
+  t.updated_at = nowISO();
+  appendLog(ledger, "approve", id, t.agent, { approval_category: t.approval_category || null, approver, scope });
+  logEvent("task-approve", "task.mjs approve", {
+    task: t,
+    result: { status: "approved" },
+    context: { approval_category: t.approval_category || null, approver_present: Boolean(approver), scope_present: Boolean(scope) },
+  });
+  saveLedger(ledger);
+  console.log(c("green", `✓ Approved ${id}: ${taskApprovalSummary(t)}`));
+}
+
+function cmdBlock(args) {
+  const id = args._[1];
+  const reason = args.reason || args._[2];
+  if (!id || !reason || !args.unlock) throw new Error("Usage: task.mjs block <id> --reason \"<text>\" --unlock \"<command>\" [--approval must-ask|defaultable|defer] [--approval-category <category>]");
+  const ledger = loadLedger();
+  const t = findTask(ledger, id);
+  if (!t) throw new Error(`Task ${id} not found.`);
+  const hasApprovalBoundary = args.approval !== undefined || args.approvalCategory !== undefined;
+  const approvalCategory = normalizeApprovalCategory(args.approvalCategory);
+  const categoryPolicy = approvalCategory ? APPROVAL_CATEGORIES.get(approvalCategory).policy : null;
+  const approvalPolicy = hasApprovalBoundary ? normalizeApprovalPolicy(args.approval || categoryPolicy || "must-ask") : null;
   t.state = "blocked";
   t.blocked_by = reason;
   t.unlock_command = args.unlock;
+  if (hasApprovalBoundary) {
+    t.approval_policy = approvalPolicy;
+    t.approval_category = approvalCategory || t.approval_category || null;
+    t.approval_state = approvalState(approvalPolicy);
+    t.human_approval = approvalPolicy === "must-ask" ? { required: true, approved_at: null, approver: null } : null;
+  }
   t.updated_at = nowISO();
-  appendLog(ledger, "block", id, t.agent, { reason });
-  logEvent("task-block", "task.mjs block", { task: t, result: { status: "blocked" }, context: { reason, unlock_command_present: Boolean(args.unlock) } });
+  appendLog(ledger, "block", id, t.agent, { reason, approval_policy: approvalPolicy, approval_category: t.approval_category });
+  logEvent("task-block", "task.mjs block", {
+    task: t,
+    result: { status: "blocked", approval_policy: approvalPolicy },
+    context: { reason, unlock_command_present: Boolean(args.unlock), approval_policy: approvalPolicy, approval_category: t.approval_category },
+  });
   saveLedger(ledger);
   console.log(c("red", `⛔ Blocked ${id}: ${reason}`));
+  const approval = taskApprovalSummary(t);
+  if (approval) console.log(c("yellow", `   Approval: ${approval}`));
   console.log(c("yellow", `   Unlock: ${args.unlock}`));
 }
 
@@ -821,6 +928,14 @@ function cmdUpdate(args) {
   if (!t) throw new Error(`Task ${id} not found.`);
   if (args.skill && args.skill.length) for (const s of args.skill) if (!t.skills.includes(s)) t.skills.push(s);
   if (args.dod && args.dod.length) for (const spec of args.dod) t.dod.push(parseDodSpec(spec));
+  if (args.approval) {
+    t.approval_policy = normalizeApprovalPolicy(args.approval);
+    t.approval_state = approvalState(t.approval_policy);
+    t.human_approval = t.approval_policy === "must-ask" ? { required: true, approved_at: null, approver: null } : null;
+  }
+  if (args.approvalCategory) {
+    t.approval_category = normalizeApprovalCategory(args.approvalCategory);
+  }
   if (args.removeDod != null) {
     if (!args.reason) throw new Error("--remove-dod requires --reason \"<text>\"");
     const removed = t.dod.splice(args.removeDod, 1)[0];
@@ -834,6 +949,8 @@ function cmdUpdate(args) {
     context: {
       added_skills: args.skill?.length || 0,
       added_dod: args.dod?.length || 0,
+      approval_policy: t.approval_policy || null,
+      approval_category: t.approval_category || null,
       removed_dod: args.removeDod != null,
       reason: args.reason,
     },
@@ -1024,16 +1141,17 @@ Usage:
   task.mjs status                                Show current task + ledger summary
   task.mjs current                               Print current task id only
   task.mjs ack <agent-id>                        Sign in as agent
-  task.mjs open "<goal>" --dod "<type>:<value>" [--skill <id>] [--parent <id>] [--qa]
+  task.mjs open "<goal>" --dod "<type>:<value>" [--skill <id>] [--parent <id>] [--qa] [--approval must-ask|defaultable|defer] [--approval-category <category>]
   task.mjs list [--state <s>] [--all]            List tasks
   task.mjs show <id>                             Full task JSON
   task.mjs verify [<id>]                         Run DoD checks
   task.mjs done [<id>]                           Close task (requires DoD all passed)
   task.mjs park <id> --reason "<text>"           Park task
   task.mjs resume <id>                           Resume parked task
-  task.mjs block <id> --reason "<text>" --unlock "<cmd>"
+  task.mjs approve <id> --by "<approver>" [--scope "<approved scope>"]
+  task.mjs block <id> --reason "<text>" --unlock "<cmd>" [--approval must-ask|defaultable|defer] [--approval-category <category>]
   task.mjs abandon <id> --reason "<text>"
-  task.mjs update <id> [--skill <id>] [--dod <spec>] [--remove-dod <i> --reason <r>]
+  task.mjs update <id> [--skill <id>] [--dod <spec>] [--approval <policy>] [--approval-category <category>] [--remove-dod <i> --reason <r>]
   task.mjs import <plan-file> [--apply]
   task.mjs doctor                               Diagnose ledger, hooks, mode, runtime
   task.mjs migrate [--apply]                    Migrate ledger with backup
@@ -1041,6 +1159,8 @@ Usage:
   task.mjs hook <event>                          (internal — invoked by Claude hooks)
 
 DoD specs: test:<command> | artifact:<path> | manual:<description>
+Approval policies: must-ask (blocked until human approval), defaultable (safe documented default exists), defer (out of scope for now).
+Approval categories: secrets, network, destructive-git, overwrite, uninstall, external-apis, multi-agent-spawning.
 See .agents/PROTOCOL.md for the full contract.
 `;
 
@@ -1060,6 +1180,7 @@ async function main() {
     if (cmd === "done") return await cmdDone(args);
     if (cmd === "park") return cmdPark(args);
     if (cmd === "resume") return cmdResume(args);
+    if (cmd === "approve") return cmdApprove(args);
     if (cmd === "block") return cmdBlock(args);
     if (cmd === "abandon") return cmdAbandon(args);
     if (cmd === "update") return cmdUpdate(args);
