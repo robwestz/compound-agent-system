@@ -242,6 +242,78 @@ test("block records unlock_command", () => {
   }
 });
 
+test("must-ask approval blockers remain blocked and preserve read-only inspection", () => {
+  const { ledger, dir } = freshLedger();
+  try {
+    run(ledger, ["open", "approval-test", "--dod", "test:echo ok"]);
+    const id = readLedger(ledger).current;
+    const blocked = run(ledger, [
+      "block",
+      id,
+      "--reason",
+      "Need approval before requesting a secret",
+      "--unlock",
+      "Human approves secret name, scope, storage, and exact command.",
+      "--approval",
+      "must-ask",
+      "--approval-category",
+      "secrets",
+    ]);
+    assert.equal(blocked.status, 0, blocked.stderr);
+    assert.match(blocked.stdout, /approval=must-ask/);
+    assert.match(blocked.stdout, /category=secrets/);
+
+    const data = readLedger(ledger);
+    assert.equal(data.tasks[0].state, "blocked");
+    assert.equal(data.tasks[0].approval_policy, "must-ask");
+    assert.equal(data.tasks[0].approval_category, "secrets");
+    assert.equal(data.tasks[0].approval_state, "pending-human-approval");
+    assert.equal(data.tasks[0].human_approval.required, true);
+    assert.equal(data.tasks[0].human_approval.approved_at, null);
+
+    const status = run(ledger, ["status"], { COMPOUND_MODE: "enforce", COMPOUND_GROUNDED: "" });
+    assert.equal(status.status, 0, status.stderr);
+    assert.match(status.stdout, /approval=must-ask/);
+    assert.match(status.stdout, /Need approval before requesting a secret/);
+
+    const list = run(ledger, ["list"], { COMPOUND_MODE: "enforce", COMPOUND_GROUNDED: "" });
+    assert.equal(list.status, 0, list.stderr);
+    assert.match(list.stdout, /approval=must-ask/);
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
+test("approval policy accepts defaultable and defer task states", () => {
+  const { ledger, dir } = freshLedger();
+  try {
+    const r = run(ledger, [
+      "open",
+      "defaultable network plan",
+      "--dod",
+      "test:echo ok",
+      "--approval",
+      "defaultable",
+      "--approval-category",
+      "network",
+    ]);
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stdout, /approval=defaultable/);
+    let data = readLedger(ledger);
+    assert.equal(data.tasks[0].approval_policy, "defaultable");
+    assert.equal(data.tasks[0].approval_state, "default-available");
+
+    const id = data.current;
+    const update = run(ledger, ["update", id, "--approval", "defer"]);
+    assert.equal(update.status, 0, update.stderr);
+    data = readLedger(ledger);
+    assert.equal(data.tasks[0].approval_policy, "defer");
+    assert.equal(data.tasks[0].approval_state, "deferred");
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
 test("import reads frontmatter and creates tasks (--apply)", () => {
   const { ledger, dir } = freshLedger();
   try {

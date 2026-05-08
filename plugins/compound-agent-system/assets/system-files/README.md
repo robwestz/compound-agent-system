@@ -181,6 +181,7 @@ For Claude marketplace installation, stage it first and then run in Claude Code:
 Premium hardening docs:
 
 - `docs/security-boundary-model.md` defines trust boundaries, default-deny behavior, fixture secret assertions, and optional external-AI rules.
+- `docs/manual-approval-boundaries.md` defines must-ask/defaultable/defer approval states for secrets, network, destructive git, overwrite, uninstall, external APIs, and multi-agent spawning.
 - `docs/secrets-and-ai-policy.md` documents the deterministic non-AI path and `GROQ_API_KEY` / `OPENROUTER_API_KEY` expectations.
 - `docs/plugin-size-budget.md` classifies core plugin, optional skill, docs/playbook, external workbench, and test-only placement.
 - `docs/troubleshooting.md` maps common failures to exact recovery actions.

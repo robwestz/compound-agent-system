@@ -54,7 +54,7 @@
     },
     {
       "path": ".agents/idea-intake.mjs",
-      "bytes": 26814
+      "bytes": 30446
     },
     {
       "path": ".agents/node-runtime.mjs",
@@ -66,7 +66,7 @@
     },
     {
       "path": ".agents/session-readiness.mjs",
-      "bytes": 19600
+      "bytes": 20674
     },
     {
       "path": ".agents/skills/SkiLLBuilDr/SKILL.md",
@@ -82,7 +82,7 @@
     },
     {
       "path": ".agents/task.mjs",
-      "bytes": 44471
+      "bytes": 49471
     },
     {
       "path": ".agents/templates/AGENT_ROLES.md",
@@ -98,7 +98,7 @@
     },
     {
       "path": ".agents/templates/GAP_SCAN.md",
-      "bytes": 733
+      "bytes": 900
     },
     {
       "path": ".agents/templates/OPEN_QUESTIONS.md",
@@ -314,7 +314,7 @@
     },
     {
       "path": "README.md",
-      "bytes": 14256
+      "bytes": 14448
     },
     {
       "path": "assemble.mjs",
@@ -331,6 +331,10 @@
     {
       "path": "docs/event-log.md",
       "bytes": 2642
+    },
+    {
+      "path": "docs/manual-approval-boundaries.md",
+      "bytes": 4911
     },
     {
       "path": "docs/planning-quality-red-team.md",
@@ -514,7 +518,7 @@
     },
     {
       "path": "tests/agents-task.test.mjs",
-      "bytes": 18899
+      "bytes": 21525
     },
     {
       "path": "tests/assemble.test.mjs",
@@ -554,7 +558,7 @@
     },
     {
       "path": "tests/golden-path-e2e.test.mjs",
-      "bytes": 6797
+      "bytes": 6914
     },
     {
       "path": "tests/handoff-bridge.test.mjs",
@@ -570,7 +574,7 @@
     },
     {
       "path": "tests/idea-intake.test.mjs",
-      "bytes": 13639
+      "bytes": 13865
     },
     {
       "path": "tests/install-rollback-uninstall.test.mjs",
@@ -594,7 +598,7 @@
     },
     {
       "path": "tests/session-readiness.test.mjs",
-      "bytes": 9516
+      "bytes": 10505
     },
     {
       "path": "tests/support-bundle.test.mjs",

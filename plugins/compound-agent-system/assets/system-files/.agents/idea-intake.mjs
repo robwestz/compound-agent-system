@@ -63,6 +63,58 @@ function unique(values) {
   return [...new Set(values.filter(Boolean))];
 }
 
+const MANUAL_APPROVAL_MATRIX = [
+  {
+    category: "secrets",
+    decision: "Secrets and credentials",
+    policy: "must-ask",
+    default: "Do not read, request, paste, export, or store credentials.",
+    unlock: "User provides the credential through an approved secret channel, states session/permanent scope, and confirms the exact command that may use it.",
+  },
+  {
+    category: "network",
+    decision: "Network access",
+    policy: "must-ask",
+    default: "Stay local and use committed fixtures or dry-run output.",
+    unlock: "User approves destination, purpose, data sent, expected cost/quota impact, and retry limit.",
+  },
+  {
+    category: "destructive-git",
+    decision: "Destructive git operations",
+    policy: "must-ask",
+    default: "Use read-only git inspection and non-destructive commits on an owned branch.",
+    unlock: "User names the exact destructive git command or branch/history rewrite and acknowledges the affected refs.",
+  },
+  {
+    category: "overwrite",
+    decision: "Overwriting existing files",
+    policy: "must-ask",
+    default: "Refuse overwrite and write a plan/diff or backup-preserving alternative.",
+    unlock: "User approves the specific paths to overwrite after reviewing the diff or install plan.",
+  },
+  {
+    category: "uninstall",
+    decision: "Uninstall or rollback",
+    policy: "must-ask",
+    default: "Inspect rollback/uninstall manifest only; do not remove files.",
+    unlock: "User confirms the manifest, changed-file handling, and target workspace before removal.",
+  },
+  {
+    category: "external-apis",
+    decision: "External API calls",
+    policy: "must-ask",
+    default: "Use deterministic local ranking, cached examples, or mock responses.",
+    unlock: "User approves provider, endpoint scope, credential source, rate/cost limit, and data-sharing boundary.",
+  },
+  {
+    category: "multi-agent-spawning",
+    decision: "Multi-agent spawning",
+    policy: "must-ask",
+    default: "Export a static role plan only; do not spawn agents.",
+    unlock: "User approves the spawn count, roles, task split, merge owner, and stop condition.",
+  },
+];
+
 function quote(value) {
   return String(value).replaceAll("\\", "\\\\").replaceAll('"', '\\"');
 }
@@ -101,6 +153,24 @@ function analyzeIdea(idea) {
   return { idea, lower, summary, title: titleFromIdea(idea, summary), features, surfaces: unique(surfaces), dataNeeds, integrationNeeds, securityNeeds, verificationNeeds, isLongBrief: idea.split(/\n/).length > 12 || features.length >= 4 };
 }
 
+function approvalMatrixBlock() {
+  return MANUAL_APPROVAL_MATRIX.map((item) => [
+    `### Decision: ${item.decision}`,
+    "",
+    `- question: Is ${item.category} approved for this task?`,
+    `- why-it-matters: ${item.decision} changes trust, reversibility, or cost boundaries.`,
+    "- priority: critical",
+    "- reversibility: costly",
+    `- approval-policy: ${item.policy}`,
+    `- recommended-default: ${item.default}`,
+    "- rationale: Premium autonomy stays bounded unless a human explicitly expands scope.",
+    `- unlock-condition: ${item.unlock}`,
+    `- consequence-of-default: The agent can continue read-only inspection, local planning, dry-runs, and fixture-backed tests without this approval.`,
+    "- consequence-of-alternative: The approved risky action may proceed only within the approved scope and must be recorded in the ledger or task report.",
+    "- proceed-without-user: false",
+  ].join("\n")).join("\n\n");
+}
+
 function makeBlockers(analysis) {
   const blockers = [
     {
@@ -134,15 +204,15 @@ function makeBlockers(analysis) {
     {
       decision: "Security boundary",
       question: "Can the agent call external APIs during implementation?",
-      "why-it-matters": "Network and secret usage change the threat model and test repeatability.",
-      "recommended-default": "No external API calls until the user explicitly provides scope and credentials.",
-      "consequence-of-default": "Safe local planning with deterministic tests.",
-      "consequence-of-alternative": "Richer discovery but requires secret handling and rate-limit controls.",
+      "why-it-matters": "Secrets, network, destructive git, overwrites, uninstall, external APIs, and multi-agent spawning change the threat model and test repeatability.",
+      "recommended-default": "No must-ask action is approved; continue with read-only inspection, local planning, dry-runs, fixtures, and static role exports.",
+      "consequence-of-default": "Safe local planning with deterministic tests while risky actions stay blocked.",
+      "consequence-of-alternative": "Broader autonomy but only inside explicitly approved scope, cost, credentials, paths, and stop conditions.",
       priority: analysis.integrationNeeds || analysis.securityNeeds ? "critical" : "defer",
       reversibility: "costly",
       "proceed-policy": analysis.integrationNeeds || analysis.securityNeeds ? "must-ask" : "defer",
-      rationale: "External calls can leak intent, consume quota, or require credentials not present in the repo.",
-      "unlock-condition": "User explicitly approves network scope and provides any required credentials.",
+      rationale: "Must-ask actions can leak intent, consume quota, remove work, overwrite user files, or spawn unbounded agents.",
+      "unlock-condition": "User explicitly approves the relevant approval category from docs/manual-approval-boundaries.md.",
       "proceed-without-user": false,
     },
   ];
@@ -359,6 +429,7 @@ function renderArtifacts(idea) {
     "{{SUMMARY}}": analysis.summary,
     "{{TITLE}}": analysis.title,
     "{{BLOCKERS}}": blockersMd,
+    "{{APPROVAL_MATRIX}}": approvalMatrixBlock(),
     "{{ROLES}}": roleSummary(phases),
     "{{BLOCKING_NOW}}": renderQuestions(blockers, "blocking_now"),
     "{{CAN_DEFAULT}}": renderQuestions(blockers, "can_default"),
@@ -399,6 +470,9 @@ function createIntakeTask(ledger, idea, rendered) {
     skills: ["planner", "gap-scan", "compound-agent-system"],
     blocked_by: rendered.blockers.filter((b) => !b["proceed-without-user"]).map((b) => b.question),
     unlock_command: "Answer no-proceed blocker questions or explicitly accept recommended defaults.",
+    approval_policy: rendered.blockers.some((b) => b["proceed-policy"] === "must-ask") ? "must-ask" : "defaultable",
+    approval_category: "external-apis",
+    approval_state: rendered.blockers.some((b) => b["proceed-policy"] === "must-ask") ? "pending-human-approval" : "default-available",
     park_reason: null,
     parent: null,
     agent: process.env.COMPOUND_AGENT_ID || ledger.agents_active?.at?.(-1) || null,

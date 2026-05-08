@@ -171,6 +171,32 @@ test("partially ready scenario prints structured unlock steps", () => {
   }
 });
 
+test("must-ask approval policy blocks long-session readiness until approved", () => {
+  const dir = mkdtempSync(join(tmpdir(), "readiness-approval-"));
+  try {
+    writeCheckpoint(dir);
+    const path = makeLedger(dir, {
+      tasks: [baseTask({
+        approval_policy: "must-ask",
+        approval_category: "external-apis",
+        approval_state: "pending-human-approval",
+        human_approval: { required: true, approved_at: null, approver: null },
+      })],
+    });
+    const r = run(path, "enforce");
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stdout, /Long-session readiness: NOT_READY/);
+    assert.match(r.stdout, /\[must_ask_approvals_clear\]/);
+
+    const result = parseResult(r.stdout);
+    assert.equal(result.ready, false);
+    assert.equal(result.checks.must_ask_approvals_clear, false);
+    assert.ok(result.unlock_steps.some((step) => step.id === "must_ask_approvals_clear"));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("unsafe false-ready scenario refuses malformed handoff and unresolved manual DoD", () => {
   const dir = mkdtempSync(join(tmpdir(), "readiness-unsafe-"));
   try {

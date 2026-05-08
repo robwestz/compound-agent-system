@@ -86,6 +86,7 @@ test("premium golden path bootstraps, plans, imports, readies, and checkpoints",
     const ledgerReady = readJson(join(dir, ".agents", "TASKS.json"));
     const active = ledgerReady.tasks.find((task) => task.id === ledgerReady.current);
     active.blocked_by = [];
+    active.human_approval = { required: true, approved_at: "2026-05-03T16:00:00.000Z", approver: "golden-fixture" };
     active.env_contract = { node: ">=18", runtime_dependencies: "none", network: "none" };
     active.handoffs = [{ checkpoint_id: "cp-20260503T160000Z-golden", path: ".agents/checkpoints/pre-ready.handoff.json" }];
     ledgerReady.workspace_state = { state: "clean" };

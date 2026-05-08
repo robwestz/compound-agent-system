@@ -83,6 +83,15 @@ function normalizeList(value) {
   return [value].filter(Boolean);
 }
 
+function normalizeApprovalPolicy(value) {
+  if (!readableString(value)) return null;
+  const normalized = String(value).toLowerCase().replaceAll("_", "-");
+  if (["can-default", "can-defaults", "default", "proceed-with-default"].includes(normalized)) return "defaultable";
+  if (["blocking-now", "blocking", "requires-approval", "human-approval"].includes(normalized)) return "must-ask";
+  if (["must-ask", "defaultable", "defer"].includes(normalized)) return normalized;
+  return null;
+}
+
 function dodStatus(task) {
   const dod = Array.isArray(task?.dod) ? task.dod : [];
   const malformed = dod.filter((check) => !readableString(check?.check) || !readableString(taskDetail(check)));
@@ -266,6 +275,11 @@ export function assessReadiness({ ledger = loadLedger(), complianceMode = mode()
   const current = ledger.current ? (ledger.tasks || []).find((task) => task.id === ledger.current) : null;
   const blockerTasks = (ledger.tasks || []).filter((task) => task.state === "blocked" || normalizeList(task.blocked_by).length);
   const blockerQuestions = blockerTasks.flatMap((task) => normalizeList(task.blocked_by)).filter(Boolean);
+  const mustAskApprovals = (ledger.tasks || []).filter((task) => {
+    if (normalizeApprovalPolicy(task.approval_policy) !== "must-ask") return false;
+    const approval = task.human_approval;
+    return !isObject(approval) || approval.approved_at == null;
+  });
   const dod = dodStatus(current);
   const handoff = handoffStatus(ledger, current);
   const questions = questionStatus(ledger, current, handoff);
@@ -281,6 +295,7 @@ export function assessReadiness({ ledger = loadLedger(), complianceMode = mode()
     last_context_refresh: Boolean(latestLog(ledger, "context-refresh")),
     last_compound_register: Boolean(latestLog(ledger, "compound-register") || latestLog(ledger, "done")),
     known_blockers_clear: blockerTasks.length === 0,
+    must_ask_approvals_clear: mustAskApprovals.length === 0,
     pending_questions_clear: blockerQuestions.length === 0 && questions.open.length === 0,
     checkpoint_present: handoff.checkpoint_count > 0,
     handoff_contract_valid: handoff.valid_contract_count > 0,
@@ -297,6 +312,7 @@ export function assessReadiness({ ledger = loadLedger(), complianceMode = mode()
   if (!checks.last_context_refresh) unlock_steps.push(unlock("last_context_refresh", "Run a CONTEXT REFRESH and log it before long execution.", "node .agents/task.mjs status"));
   if (!checks.last_compound_register) unlock_steps.push(unlock("last_compound_register", "Complete or register the last unit of work with COMPOUND REGISTER.", "Record a [COMPOUND] block before unattended execution."));
   if (!checks.known_blockers_clear) unlock_steps.push(unlock("known_blockers_clear", "Resolve blockers or accept documented recommended defaults.", "node .agents/task.mjs status"));
+  if (!checks.must_ask_approvals_clear) unlock_steps.push(unlock("must_ask_approvals_clear", "Get explicit human approval for must-ask boundaries before proceeding.", "Review docs/manual-approval-boundaries.md and record approved scope in the task report."));
   if (!checks.pending_questions_clear) unlock_steps.push(unlock("pending_questions_clear", "Resolve open questions or convert them to documented defaults.", "Review phase-0/OPEN_QUESTIONS.md and handoff pending_decisions."));
   if (!checks.checkpoint_present) unlock_steps.push(unlock("checkpoint_present", "Create a checkpoint for the active task.", `node handoff-bridge.mjs checkpoint --task ${current?.id || "<task-id>"} --from-agent <agent-id> --summary "<state>" --out .agents/checkpoints/${current?.id || "task"}.handoff.json`));
   if (checks.checkpoint_present && !checks.handoff_contract_valid) unlock_steps.push(unlock("handoff_contract_valid", "Create a valid shareable handoff contract for the active task.", `node handoff-bridge.mjs checkpoint --task ${current?.id || "<task-id>"} --from-agent <agent-id> --summary "<state>" --out .agents/checkpoints/${current?.id || "task"}.handoff.json`));

@@ -158,6 +158,9 @@ test("generated artifacts include first vertical slice and upgraded decisions", 
     assert.match(gap, /priority: critical/);
     assert.match(gap, /reversibility: costly/);
     assert.match(gap, /proceed-policy: must-ask/);
+    for (const category of ["secrets", "network", "destructive-git", "overwrite", "uninstall", "external-apis", "multi-agent-spawning"]) {
+      assert.match(gap, new RegExp(`Is ${category} approved for this task\\?`));
+    }
     assert.match(gap, /unlock-condition:/);
     assert.match(questions, /## blocking_now/);
     assert.match(questions, /## can_default/);
