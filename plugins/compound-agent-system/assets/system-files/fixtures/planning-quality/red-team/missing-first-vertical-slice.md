@@ -15,6 +15,8 @@ phases:
 
 # Phase Plan
 
+Fixture purpose: Red-team planning fixture proving plans without a declared smallest useful slice are rejected.
+
 [COMPOUND-PHASE id=phase-1-local-proof goal="Create deterministic local proof artifact" dod="artifact:docs/local-proof.md" skills="planner,executor,reviewer,verifier"]
 
 recommended-default: Use local fixtures.

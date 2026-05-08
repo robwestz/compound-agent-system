@@ -15,6 +15,8 @@ phases:
 
 # Phase Plan
 
+Fixture purpose: Red-team planning fixture proving vague phase goals are rejected.
+
 first_vertical_slice: produce one local artifact from one fixture.
 
 [COMPOUND-PHASE id=phase-1-thin goal="Do it" dod="artifact:docs/thin.md" skills="planner,executor,reviewer,verifier"]

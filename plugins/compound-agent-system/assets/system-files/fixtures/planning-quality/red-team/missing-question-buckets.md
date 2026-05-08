@@ -15,6 +15,8 @@ phases:
 
 # Phase Plan
 
+Fixture purpose: Red-team planning fixture proving question categorization sections are required.
+
 first_vertical_slice: resolve one source question and produce a local proof.
 
 [COMPOUND-PHASE id=phase-1-question-proof goal="Resolve source questions before local proof" dod="artifact:docs/question-proof.md" skills="planner,executor,reviewer,verifier"]

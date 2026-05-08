@@ -46,6 +46,11 @@ function writeIdea(dir, benchmark) {
   return rel;
 }
 
+function benchmarkCases() {
+  return JSON.parse(readFileSync(join(ROOT, "fixtures", "ideas", "realworld-benchmarks.json"), "utf-8"))
+    .filter((entry) => entry && entry.expected);
+}
+
 function parseRoleMap(roles) {
   const match = /```json\n([\s\S]+?)\n```/.exec(roles);
   assert.ok(match, "role map JSON block exists");
@@ -250,7 +255,11 @@ test("generated output passes check-output-quality", () => {
 
 
 test("real-world benchmark corpus covers categories and expected planning traits", () => {
-  const benchmarks = JSON.parse(readFileSync(join(ROOT, "fixtures", "ideas", "realworld-benchmarks.json"), "utf-8"));
+  const raw = JSON.parse(readFileSync(join(ROOT, "fixtures", "ideas", "realworld-benchmarks.json"), "utf-8"));
+  const corpusNote = raw.find((entry) => entry.id === "__corpus_note");
+  assert.match(corpusNote.purpose, /Fixture purpose:/);
+  assert.match(corpusNote.not_to_build, /fixture-only product ideas/);
+  const benchmarks = benchmarkCases();
   assert.equal(benchmarks.length, 12);
   assert.deepEqual(new Set(benchmarks.map((b) => b.category)), new Set(["CLI tool", "browser app", "data workflow", "library", "migration", "ambiguous product brief"]));
   for (const benchmark of benchmarks) {
@@ -262,7 +271,7 @@ test("real-world benchmark corpus covers categories and expected planning traits
 });
 
 test("real-world benchmark ideas produce expected phase counts first slices blockers and role maps", () => {
-  const benchmarks = JSON.parse(readFileSync(join(ROOT, "fixtures", "ideas", "realworld-benchmarks.json"), "utf-8"));
+  const benchmarks = benchmarkCases();
   for (const benchmark of benchmarks) {
     const dir = workspace();
     try {
