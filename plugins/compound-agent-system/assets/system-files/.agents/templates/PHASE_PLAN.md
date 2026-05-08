@@ -22,6 +22,12 @@
 
 {{ROLES}}
 
+## Open question buckets
+
+- blocking_now: see `OPEN_QUESTIONS.md`.
+- can_default: see `OPEN_QUESTIONS.md`.
+- defer: see `OPEN_QUESTIONS.md`.
+
 ## Closing
 
 Import this file with `node .agents/task.mjs import phase-0/PHASE_PLAN.md --apply` after Phase 0 is accepted.

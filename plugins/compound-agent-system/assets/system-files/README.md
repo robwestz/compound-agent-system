@@ -189,7 +189,7 @@ node .agents\task.mjs status
 
 Idea intake immediately creates an intake/planning task, records the original idea text, runs deterministic GAP SCAN, proposes recommended defaults, assigns planner/executor/reviewer/verifier roles, and writes Phase 0 artifacts. Blocker questions do not prevent the intake task from opening; implementation tasks wait for accepted scope.
 
-Generated planning output must pass `.agents/check-output-quality.mjs` and `.agents/check-planning-quality.mjs` before it is treated as an artifact. The planning quality gate rejects generic foundation/verification-only plans, missing `first_vertical_slice`, missing phase DoD, missing role ownership, missing blocker defaults, and missing import markers.
+Generated planning output must pass `.agents/check-output-quality.mjs` and `.agents/check-planning-quality.mjs` before it is treated as an artifact. The planning quality gate rejects generic foundation/verification-only plans, missing `first_vertical_slice`, missing phase DoD, role mismatch, missing blocker defaults, unsafe defaults, unresolved placeholders, missing question buckets, thin phase goals, and missing import markers. Add new deterministic checks through the red-team corpus documented in `docs/planning-quality-red-team.md`; do not add LLM judging to this gate.
 
 `AGENT_ROLES.md` is operational, not decorative. It contains a static JSON role map with task IDs, artifacts, autonomy level, handoff condition, and `spawn_policy: static-export-only` for each planner/executor/reviewer/verifier assignment. Export it without spawning agents:
 

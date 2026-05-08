@@ -1,12 +1,4 @@
 {
-  "name": "compound-agent-system-workspace-harness",
-  "created": "2026-04-29",
-  "plugin": "plugins/compound-agent-system",
-  "clients": [
-    "claude",
-    "codex"
-  ],
-  "bootstrap": "bootstrap.mjs",
   "system_files": [
     {
       "path": ".agents/COMPOUND.md",
@@ -262,7 +254,7 @@
     },
     {
       "path": "README.md",
-      "bytes": 12307
+      "bytes": 12529
     },
     {
       "path": "assemble.mjs",
@@ -271,6 +263,10 @@
     {
       "path": "docs/compatibility-matrix.md",
       "bytes": 5221
+    },
+    {
+      "path": "docs/planning-quality-red-team.md",
+      "bytes": 1070
     },
     {
       "path": "docs/plugin-size-budget.md",
@@ -287,6 +283,46 @@
     {
       "path": "docs/troubleshooting.md",
       "bytes": 2204
+    },
+    {
+      "path": "fixtures/planning-quality/red-team/generic-two-phase-plan.md",
+      "bytes": 747
+    },
+    {
+      "path": "fixtures/planning-quality/red-team/missing-blocker-metadata.md",
+      "bytes": 658
+    },
+    {
+      "path": "fixtures/planning-quality/red-team/missing-dod.md",
+      "bytes": 678
+    },
+    {
+      "path": "fixtures/planning-quality/red-team/missing-first-vertical-slice.md",
+      "bytes": 674
+    },
+    {
+      "path": "fixtures/planning-quality/red-team/missing-question-buckets.md",
+      "bytes": 719
+    },
+    {
+      "path": "fixtures/planning-quality/red-team/role-mismatch.md",
+      "bytes": 736
+    },
+    {
+      "path": "fixtures/planning-quality/red-team/thin-phase-goal.md",
+      "bytes": 642
+    },
+    {
+      "path": "fixtures/planning-quality/red-team/unimportable-markers.md",
+      "bytes": 384
+    },
+    {
+      "path": "fixtures/planning-quality/red-team/unresolved-placeholder.md",
+      "bytes": 731
+    },
+    {
+      "path": "fixtures/planning-quality/red-team/unsafe-default.md",
+      "bytes": 862
     },
     {
       "path": "handoff-bridge.mjs",
@@ -352,12 +388,5 @@
       "path": "tests/token-budget.test.mjs",
       "bytes": 6650
     }
-  ],
-  "excluded": [
-    ".claude/worktrees/",
-    ".claude/settings.local.json",
-    ".omc/**/*.zip",
-    "node_modules/",
-    "browser build data files"
   ]
 }
