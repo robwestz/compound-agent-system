@@ -1,12 +1,4 @@
 {
-  "name": "compound-agent-system-workspace-harness",
-  "created": "2026-04-29",
-  "plugin": "plugins/compound-agent-system",
-  "clients": [
-    "claude",
-    "codex"
-  ],
-  "bootstrap": "bootstrap.mjs",
   "system_files": [
     {
       "path": ".agents/COMPOUND.md",
@@ -43,6 +35,10 @@
     {
       "path": ".agents/node-runtime.mjs",
       "bytes": 5166
+    },
+    {
+      "path": ".agents/role-plan.mjs",
+      "bytes": 3898
     },
     {
       "path": ".agents/skills/SkiLLBuilDr/SKILL.md",
@@ -258,7 +254,7 @@
     },
     {
       "path": "README.md",
-      "bytes": 12177
+      "bytes": 12529
     },
     {
       "path": "assemble.mjs",
@@ -381,6 +377,10 @@
       "bytes": 3903
     },
     {
+      "path": "tests/role-plan.test.mjs",
+      "bytes": 4200
+    },
+    {
       "path": "tests/token-budget-trigger-sim.mjs",
       "bytes": 2251
     },
@@ -388,12 +388,5 @@
       "path": "tests/token-budget.test.mjs",
       "bytes": 6650
     }
-  ],
-  "excluded": [
-    ".claude/worktrees/",
-    ".claude/settings.local.json",
-    ".omc/**/*.zip",
-    "node_modules/",
-    "browser build data files"
   ]
 }

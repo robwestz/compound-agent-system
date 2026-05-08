@@ -181,7 +181,11 @@ test("agent role map is project-specific and phase-linked", () => {
     assert.notEqual(simpleRoles, mediumRoles);
     for (const role of ["planner", "executor", "reviewer", "verifier"]) assert.match(mediumRoles, new RegExp(`"${role}"`));
     assert.match(mediumRoles, /"phase_id"/);
+    assert.match(mediumRoles, /"task_ids"/);
+    assert.match(mediumRoles, /"artifacts"/);
     assert.match(mediumRoles, /"autonomy_level"/);
+    assert.match(mediumRoles, /"handoff_condition"/);
+    assert.match(mediumRoles, /static-export-only/);
   } finally {
     rmSync(simpleDir, { recursive: true, force: true });
     rmSync(mediumDir, { recursive: true, force: true });
