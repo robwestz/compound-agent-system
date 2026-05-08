@@ -1,20 +1,31 @@
 # Troubleshooting
 
-High-frequency failures should explain what happened, why it matters, and the exact next action.
+Use this when install, first run, operations, readiness, or release validation fails. Start with the local diagnostic commands; they produce the safest next action without uploading anything.
 
-| Area | Symptom | Why it matters | Next action |
+```bash
+node .agents/task.mjs doctor
+node .agents/session-readiness.mjs
+node .agents/support-bundle.mjs
+```
+
+`doctor` explains environment, ledger, hooks, mode, docs, and security failures. `session-readiness` explains why unattended work is not safe yet. `support-bundle` creates a local review-before-share folder with `doctor.json` and `readiness.json` for support.
+
+| Error or symptom | What happened | Why it matters | Recovery command |
 |---|---|---|---|
-| Install dry-run | Root files such as `CLAUDE.md` are listed as high impact | The installer may overwrite local project instructions | Review `compound-install-plan.json`; rerun with `--overwrite` only after approval |
-| Rollback/uninstall | `Refusing rollback outside target` or unsafe uninstall refusals | Manifest paths could otherwise affect sibling directories | Inspect the manifest and remove or correct paths outside the target repo |
-| Hooks | Doctor reports missing or duplicate hooks | Agents may miss task, DoD, or checkpoint gates | Run `node .agents/activate.mjs`; inspect duplicates before editing user hooks |
-| Ledger | Doctor reports malformed JSON | The harness cannot prove task state or DoD | Restore a known-good `TASKS.json` backup or fix JSON syntax; doctor will not overwrite it |
-| Ledger migration | `migration_needed` | Long-running agents may disagree on schema | Run `node .agents/task.mjs migrate --apply` after grounding |
-| Fact-Forcing Gate | State-changing command exits 2 in enforce mode | Prevents action on stale user instructions | Quote the current user instruction in `COMPOUND_GROUNDED`, then retry |
-| Optional AI | `--ai` has no provider key | AI is optional and no network call was made | Continue with local ranking or set `GROQ_API_KEY` / `OPENROUTER_API_KEY` intentionally |
-| Idea intake | Output-quality JSON reports issues | Generated plans may be generic or incomplete | Fix the source idea/template output and rerun the quality checker |
-| Readiness | `Long-session readiness: NOT_READY` | Unattended execution lacks a required safety proof | Follow each listed unlock step before multi-hour execution |
-| Package validation | Missing required file or stale manifest warning | Users may install an incomplete or drifted payload | Restore the file or update manifest metadata in the same PR |
+| `Install Node 18 or newer.` | `doctor` detected Node 16 or older. | The harness only supports Node 18+. | Install/select Node 18+, then rerun `node .agents/task.mjs doctor`. |
+| Root files such as `CLAUDE.md` are high impact in the install plan. | Dry-run found target files that may be overwritten. | Local project instructions can be lost. | Review `compound-install-plan.json`; rerun install with `--overwrite` only after approval. |
+| `Refusing rollback outside target` or unsafe uninstall refusal. | Rollback/uninstall manifest points outside the target repo. | Recovery could affect sibling directories. | Inspect `.agents/install-manifest.json`; correct/remove unsafe entries, then rerun the rollback/uninstall command. |
+| Doctor reports missing or duplicate hooks. | `.claude/settings.json` does not contain the expected Compound hooks exactly once. | Agents may miss task, DoD, or checkpoint gates. | Run `node .agents/activate.mjs`, then rerun `node .agents/task.mjs doctor`. |
+| Doctor reports malformed `TASKS.json`. | The ledger is not parseable JSON. | The harness cannot prove task state or DoD. | Restore a known-good `.agents/TASKS.json` backup or fix JSON syntax; rerun `node .agents/task.mjs doctor`. |
+| Doctor reports `migration_needed`. | Ledger schema is older than the current CLI expects. | Long-running agents may disagree on task state. | Set `COMPOUND_GROUNDED` to the exact current instruction, then run `node .agents/task.mjs migrate --apply`. |
+| `Fact-Forcing Gate` or state-changing command exits 2 in enforce mode. | The session has not grounded the first state-changing action. | Prevents actions based on stale user instructions. | Quote the current instruction in `COMPOUND_GROUNDED`, then retry the original command. |
+| `--ai set but no GROQ_API_KEY / OPENROUTER_API_KEY in env.` | Optional AI was requested without provider credentials. | No network call was made; deterministic ranking remains available. | Continue without `--ai`, or intentionally set `GROQ_API_KEY` / `OPENROUTER_API_KEY` for that command. |
+| Output-quality or planning-quality JSON reports issues. | Generated planning output is generic, incomplete, or unsafe to import. | Bad plans create poor tasks and handoffs. | Fix the source idea/template output, then rerun `.agents/check-output-quality.mjs` or `.agents/check-planning-quality.mjs`. |
+| `Long-session readiness: NOT_READY`. | Premium preflight conditions are missing. | Unattended execution lacks required safety proof. | Follow each unlock step from `node .agents/session-readiness.mjs`; use `node .agents/support-bundle.mjs` if support needs evidence. |
+| Support requests diagnostics. | Support needs context but not a full repo dump. | Raw ledgers/events may contain private context. | Run `node .agents/support-bundle.mjs`; review the generated folder before sharing. |
+| Package validator reports missing required files. | Required plugin or payload files are absent. | Users may install an incomplete harness. | Restore each file listed by `node plugins/compound-agent-system/scripts/validate-package.mjs`. |
+| Package validator reports stale `manifest.json` byte metadata. | Bundled system files changed without manifest byte updates. | Reviewers cannot trust payload drift checks. | Update `manifest.json` bytes for changed files, then rerun `node plugins/compound-agent-system/scripts/validate-package.mjs`. |
 
-## Closing
+## If you are still blocked
 
-When in doubt, run `node .agents/task.mjs doctor` in the installed workspace, then follow the first listed `next_action` before attempting implementation work.
+Run `node .agents/support-bundle.mjs`, review the generated bundle, and share only the redacted files needed for support. The bundle is local-only and does not upload automatically.
