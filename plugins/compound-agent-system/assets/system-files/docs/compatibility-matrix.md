@@ -19,7 +19,7 @@ Defines which Node, OS, shell, and agent-client combinations the Compound Agent 
 | Ubuntu Linux on GitHub Actions | **Supported** | Primary CI and development platform |
 | Other Linux distributions | Best-effort | Expected to behave like Ubuntu when Node ≥ 18 is available; not tested separately |
 | macOS (12+) | Best-effort | May work; not tested in CI |
-| Windows 10/11 | Best-effort | PowerShell and Git Bash may work; parity tracked by task 25. `node-runtime.mjs` includes Windows-specific fallbacks |
+| Windows 10/11 | Best-effort | PowerShell and Git Bash are documented and covered by deterministic CRLF/path/quoting tests; Windows CI is not automated. `node-runtime.mjs` includes Windows-specific fallbacks |
 | WSL2 | Best-effort | Expected to behave like Ubuntu when running inside WSL; not tested separately |
 | FreeBSD, other POSIX | Unsupported | Not tested; no support commitment |
 
@@ -28,7 +28,7 @@ Defines which Node, OS, shell, and agent-client combinations the Compound Agent 
 | Shell | Status | Notes |
 |---|---|---|
 | Bash (4+) | **Supported** | Default for CI and documented commands |
-| PowerShell (5.1+ / 7+) | Best-effort | Install scripts and bootstrap support PowerShell; full parity tracked by task 25 |
+| PowerShell (5.1+ / 7+) | Best-effort | Bootstrap, install, validation, idea-intake, task import/status, readiness, and documented examples have PowerShell-safe equivalents; no WSL required |
 | Zsh | Best-effort | Expected to work via POSIX compatibility; not tested separately |
 | Fish, Nushell, etc. | Unsupported | Not tested |
 
@@ -49,7 +49,8 @@ Defines which Node, OS, shell, and agent-client combinations the Compound Agent 
 | `\n` line endings in generated files | All platforms | Yes — `writeFileSync` uses `\n`; no `\r\n` normalization |
 | `path.join` / `path.resolve` for local filesystem | Runtime scripts | Yes — deterministic on Linux; Windows uses `\` which `replaceAll("\\", "/")` normalizes in the validator |
 | Case-sensitive filenames | Linux CI | Yes — tests create and assert exact filenames |
-| Paths with spaces | Windows fallbacks only | Partial — `node-runtime.mjs` passes Windows fallback paths as executable arguments |
+| Paths with spaces | Bootstrap/install/idea-intake/task commands | Yes — install plan emits POSIX and PowerShell command variants; idea intake and task import tests run from paths with spaces |
+| CRLF input files | Idea and plan import | Yes — idea intake normalizes CRLF input; task import accepts CRLF frontmatter |
 
 ## What "supported" means
 
@@ -59,8 +60,16 @@ Defines which Node, OS, shell, and agent-client combinations the Compound Agent 
 
 ## How to verify your environment
 
+POSIX:
+
 ```bash
 node .agents/task.mjs doctor
+```
+
+PowerShell:
+
+```powershell
+node .agents\task.mjs doctor
 ```
 
 The `doctor` command checks:
@@ -74,12 +83,13 @@ If `doctor` reports `FAIL`, follow the `next_action` for each failing check.
 
 ## Honest limitations
 
-- **Windows CI is not yet automated.** Windows support is best-effort until task 25 adds CI parity.
+- **Windows CI is not automated.** Windows support remains best-effort; parity is covered by deterministic tests for CRLF, path separators, spaces in paths, and PowerShell-safe command strings.
 - **macOS is not in CI.** macOS is expected to work but no automated verification exists.
 - **Odd Node releases (19.x, 21.x, 23.x) are not tested.** They may work but are not regression-tracked.
 - **The harness does not detect or warn about unsupported shells.** Shell compatibility is the user's responsibility.
 - **Docker/container environments are not tested.** They should work if Node ≥ 18 is available, but no assertions exist.
 - **External Claude/Codex marketplace installs are not automated in this task.** Supported client status covers packaged manifests, bundled hooks, and shared CLI files.
+- **Shell behavior outside documented commands is not guaranteed.** Use `node` entrypoints with quoted arguments rather than POSIX shell features when working in PowerShell.
 
 ## Release checklist — matrix verification
 

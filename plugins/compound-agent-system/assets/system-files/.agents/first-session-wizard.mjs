@@ -24,6 +24,19 @@ function modeLabel(value = mode()) {
   return "WARN (guides without blocking)";
 }
 
+function commandVariants(posix, powershell = null) {
+  return powershell ? { posix, powershell } : posix;
+}
+
+function printCommand(label, command) {
+  if (typeof command === "string") {
+    console.log(`${label}: ${command}`);
+    return;
+  }
+  console.log(`${label}: ${command.posix}`);
+  console.log(`${label} (PowerShell): ${command.powershell}`);
+}
+
 function workspaceRoot() {
   const ledgerDir = dirname(resolve(ledgerPath));
   if (basename(ledgerDir) === ".agents") return dirname(ledgerDir);
@@ -74,7 +87,7 @@ function nextStep({ root = workspaceRoot(), ledger = loadLedger(), complianceMod
       step: "1 of 5",
       title: "sign in the agent",
       agent: "not signed in",
-      next: "node .agents/agent-activate.mjs --id <agent-id>",
+      next: commandVariants("node .agents/agent-activate.mjs --id <agent-id>", "node .agents\\agent-activate.mjs --id <agent-id>"),
       mode: modeLabel(complianceMode),
     };
   }
@@ -93,7 +106,7 @@ function nextStep({ root = workspaceRoot(), ledger = loadLedger(), complianceMod
       step: "3 of 5",
       title: "turn the idea into a plan",
       agent,
-      next: "node .agents/idea-intake.mjs --input idea.md --apply",
+      next: commandVariants("node .agents/idea-intake.mjs --input idea.md --apply", "node .agents\\idea-intake.mjs --input idea.md --apply"),
       mode: modeLabel(complianceMode),
     };
   }
@@ -102,7 +115,7 @@ function nextStep({ root = workspaceRoot(), ledger = loadLedger(), complianceMod
       step: "4 of 5",
       title: "import planned tasks",
       agent,
-      next: "node .agents/task.mjs import phase-0/PHASE_PLAN.md --apply",
+      next: commandVariants("node .agents/task.mjs import phase-0/PHASE_PLAN.md --apply", "node .agents\\task.mjs import phase-0\\PHASE_PLAN.md --apply"),
       mode: modeLabel(complianceMode),
     };
   }
@@ -110,7 +123,7 @@ function nextStep({ root = workspaceRoot(), ledger = loadLedger(), complianceMod
     step: "5 of 5",
     title: "check readiness",
     agent,
-    next: "node .agents/session-readiness.mjs",
+    next: commandVariants("node .agents/session-readiness.mjs", "node .agents\\session-readiness.mjs"),
     mode: modeLabel(complianceMode),
   };
 }
@@ -128,8 +141,8 @@ export function printFirstSessionWizard(options = {}) {
   console.log(`Step ${step.step}: ${step.title}.`);
   console.log(`System: installed; mode ${step.mode}.`);
   console.log(`Agent: ${step.agent}.`);
-  console.log(`Next: ${step.next}`);
-  console.log("Skip: node .agents/first-session-wizard.mjs skip");
+  printCommand("Next", step.next);
+  printCommand("Skip", commandVariants("node .agents/first-session-wizard.mjs skip", "node .agents\\first-session-wizard.mjs skip"));
 }
 
 function main() {

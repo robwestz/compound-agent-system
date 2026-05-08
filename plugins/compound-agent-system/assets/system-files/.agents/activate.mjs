@@ -15,22 +15,27 @@ const SETTINGS_PATH = join(REPO_ROOT, ".claude", "settings.json");
 const TASKS_PATH = join(__dirname, "TASKS.json");
 
 const HOOK_MARKER = "compound-protocol";
+const HOOK_COMMANDS = {
+  sessionStart: "node .agents/task.mjs hook session-start",
+  preEdit: "node .agents/task.mjs hook pre-edit",
+  stop: "node .agents/task.mjs hook stop",
+};
 
 const HOOKS_TO_INSTALL = {
   SessionStart: [
     {
-      hooks: [{ type: "command", command: "node .agents/task.mjs hook session-start", _compound: HOOK_MARKER }],
+      hooks: [{ type: "command", command: HOOK_COMMANDS.sessionStart, _compound: HOOK_MARKER }],
     },
   ],
   PreToolUse: [
     {
       matcher: "Edit|Write",
-      hooks: [{ type: "command", command: "node .agents/task.mjs hook pre-edit", _compound: HOOK_MARKER }],
+      hooks: [{ type: "command", command: HOOK_COMMANDS.preEdit, _compound: HOOK_MARKER }],
     },
   ],
   Stop: [
     {
-      hooks: [{ type: "command", command: "node .agents/task.mjs hook stop", _compound: HOOK_MARKER }],
+      hooks: [{ type: "command", command: HOOK_COMMANDS.stop, _compound: HOOK_MARKER }],
     },
   ],
 };
@@ -110,7 +115,8 @@ function main() {
   console.log("");
   console.log("Compliance level: " + mode.toUpperCase());
   console.log("Observe: log only; Warn: warn but do not block; Enforce: block invalid state-changing actions.");
-  console.log("To enable enforcement: export COMPOUND_MODE=enforce");
+  console.log("To enable enforcement (POSIX): export COMPOUND_MODE=enforce");
+  console.log("To enable enforcement (PowerShell): $env:COMPOUND_MODE = 'enforce'");
   console.log("Recommended switch point: after the first smoke test passes, before unattended execution.");
   console.log("");
   printFirstSessionWizard({ complianceMode: mode });

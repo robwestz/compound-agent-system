@@ -9,6 +9,8 @@ const REPO_ROOT = resolve(__dirname, "..", "..", "..", "..", "..");
 const SYSTEM_ROOT = join(REPO_ROOT, "plugins", "compound-agent-system", "assets", "system-files");
 const MATRIX = join(REPO_ROOT, "docs", "compatibility-matrix.md");
 const BUNDLED_MATRIX = join(SYSTEM_ROOT, "docs", "compatibility-matrix.md");
+const ROOT_README = join(REPO_ROOT, "README.md");
+const BUNDLED_README = join(SYSTEM_ROOT, "README.md");
 const WORKFLOW = join(SYSTEM_ROOT, ".github", "workflows", "test.yml");
 
 function walk(dir) {
@@ -88,4 +90,21 @@ test("release checklist requires matrix verification", () => {
   assert.match(matrix, /compatibility matrix doc matches the actual CI matrix/);
   assert.match(matrix, /No docs or README claim support for environments not listed as "Supported"/);
   assert.match(matrix, /COMPOUND_DOCTOR_NODE_VERSION=v16\.20\.0/);
+});
+
+test("README documents POSIX and PowerShell command pairs plus Windows limitations", () => {
+  const rootReadme = readFileSync(ROOT_README, "utf-8");
+  const bundledReadme = readFileSync(BUNDLED_README, "utf-8");
+  for (const readme of [rootReadme, bundledReadme]) {
+    assert.match(readme, /POSIX:[\s\S]*node .*install-compound-system\.mjs --target "\/path\/to\/repo with spaces"/);
+    assert.match(readme, /PowerShell:[\s\S]*node .*install-compound-system\.mjs --target 'C:\\path\\to\\repo with spaces'/);
+    assert.match(readme, /POSIX:[\s\S]*node \.agents\/idea-intake\.mjs --input fixtures\/ideas\/simple-idea\.md --apply/);
+    assert.match(readme, /PowerShell:[\s\S]*node \.agents\\idea-intake\.mjs --input fixtures\\ideas\\simple-idea\.md --apply/);
+    assert.match(readme, /POSIX:[\s\S]*node \.agents\/task\.mjs import phase-0\/PHASE_PLAN\.md --apply/);
+    assert.match(readme, /PowerShell:[\s\S]*node \.agents\\task\.mjs import phase-0\\PHASE_PLAN\.md --apply/);
+    assert.match(readme, /export COMPOUND_MODE=enforce/);
+    assert.match(readme, /\$env:COMPOUND_MODE = 'enforce'/);
+    assert.match(readme, /does not require WSL/);
+    assert.match(readme, /Windows CI is not automated/);
+  }
 });

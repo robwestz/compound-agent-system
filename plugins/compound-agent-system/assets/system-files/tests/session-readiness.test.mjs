@@ -151,7 +151,8 @@ test("partially ready scenario prints structured unlock steps", () => {
     assert.match(r.stdout, /\[checkpoint_present\]/);
     assert.match(r.stdout, /\[env_contract_present\]/);
     assert.match(r.stdout, /\[compliance_mode_enforce\]/);
-    assert.match(r.stdout, /command: export COMPOUND_MODE=enforce/);
+    assert.match(r.stdout, /POSIX: export COMPOUND_MODE=enforce/);
+    assert.match(r.stdout, /PowerShell: \$env:COMPOUND_MODE = 'enforce'/);
 
     const result = parseResult(r.stdout);
     assert.equal(result.ready, false);
@@ -166,6 +167,10 @@ test("partially ready scenario prints structured unlock steps", () => {
         "compliance_mode_enforce",
       ]
     );
+    assert.deepEqual(result.unlock_steps.at(-1).command, {
+      posix: "export COMPOUND_MODE=enforce",
+      powershell: "$env:COMPOUND_MODE = 'enforce'",
+    });
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
