@@ -74,7 +74,7 @@
     },
     {
       "path": ".agents/support-bundle.mjs",
-      "bytes": 9022
+      "bytes": 9298
     },
     {
       "path": ".agents/task.mjs",
@@ -590,7 +590,7 @@
     },
     {
       "path": "tests/support-bundle.test.mjs",
-      "bytes": 5332
+      "bytes": 5950
     },
     {
       "path": "tests/token-budget-trigger-sim.mjs",

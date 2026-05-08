@@ -121,3 +121,20 @@ test("support bundle refuses output outside the workspace", () => {
     rmSync(ws.dir, { recursive: true, force: true });
   }
 });
+
+test("support bundle still exports diagnostics when the ledger is malformed", () => {
+  const ws = workspace();
+  try {
+    writeFileSync(ws.ledger, "{ bad json");
+    const r = run(ws);
+    assert.equal(r.status, 0, r.stderr);
+    const ledger = readJson(join(ws.out, "ledger-redacted.json"));
+    assert.match(ledger.error, /JSON/);
+    const doctor = readJson(join(ws.out, "doctor.json"));
+    assert.equal(doctor.ok, true);
+    assert.equal(doctor.report.status, "FAIL");
+    assert.equal(doctor.report.checks.ledger.status, "invalid");
+  } finally {
+    rmSync(ws.dir, { recursive: true, force: true });
+  }
+});

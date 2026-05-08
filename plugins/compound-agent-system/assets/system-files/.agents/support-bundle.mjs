@@ -52,6 +52,14 @@ function readJson(path, fallback = null) {
   return JSON.parse(readFileSync(path, "utf-8"));
 }
 
+function safeReadJson(path, fallback = null) {
+  try {
+    return { value: readJson(path, fallback), error: null };
+  } catch (error) {
+    return { value: fallback, error: redactText(error.message) };
+  }
+}
+
 function safeReadEvents(path) {
   try {
     return { events: readEvents(path), error: null };
@@ -140,7 +148,7 @@ export function createSupportBundle(options = {}) {
   if (existsSync(outDir)) throw new Error(`Refusing to overwrite existing support bundle directory: ${outDir}`);
   mkdirSync(outDir, { recursive: true });
 
-  const ledger = readJson(ledgerPath, { missing: true });
+  const ledgerRead = safeReadJson(ledgerPath, { missing: true });
   const eventPath = eventLogPathFromLedgerPath(ledgerPath);
   const eventRead = safeReadEvents(eventPath);
   const recentEvents = eventRead.events.slice(-options.events);
@@ -181,7 +189,7 @@ If anything in this directory looks sensitive, delete the bundle or remove that 
     compound_tasks_path_present: Boolean(process.env.COMPOUND_TASKS_PATH),
     event_limit: options.events,
   }));
-  writeJson(join(outDir, "ledger-redacted.json"), sanitizeForBundle(ledger));
+  writeJson(join(outDir, "ledger-redacted.json"), ledgerRead.error ? { error: ledgerRead.error } : sanitizeForBundle(ledgerRead.value));
   writeJson(join(outDir, "events-recent-redacted.json"), sanitizeForBundle(recentEvents));
   if (eventRead.error) writeJson(join(outDir, "events-read-error.json"), { error: eventRead.error });
   writeJson(join(outDir, "doctor.json"), doctor);
