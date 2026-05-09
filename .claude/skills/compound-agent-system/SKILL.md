@@ -37,6 +37,36 @@ Use shell-only tests for local CLI features. Browser recordings are unnecessary 
 4. For safety features, assert negative cases too: refused overwrites, refused paths outside workspace, malformed JSON, missing logs, or invalid arguments.
 5. Remove transient `.agents/events.jsonl` generated in the repository fixture before committing.
 
+## Commercial Acceptance Testing Pattern
+
+For final premium-production or release-candidate work, use shell-only testing and post one PR comment with the result summary.
+
+Run:
+
+```bash
+node --test plugins/compound-agent-system/assets/system-files/tests/commercial-acceptance.test.mjs
+node --test \
+  plugins/compound-agent-system/assets/system-files/tests/performance-scale.test.mjs \
+  plugins/compound-agent-system/assets/system-files/tests/release-readiness.test.mjs \
+  plugins/compound-agent-system/assets/system-files/tests/backward-compatibility.test.mjs \
+  plugins/compound-agent-system/assets/system-files/tests/commercial-acceptance.test.mjs
+for f in docs/premium-production/tasks/{29..32}-*.md; do
+  node plugins/compound-agent-system/assets/system-files/.agents/eval-loop.mjs "$f"
+done
+node plugins/compound-agent-system/scripts/validate-package.mjs
+node --test plugins/compound-agent-system/assets/system-files/tests/*.test.mjs
+```
+
+Expected release-candidate signals:
+
+- commercial acceptance: `tests 4`, `pass 4`, `fail 0`
+- focused final-wave suites: `tests 14`, `pass 14`, `fail 0`
+- eval-loop JSON for tasks 29–32: `"ok": true` and `"issues": []`
+- validator: `compound-agent-system package: valid`
+- full suite: all tests pass with `fail 0`
+
+Do not record the browser for this flow; the evidence is command output.
+
 ## Support Bundle Testing Pattern
 
 For `.agents/support-bundle.mjs`, test a temp workspace rather than the real repo ledger:
