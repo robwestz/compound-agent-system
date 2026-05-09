@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { spawnSync } from "node:child_process";
 
 import {
@@ -17,7 +17,8 @@ import {
 
 function tempWorkspace() {
   const dir = mkdtempSync(join(tmpdir(), "handoff-bridge-test-"));
-  const ledgerPath = join(dir, "TASKS.json");
+  const ledgerPath = join(dir, ".agents", "TASKS.json");
+  mkdirSync(dirname(ledgerPath), { recursive: true });
   const ledger = {
     version: "1",
     schema_url: ".agents/PROTOCOL.md",

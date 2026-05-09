@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 
 import {
   buildResumePrompt,
@@ -10,7 +10,8 @@ import {
 } from "../handoff-bridge.mjs";
 
 const dir = mkdtempSync(join(tmpdir(), "handoff-roundtrip-"));
-const ledgerPath = join(dir, "TASKS.json");
+const ledgerPath = join(dir, ".agents", "TASKS.json");
+mkdirSync(dirname(ledgerPath), { recursive: true });
 
 try {
   writeFileSync(

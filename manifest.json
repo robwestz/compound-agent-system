@@ -26,7 +26,7 @@
     },
     {
       "path": ".agents/activate.mjs",
-      "bytes": 4395
+      "bytes": 4485
     },
     {
       "path": ".agents/agent-activate.mjs",
@@ -314,7 +314,7 @@
     },
     {
       "path": "README.md",
-      "bytes": 20428
+      "bytes": 21300
     },
     {
       "path": "assemble.mjs",
@@ -338,7 +338,7 @@
     },
     {
       "path": "docs/development.md",
-      "bytes": 1930
+      "bytes": 2465
     },
     {
       "path": "docs/event-log.md",
@@ -374,7 +374,7 @@
     },
     {
       "path": "docs/plugin-size-budget.md",
-      "bytes": 2276
+      "bytes": 2639
     },
     {
       "path": "docs/release.md",
@@ -558,7 +558,7 @@
     },
     {
       "path": "tests/agents-task.test.mjs",
-      "bytes": 24914
+      "bytes": 25009
     },
     {
       "path": "tests/assemble.test.mjs",
@@ -590,7 +590,7 @@
     },
     {
       "path": "tests/docs-ia.test.mjs",
-      "bytes": 3390
+      "bytes": 5068
     },
     {
       "path": "tests/doctor-recovery.test.mjs",
@@ -606,7 +606,7 @@
     },
     {
       "path": "tests/first-session-output.test.mjs",
-      "bytes": 8050
+      "bytes": 8233
     },
     {
       "path": "tests/golden-path-e2e.test.mjs",
@@ -614,11 +614,11 @@
     },
     {
       "path": "tests/handoff-bridge.test.mjs",
-      "bytes": 14073
+      "bytes": 14148
     },
     {
       "path": "tests/handoff-roundtrip-sim.mjs",
-      "bytes": 3874
+      "bytes": 3958
     },
     {
       "path": "tests/hook-idempotency.test.mjs",
@@ -634,7 +634,7 @@
     },
     {
       "path": "tests/mode-policy.test.mjs",
-      "bytes": 4336
+      "bytes": 4409
     },
     {
       "path": "tests/node-runtime.test.mjs",
@@ -642,11 +642,11 @@
     },
     {
       "path": "tests/package-integrity.test.mjs",
-      "bytes": 5164
+      "bytes": 5859
     },
     {
       "path": "tests/performance-scale.test.mjs",
-      "bytes": 4529
+      "bytes": 4602
     },
     {
       "path": "tests/release-readiness.test.mjs",
@@ -658,7 +658,7 @@
     },
     {
       "path": "tests/session-readiness.test.mjs",
-      "bytes": 11506
+      "bytes": 11566
     },
     {
       "path": "tests/subagent-batch-playbook.test.mjs",

@@ -59,3 +59,9 @@ Before adding files, classify them as:
 - test-only
 
 Large, provider-specific, or workflow-specific additions default out of core.
+
+## Root housekeeping rule
+
+The repository root is reserved for operator entrypoints and package metadata only: `README.md`, `CHANGELOG.md`, `CLAUDE.md`, `UPGRADE_TRACKER.md`, `compound-agent-system-product-upgrade-spec.md`, bootstrap/install scripts, marketplace manifests, and `manifest.json`.
+
+Historical prompts, old handoffs, one-off notes, and superseded task briefs belong under `docs/archive/`. Scratch fixtures such as `file1.txt`, `file2.txt`, generated event logs, ZIPs, local settings, and worktrees must not be committed.

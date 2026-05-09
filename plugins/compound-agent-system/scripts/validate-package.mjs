@@ -177,6 +177,7 @@ if (existsSync(systemRoot)) {
     const rel = file.slice(systemRoot.length + 1).replaceAll("\\", "/");
     if (rel.includes(".claude/settings.local.json") || rel.includes(".claude/worktrees/")) forbidden.push(rel);
     if (rel.endsWith(".zip")) forbidden.push(rel);
+    if (rel === ".agents/events.jsonl") forbidden.push(rel);
   }
 }
 
