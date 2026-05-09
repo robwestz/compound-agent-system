@@ -123,6 +123,13 @@ const required = [
   "AGENT_HANDOFF.md"
 ];
 
+function isForbiddenBundledFile(rel) {
+  if (rel.includes(".claude/settings.local.json") || rel.includes(".claude/worktrees/")) return true;
+  if (rel.endsWith(".zip")) return true;
+  if (rel === ".agents/events.jsonl") return true;
+  return false;
+}
+
 function walk(dir) {
   const out = [];
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -165,6 +172,17 @@ if (existsSync(repoManifestPath)) {
     }
     process.exit(1);
   }
+  const manifestPaths = new Set((manifest.system_files || []).map((entry) => entry.path));
+  const untracked = walk(systemRoot)
+    .map((file) => file.slice(systemRoot.length + 1).replaceAll("\\", "/"))
+    .filter((rel) => !manifestPaths.has(rel) && !isForbiddenBundledFile(rel));
+  if (untracked.length) {
+    console.error("Package integrity failed: manifest.json is missing system_files entries.");
+    console.error("Why it matters: package reviewers cannot trust payload drift checks.");
+    console.error("Next action: regenerate manifest.json from the actual system-files payload.");
+    for (const rel of untracked) console.error(`- ${rel}`);
+    process.exit(1);
+  }
 }
 
 JSON.parse(readFileSync(join(pluginRoot, ".codex-plugin", "plugin.json"), "utf-8"));
@@ -175,9 +193,7 @@ const forbidden = [];
 if (existsSync(systemRoot)) {
   for (const file of walk(systemRoot)) {
     const rel = file.slice(systemRoot.length + 1).replaceAll("\\", "/");
-    if (rel.includes(".claude/settings.local.json") || rel.includes(".claude/worktrees/")) forbidden.push(rel);
-    if (rel.endsWith(".zip")) forbidden.push(rel);
-    if (rel === ".agents/events.jsonl") forbidden.push(rel);
+    if (isForbiddenBundledFile(rel)) forbidden.push(rel);
   }
 }
 

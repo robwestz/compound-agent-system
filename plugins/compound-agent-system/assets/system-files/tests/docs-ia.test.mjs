@@ -25,6 +25,14 @@ function read(rel) {
   return readFileSync(join(REPO_ROOT, rel), "utf-8");
 }
 
+function readSystem(rel) {
+  return readFileSync(join(SYSTEM_ROOT, rel), "utf-8");
+}
+
+function parseJson(rel) {
+  return JSON.parse(readSystem(rel));
+}
+
 function markdownLinks(markdown) {
   const links = [];
   const pattern = /\[[^\]]+\]\(([^)]+)\)/g;
@@ -129,4 +137,52 @@ test("premium positioning report records world-class quick wins with constraints
     assert.match(report, new RegExp(item));
   }
   assert.match(report, /better than corresponding Anthropic-native workflow usage/);
+});
+
+test("installed payload presents a clean Compound Agent System identity", () => {
+  const claude = readSystem("CLAUDE.md");
+  const readme = readSystem("README.md");
+  for (const doc of [claude, readme]) {
+    assert.match(doc, /Compound Agent System/);
+    assert.match(doc, /task ledger/);
+    assert.doesNotMatch(doc, /Local browser/i);
+    assert.doesNotMatch(doc, /skill-browser/i);
+    assert.doesNotMatch(doc, /assembler\.html/i);
+    assert.doesNotMatch(doc, /playground\.html/i);
+    assert.doesNotMatch(doc, /749 items/i);
+  }
+});
+
+test("bundled first-run ledger is empty and ready for a new repo", () => {
+  const ledger = parseJson(".agents/TASKS.json");
+  assert.equal(ledger.current, null);
+  assert.deepEqual(ledger.tasks, []);
+  assert.deepEqual(ledger.agents_active, []);
+  assert.deepEqual(ledger.agent_profiles, {});
+  assert.deepEqual(ledger.log, []);
+});
+
+test("installed payload omits stale package and generated-project artifacts", () => {
+  const absent = [
+    "package.json",
+    "package-lock.json",
+    "HANDOFF.md",
+    ".omc",
+    ".claude/ecc-tools.json",
+    ".claude/identity.json",
+    ".claude/homunculus",
+    ".agents/skills/SkiLLBuilDr",
+    ".claude/skills/SkiLLBuilDr",
+    ".claude/commands/add-new-workspace-or-prototype.md",
+    ".claude/commands/release-version-bump-and-changelog.md",
+    ".github/workflows/test.yml",
+    ".github/workflows/pages.yml",
+  ];
+  for (const rel of absent) {
+    assert.equal(existsSync(join(SYSTEM_ROOT, rel)), false, rel);
+  }
+  assert.doesNotMatch(read("README.md"), /curated `.omc`/);
+  assert.doesNotMatch(readSystem(".codex/AGENTS.md"), /SkiLLBuilDr/);
+  assert.equal(existsSync(join(SYSTEM_ROOT, ".agents", "skills", "compound-agent-system", "SKILL.md")), true);
+  assert.equal(existsSync(join(SYSTEM_ROOT, ".claude", "skills", "compound-agent-system", "SKILL.md")), true);
 });

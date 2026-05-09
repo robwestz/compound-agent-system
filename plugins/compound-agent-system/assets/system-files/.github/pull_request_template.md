@@ -4,21 +4,20 @@
 
 ## Type
 
-- [ ] `feat` — new feature or builder
+- [ ] `feat` — new harness feature
 - [ ] `fix` — bug fix
-- [ ] `refactor` — no behaviour change
+- [ ] `docs` — documentation only
 - [ ] `test` — tests only
-- [ ] `chore` — build, CI, deps, docs
+- [ ] `chore` — maintenance / release / packaging
 
-## Checklist
+## Verification
 
-- [ ] `node --test tests/*.test.mjs` — all tests green locally
-- [ ] `node build.mjs` — builds without error
-- [ ] No `data.json` / `data.js` / `dist/` committed (gitignored generated files)
-- [ ] No secrets, API keys, or absolute local paths in committed files
-- [ ] Commit messages follow Conventional Commits (`feat:`, `fix:`, `chore:` etc.)
-- [ ] UI changes tested in browser (Browse, Compose, Recipes, Playground, Assembler)
+- [ ] `node .agents/task.mjs status`
+- [ ] `node .agents/task.mjs doctor`
+- [ ] Task-specific DoD commands passed
+- [ ] No secrets, generated event logs, support bundles, or machine-local paths committed
+- [ ] Manual approvals recorded when required
 
-## Screenshots / demo
+## Notes
 
-<!-- UI changes: before/after screenshot or description of what to click to verify. -->
+<!-- Link readiness output, support-bundle path, or handoff checkpoint when relevant. -->

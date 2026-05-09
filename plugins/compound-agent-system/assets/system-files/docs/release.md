@@ -26,7 +26,7 @@ Minimum release checklist:
 
 - CI passes on Node 18, 20, and 22.
 - `node .agents/task.mjs doctor` reports PASS on a clean install.
-- The compatibility matrix matches `.github/workflows/test.yml`.
+- The compatibility matrix matches the package repository CI matrix and documented supported Node versions.
 - README and docs do not claim broader support than the matrix.
 - Legacy ledger migration still preserves user task state.
 - Deprecation messages include migration path and timeline.

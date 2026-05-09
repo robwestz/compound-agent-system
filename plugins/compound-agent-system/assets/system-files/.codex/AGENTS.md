@@ -1,27 +1,27 @@
-# ECC for Codex CLI
+# Codex baseline for Compound Agent System
 
-This supplements the root `AGENTS.md` with a repo-local ECC baseline.
+This repository has the Compound Agent System installed. Follow the same ledger and DoD workflow as Claude.
 
-## Repo Skill
+## Start
 
-- Repo-generated Codex skill: `.agents/skills/SkiLLBuilDr/SKILL.md`
-- Claude-facing companion skill: `.claude/skills/SkiLLBuilDr/SKILL.md`
-- Keep user-specific credentials and private MCPs in `~/.codex/config.toml`, not in this repo.
+```bash
+node .agents/task.mjs status
+node .agents/task.mjs doctor
+node .agents/agent-activate.mjs --id <agent-id> --role <role>
+```
 
-## MCP Baseline
+## Rules
 
-Treat `.codex/config.toml` as the default ECC-safe baseline for work in this repository.
-The generated baseline enables GitHub, Context7, Exa, Memory, Playwright, and Sequential Thinking.
+- Read `CLAUDE.md` and `.agents/PROTOCOL.md` before implementation work.
+- Open or resume a ledger task before state-changing edits.
+- Verify Definition of Done before marking work done.
+- Keep user-specific credentials and private MCPs outside the repository.
+- Do not commit support bundles, event logs, local settings, or generated artifacts.
 
-## Multi-Agent Support
+## Useful commands
 
-- Explorer: read-only evidence gathering
-- Reviewer: correctness, security, and regression review
-- Docs researcher: API and release-note verification
-
-## Workflow Files
-
-- `.claude/commands/add-new-workspace-or-prototype.md`
-- `.claude/commands/release-version-bump-and-changelog.md`
-
-Use these workflow files as reusable task scaffolds when the detected repository workflows recur.
+```bash
+node .agents/task.mjs open "<goal>" --dod "test:<command>" --skill compound-agent-system
+node .agents/session-readiness.mjs
+node handoff-bridge.mjs checkpoint --task <task-id> --from-agent <agent-id> --summary "<state>" --pending "<next>"
+```

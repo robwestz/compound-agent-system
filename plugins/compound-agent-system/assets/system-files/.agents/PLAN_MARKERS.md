@@ -42,11 +42,11 @@ phases:
     parent: null
 
   - id: phase-3.1
-    goal: "Wire CI to run E2E on PR"
+    goal: "Wire CI to run tests on PR"
     dod:
       - check: artifact
-        path: ".github/workflows/test.yml"
-        contains: "playwright"
+        path: ".github/workflows/ci.yml"
+        contains: "node --test"
     skills:
       - "github-ops"
     parent: "phase-3"

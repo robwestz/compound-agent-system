@@ -40,7 +40,7 @@ Every PR should state:
 ## Existing file classification
 
 - Core plugin: `scripts/*.mjs`, `.agents/*.mjs`, `bootstrap.mjs`, plugin manifests, system hook/config files.
-- Docs/playbook: `README.md`, `docs/**`, `AGENT_ONBOARDING.md`, `HANDOFF.md`, `FUTURE_WORK.md`, framework markdown.
+- Docs/playbook: `README.md`, `docs/**`, `AGENT_ONBOARDING.md`, `FUTURE_WORK.md`, framework markdown.
 - Test-only: `tests/**`, `fixtures/**`.
 - Optional skill: `.agents/skills/**`, `.claude/skills/**`, `skills/**`.
 - External workbench: documented contracts only; implementation belongs outside this plugin unless explicitly approved.

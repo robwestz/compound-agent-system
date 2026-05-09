@@ -24,9 +24,9 @@ A file or directory that must exist (and optionally match a content regex).
 
 ```yaml
 - check: artifact
-  path: "dist/skill-browser.html"
+  path: "docs/release.md"
   min_bytes: 100000          # optional
-  contains: "buildr.nu"      # optional substring or regex
+  contains: "Release gate"   # optional substring or regex
 ```
 
 Verified by: `task verify <id>` checks `existsSync(path)` and conditions. Records
