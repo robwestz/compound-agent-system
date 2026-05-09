@@ -4,6 +4,20 @@ This folder contains a Claude- and Codex-compatible plugin package plus a curate
 
 Do not build the API Alchemy Engine. It appears only as sanitized fixture material for idea-intake tests; this repository upgrades the plugin/harness.
 
+## Version and DoD status
+
+**Version:** `1.0.0`  
+**Status:** premium-production release candidate; the 32-task premium-production DoD catalog is implemented and merged.
+
+Release-candidate evidence:
+
+- Plugin manifests: `plugins/compound-agent-system/.claude-plugin/plugin.json` and `plugins/compound-agent-system/.codex-plugin/plugin.json` both declare `1.0.0`.
+- Premium roadmap: `docs/premium-production/TASK_EVIDENCE_MATRIX.md` marks tasks 01-32 as `DONE`.
+- Final gate: `docs/premium-production/FINAL_ACCEPTANCE_REPORT.md` records the release-candidate decision, scorecard, residual risks, and no-release triggers.
+- Required local verification:
+  - `node plugins/compound-agent-system/scripts/validate-package.mjs`
+  - `node --test plugins/compound-agent-system/assets/system-files/tests/*.test.mjs`
+
 ## Start here by intent
 
 | I want to... | Start here | Then use |
@@ -32,8 +46,9 @@ Do not build the API Alchemy Engine. It appears only as sanitized fixture materi
 | Performance limits | [`docs/performance-and-scale-limits.md`](docs/performance-and-scale-limits.md) | Large-ledger benchmarks, thresholds, and known limits. |
 | Marketplace readiness | [`docs/marketplace-release-readiness.md`](docs/marketplace-release-readiness.md) | Dry-run checklist, metadata review, rollback, and support notes. |
 | Backward compatibility | [`docs/backward-compatibility-contract.md`](docs/backward-compatibility-contract.md) | Stable, deprecated, and internal surfaces plus upgrade rules. |
-| Historical handoff | [`SESSION.md`](SESSION.md) | Legacy packaging-session notes; use current docs first. |
-| Historical prompt | [`upgrade_package_2.md`](upgrade_package_2.md) | Legacy upgrade prompt; use `UPGRADE_TRACKER.md` and task files for current status. |
+| Historical handoff | [`docs/archive/SESSION.md`](docs/archive/SESSION.md) | Legacy packaging-session notes; use current docs first. |
+| Historical prompt | [`docs/archive/upgrade_package_2.md`](docs/archive/upgrade_package_2.md) | Legacy upgrade prompt; use `UPGRADE_TRACKER.md` and task files for current status. |
+| Premium positioning | [`docs/premium-production/PREMIUM_POSITIONING_REPORT.md`](docs/premium-production/PREMIUM_POSITIONING_REPORT.md) | Why this is premium, what it is better at, and five near-term world-class upgrades. |
 
 ## Layout
 
@@ -51,7 +66,7 @@ Do not build the API Alchemy Engine. It appears only as sanitized fixture materi
 | `bootstrap.mjs` | Package-root shortcut for bootstrap |
 | `install-global-plugin.ps1` | Stages/registers the plugin for Codex, Claude, or both |
 | `claude-marketplace.json` | Local Claude marketplace template |
-| `SESSION.md` | Separate harness session notes and handoff prompt |
+| `docs/archive/` | Historical prompts and packaging notes kept out of the root entrypoint |
 
 ## Use
 
@@ -404,7 +419,7 @@ The generated plan is idea-derived: short, medium, and long idea fixtures should
 
 ## Premium production roadmap
 
-The premium-production hardening catalog lives in `docs/premium-production/`. It breaks the remaining commercial-readiness work into small task files with DoD, constraints, quality bar, dependencies, skill guidance, and implementer/evaluator feedback-loop expectations. Use that catalog before starting broad hardening work so the core plugin stays focused and optional workflows can remain skills, docs/playbooks, external workbench work, or test-only assets.
+The premium-production hardening catalog lives in `docs/premium-production/`. It is now fully implemented: tasks 01-32 are marked `DONE`, and the final commercial acceptance report classifies the package as a `1.0.0` release candidate. Future broad hardening work should still use this catalog style so the core plugin stays focused and optional workflows can remain skills, docs/playbooks, external workbench work, or test-only assets.
 
 For parallel premium waves, use `docs/subagent-batch-execution-playbook.md`. It defines which tasks can be batched, how branches/PRs/evidence are named, when to stop the batch, and how to validate task reports with the evaluator feedback-loop runner.
 

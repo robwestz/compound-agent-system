@@ -12,7 +12,7 @@ import { printFirstSessionWizard } from "./first-session-wizard.mjs";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..");
 const SETTINGS_PATH = join(REPO_ROOT, ".claude", "settings.json");
-const TASKS_PATH = join(__dirname, "TASKS.json");
+const TASKS_PATH = process.env.COMPOUND_TASKS_PATH || join(__dirname, "TASKS.json");
 
 const HOOK_MARKER = "compound-protocol";
 const HOOK_COMMANDS = {
@@ -52,6 +52,7 @@ function saveSettings(s) {
 
 function ensureTasksLedger() {
   if (existsSync(TASKS_PATH)) return false;
+  mkdirSync(dirname(TASKS_PATH), { recursive: true });
   writeFileSync(
     TASKS_PATH,
     JSON.stringify(

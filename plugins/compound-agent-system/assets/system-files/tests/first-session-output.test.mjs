@@ -54,7 +54,7 @@ function writeLedger(dir, ledger) {
 test("activate output uses first-session template", () => {
   const dir = mkdtempSync(join(tmpdir(), "compound-activate-"));
   try {
-    const r = spawnSync(process.execPath, [ACTIVATE], { cwd: dir, encoding: "utf-8", env: { ...process.env, COMPOUND_MODE: "warn" } });
+    const r = spawnSync(process.execPath, [ACTIVATE], { cwd: dir, encoding: "utf-8", env: { ...process.env, COMPOUND_MODE: "warn", COMPOUND_TASKS_PATH: join(dir, ".agents", "TASKS.json") } });
     assert.equal(r.status, 0, r.stderr);
     assertTemplate(r.stdout);
   } finally {
@@ -65,7 +65,7 @@ test("activate output uses first-session template", () => {
 test("activate wizard normalizes uppercase compliance mode", () => {
   const dir = mkdtempSync(join(tmpdir(), "compound-activate-mode-"));
   try {
-    const r = spawnSync(process.execPath, [ACTIVATE], { cwd: dir, encoding: "utf-8", env: { ...process.env, COMPOUND_MODE: "ENFORCE" } });
+    const r = spawnSync(process.execPath, [ACTIVATE], { cwd: dir, encoding: "utf-8", env: { ...process.env, COMPOUND_MODE: "ENFORCE", COMPOUND_TASKS_PATH: join(dir, ".agents", "TASKS.json") } });
     assert.equal(r.status, 0, r.stderr);
     assert.match(r.stdout, /Compliance level: ENFORCE/);
     assert.match(r.stdout, /System: installed; mode ENFORCE \(blocks unsafe changes\)\./);
@@ -79,7 +79,8 @@ test("activate wizard normalizes uppercase compliance mode", () => {
 test("agent activation output uses first-session template", () => {
   const dir = mkdtempSync(join(tmpdir(), "compound-agent-activate-"));
   try {
-    const r = spawnSync(process.execPath, [AGENT_ACTIVATE, "--id", "claude-opus-4.7", "--role", "planner"], { cwd: dir, encoding: "utf-8", env: { ...process.env, COMPOUND_TASKS_PATH: join(dir, "TASKS.json") } });
+    mkdirSync(join(dir, ".agents"), { recursive: true });
+    const r = spawnSync(process.execPath, [AGENT_ACTIVATE, "--id", "claude-opus-4.7", "--role", "planner"], { cwd: dir, encoding: "utf-8", env: { ...process.env, COMPOUND_TASKS_PATH: join(dir, ".agents", "TASKS.json") } });
     assert.equal(r.status, 0, r.stderr);
     assertTemplate(r.stdout);
   } finally {

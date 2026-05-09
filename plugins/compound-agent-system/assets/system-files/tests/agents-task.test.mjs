@@ -4,7 +4,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, writeFileSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, writeFileSync, readFileSync, rmSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -15,7 +15,8 @@ const CLI = join(REPO_ROOT, ".agents", "task.mjs");
 
 function freshLedger() {
   const dir = mkdtempSync(join(tmpdir(), "compound-test-"));
-  const ledger = join(dir, "TASKS.json");
+  const ledger = join(dir, ".agents", "TASKS.json");
+  mkdirSync(dirname(ledger), { recursive: true });
   writeFileSync(
     ledger,
     JSON.stringify(
@@ -612,10 +613,10 @@ test("session-start resets persisted grounding", () => {
   try {
     const first = run(ledger, ["ack", "claude-opus-4.7"], { COMPOUND_MODE: "enforce", COMPOUND_GROUNDED: "Repository: robwestz/compound-agent-system" });
     assert.equal(first.status, 0, first.stderr);
-    assert.equal(existsSync(join(dir, ".grounded")), true);
+    assert.equal(existsSync(join(dir, ".agents", ".grounded")), true);
     const start = run(ledger, ["hook", "session-start"], { COMPOUND_MODE: "enforce", COMPOUND_GROUNDED: "" });
     assert.equal(start.status, 0, start.stderr);
-    assert.equal(existsSync(join(dir, ".grounded")), false);
+    assert.equal(existsSync(join(dir, ".agents", ".grounded")), false);
     const second = run(ledger, ["ack", "codex-test"], { COMPOUND_MODE: "enforce", COMPOUND_GROUNDED: "" });
     assert.equal(second.status, 2);
     assert.match(second.stderr, /Fact-Forcing Gate/);

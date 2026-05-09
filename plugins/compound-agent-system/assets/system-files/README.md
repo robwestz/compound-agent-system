@@ -4,6 +4,20 @@ This folder contains a Claude- and Codex-compatible plugin package plus a curate
 
 Do not build the API Alchemy Engine. It appears only as sanitized fixture material for idea-intake tests; this repository upgrades the plugin/harness.
 
+## Version and DoD status
+
+**Version:** `1.0.0`  
+**Status:** premium-production release candidate; the 32-task premium-production DoD catalog is implemented and merged in the package repository.
+
+Release-candidate evidence in the package repository:
+
+- Plugin manifests: `plugins/compound-agent-system/.claude-plugin/plugin.json` and `plugins/compound-agent-system/.codex-plugin/plugin.json` both declare `1.0.0`.
+- Premium roadmap: `docs/premium-production/TASK_EVIDENCE_MATRIX.md` marks tasks 01-32 as `DONE`.
+- Final gate: `docs/premium-production/FINAL_ACCEPTANCE_REPORT.md` records the release-candidate decision, scorecard, residual risks, and no-release triggers.
+- Required local verification:
+  - `node plugins/compound-agent-system/scripts/validate-package.mjs`
+  - `node --test plugins/compound-agent-system/assets/system-files/tests/*.test.mjs`
+
 ## Start here by intent
 
 | I want to... | Start here | Then use |
@@ -405,7 +419,7 @@ The generated plan is idea-derived: short, medium, and long idea fixtures should
 
 ## Premium production roadmap
 
-The premium-production hardening catalog lives in `docs/premium-production/`. It breaks the remaining commercial-readiness work into small task files with DoD, constraints, quality bar, dependencies, skill guidance, and implementer/evaluator feedback-loop expectations. Use that catalog before starting broad hardening work so the core plugin stays focused and optional workflows can remain skills, docs/playbooks, external workbench work, or test-only assets.
+The premium-production hardening catalog lives in the package repository under `docs/premium-production/`. It is fully implemented for version `1.0.0`: tasks 01-32 are marked `DONE`, and the final commercial acceptance report classifies the package as a release candidate. Future broad hardening work should still use this catalog style so the core plugin stays focused and optional workflows can remain skills, docs/playbooks, external workbench work, or test-only assets.
 
 ## Fact-Forcing Gate
 

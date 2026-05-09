@@ -79,7 +79,8 @@ function makeLedger(dir, overrides = {}) {
     ],
     ...overrides,
   };
-  const path = join(dir, "TASKS.json");
+  const path = join(dir, ".agents", "TASKS.json");
+  mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, JSON.stringify(ledger, null, 2));
   return path;
 }

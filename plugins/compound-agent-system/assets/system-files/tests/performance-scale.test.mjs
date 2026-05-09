@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -45,7 +45,8 @@ function run(command, args, options = {}) {
 
 function workspace() {
   const dir = mkdtempSync(join(tmpdir(), "compound-scale-"));
-  const ledger = join(dir, "TASKS.json");
+  const ledger = join(dir, ".agents", "TASKS.json");
+  mkdirSync(dirname(ledger), { recursive: true });
   writeFileSync(ledger, JSON.stringify(largeLedger(), null, 2) + "\n");
   return { dir, ledger };
 }

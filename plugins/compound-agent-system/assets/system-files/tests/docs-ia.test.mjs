@@ -87,7 +87,7 @@ test("API Alchemy fixture-only warning is preserved in IA entrypoints", () => {
 
 test("relative markdown links in IA docs resolve", () => {
   for (const root of [REPO_ROOT, SYSTEM_ROOT]) {
-    for (const rel of ["README.md", ...intentDocs]) {
+    for (const rel of ["README.md", ...intentDocs, "docs/premium-production/PREMIUM_POSITIONING_REPORT.md"]) {
       const file = join(root, rel);
       if (!existsSync(file)) continue;
       const baseDir = dirname(file);
@@ -97,4 +97,36 @@ test("relative markdown links in IA docs resolve", () => {
       }
     }
   }
+});
+
+test("root housekeeping keeps historical prompts archived and scratch files absent", () => {
+  const readme = read("README.md");
+  assert.match(readme, /Version:\*\* `1\.0\.0`/);
+  assert.match(readme, /premium-production release candidate/);
+  assert.match(readme, /docs\/archive\/SESSION\.md/);
+  assert.match(readme, /docs\/archive\/upgrade_package_2\.md/);
+  assert.equal(existsSync(join(REPO_ROOT, "SESSION.md")), false);
+  assert.equal(existsSync(join(REPO_ROOT, "upgrade_package_2.md")), false);
+  assert.equal(existsSync(join(REPO_ROOT, "file1.txt")), false);
+  assert.equal(existsSync(join(REPO_ROOT, "file2.txt")), false);
+  assert.equal(existsSync(join(REPO_ROOT, "docs", "archive", "SESSION.md")), true);
+  assert.equal(existsSync(join(REPO_ROOT, "docs", "archive", "upgrade_package_2.md")), true);
+});
+
+test("premium positioning report records world-class quick wins with constraints", () => {
+  const report = read("docs/premium-production/PREMIUM_POSITIONING_REPORT.md");
+  assert.match(report, /Why this is premium/);
+  assert.match(report, /Why this is better than ordinary agent harnesses/);
+  assert.match(report, /What it may be uniquely better at/);
+  assert.match(report, /Five short world-class follow-up upgrades/);
+  for (const item of [
+    "Hook compatibility conformance harness",
+    "Proof-carrying task receipts",
+    "Diff-risk approval classifier",
+    "Unattended-session black-box simulator",
+    "Competitive capability scorecard as code",
+  ]) {
+    assert.match(report, new RegExp(item));
+  }
+  assert.match(report, /better than corresponding Anthropic-native workflow usage/);
 });

@@ -45,6 +45,10 @@ Every PR should state:
 - Optional skill: `.agents/skills/**`, `.claude/skills/**`, `skills/**`.
 - External workbench: documented contracts only; implementation belongs outside this plugin unless explicitly approved.
 
+## Archive and root hygiene
+
+Keep the repository root limited to package entrypoints and marketplace metadata. Move historical prompts, superseded handoffs, and one-off operator notes into `docs/archive/` when they are still useful; delete scratch files that have no product or evidence value. Never bundle generated runtime logs such as `.agents/events.jsonl`.
+
 ## Closing
 
 If a proposed addition is large, provider-specific, or only useful for one workflow, default it out of core and into an optional skill, docs/playbook, external workbench, or test-only fixture.

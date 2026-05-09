@@ -86,6 +86,20 @@ test("package validator fails on stale manifest byte metadata", () => {
   }
 });
 
+test("package validator rejects generated event logs in bundled payload", () => {
+  const dir = cloneRepo();
+  try {
+    const eventLog = join(dir, "plugins", "compound-agent-system", "assets", "system-files", ".agents", "events.jsonl");
+    writeFileSync(eventLog, JSON.stringify({ event: "runtime-only" }) + "\n");
+    const r = spawnSync(process.execPath, [join(dir, "plugins", "compound-agent-system", "scripts", "validate-package.mjs")], { cwd: dir, encoding: "utf-8" });
+    assert.notEqual(r.status, 0);
+    assert.match(r.stderr, /Forbidden bundled files/);
+    assert.match(r.stderr, /\.agents\/events\.jsonl/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("committed fixtures contain no real-looking secrets", () => {
   const r = spawnSync(process.execPath, [join(SYSTEM_ROOT, ".agents", "task.mjs"), "doctor"], {
     cwd: REPO_ROOT,
