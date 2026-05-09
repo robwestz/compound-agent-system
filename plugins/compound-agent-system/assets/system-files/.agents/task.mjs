@@ -16,6 +16,7 @@ const REPO_ROOT = resolve(__dirname, "..");
 const TASKS_PATH = process.env.COMPOUND_TASKS_PATH || join(__dirname, "TASKS.json");
 const CURRENT_LEDGER_VERSION = "1";
 const SUPPORTED_LEDGER_VERSIONS = new Set(["1"]);
+const LEDGER_V0_DEPRECATION = "Deprecated ledger schema v0 is migration-only; run node .agents/task.mjs migrate --apply. Support will not be removed before 2.0.0.";
 const MODE_POLICY = {
   observe: {
     blocks: "nothing",
@@ -333,7 +334,10 @@ function cmdStatus() {
   console.log(`  PowerShell switch: ${compliance.switch_powershell}`);
   console.log(`  recommended switch point: ${compliance.recommended}`);
   console.log(`Ledger schema: ${version.version} (${version.status})`);
-  if (version.status === "migration_needed") console.log("  next: node .agents/task.mjs migrate --apply");
+  if (version.status === "migration_needed") {
+    console.log(`  deprecated: ${LEDGER_V0_DEPRECATION}`);
+    console.log("  next: node .agents/task.mjs migrate --apply");
+  }
   if (blocked > 0) {
     console.log(c("yellow", "Blocked tasks:"));
     for (const t of ledger.tasks.filter((t) => t.state === "blocked")) {
@@ -544,7 +548,7 @@ function doctorReport() {
         : version.status === "current"
           ? "No ledger action required."
           : version.status === "migration_needed"
-            ? "Run node .agents/task.mjs migrate --apply to write a backed-up v1 ledger."
+            ? `${LEDGER_V0_DEPRECATION} A backup is written before migration.`
             : "Downgrade or export this ledger with a supported Compound Agent System version.",
     };
   }
@@ -574,6 +578,7 @@ function cmdMigrate(args) {
   }
   const migrated = normalizeLedgerV1(ledger);
   console.log(`Ledger migration: ${version.version} -> ${CURRENT_LEDGER_VERSION}`);
+  console.log(LEDGER_V0_DEPRECATION);
   if (!args.apply) {
     console.log("Dry-run. Re-run with --apply to write a backed-up migration.");
     return;

@@ -12,6 +12,10 @@ node .agents/session-readiness.mjs
 
 Use `status` for ledger state, `doctor` for environment and safety diagnostics, and `session-readiness` before unattended or multi-hour execution.
 
+## Performance limits
+
+For large ledgers, run the deterministic benchmark in [Performance and Scale Limits](performance-and-scale-limits.md). The documented warning threshold for `status` and readiness is 2,500 ms with a 1,000-task ledger.
+
 ## Task workflow
 
 ```bash

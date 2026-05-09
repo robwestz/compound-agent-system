@@ -74,3 +74,5 @@ Rollback and uninstall refuse manifest paths outside the target repo boundary.
 ## After install
 
 Continue with [First run](first-run.md).
+
+For upgrades of existing installations, review [Backward Compatibility Contract](backward-compatibility-contract.md). Existing ledgers must be preserved; legacy ledgers should run `node .agents/task.mjs migrate --apply`.

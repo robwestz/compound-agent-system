@@ -14,7 +14,8 @@ Do not build the API Alchemy Engine. It appears only as sanitized fixture materi
 | Operate an installed workspace | [`docs/operations.md`](docs/operations.md) | [`docs/troubleshooting.md`](docs/troubleshooting.md) |
 | Debug a failure | [`docs/troubleshooting.md`](docs/troubleshooting.md) | [`docs/operations.md`](docs/operations.md) |
 | Contribute safely | [`docs/development.md`](docs/development.md) | [`docs/premium-production/README.md`](docs/premium-production/README.md) |
-| Prepare a release | [`docs/release.md`](docs/release.md) | [`docs/compatibility-matrix.md`](docs/compatibility-matrix.md) |
+| Prepare a release | [`docs/release.md`](docs/release.md) | [`docs/marketplace-release-readiness.md`](docs/marketplace-release-readiness.md) |
+| Review performance or compatibility limits | [`docs/performance-and-scale-limits.md`](docs/performance-and-scale-limits.md) | [`docs/backward-compatibility-contract.md`](docs/backward-compatibility-contract.md) |
 | Review security or optional AI behavior | [`docs/security-boundary-model.md`](docs/security-boundary-model.md) | [`docs/secrets-and-ai-policy.md`](docs/secrets-and-ai-policy.md) |
 
 ## Documentation map
@@ -28,6 +29,9 @@ Do not build the API Alchemy Engine. It appears only as sanitized fixture materi
 | Troubleshooting | [`docs/troubleshooting.md`](docs/troubleshooting.md) | Error-to-command recovery table using doctor/readiness/support-bundle. |
 | Development | [`docs/development.md`](docs/development.md) | Local verification, docs mirroring, manifest maintenance, no-runtime-deps rule. |
 | Release | [`docs/release.md`](docs/release.md) | Release gates, compatibility, package validation, marketplace handoff. |
+| Performance limits | [`docs/performance-and-scale-limits.md`](docs/performance-and-scale-limits.md) | Large-ledger benchmarks, thresholds, and known limits. |
+| Marketplace readiness | [`docs/marketplace-release-readiness.md`](docs/marketplace-release-readiness.md) | Dry-run checklist, metadata review, rollback, and support notes. |
+| Backward compatibility | [`docs/backward-compatibility-contract.md`](docs/backward-compatibility-contract.md) | Stable, deprecated, and internal surfaces plus upgrade rules. |
 | Historical handoff | [`SESSION.md`](SESSION.md) | Legacy packaging-session notes; use current docs first. |
 | Historical prompt | [`upgrade_package_2.md`](upgrade_package_2.md) | Legacy upgrade prompt; use `UPGRADE_TRACKER.md` and task files for current status. |
 

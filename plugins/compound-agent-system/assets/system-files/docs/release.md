@@ -13,9 +13,14 @@ node --test plugins/compound-agent-system/assets/system-files/tests/*.test.mjs
 
 Both must pass. The validator rejects missing required files, forbidden bundled artifacts, and stale `manifest.json` byte metadata.
 
+## Marketplace release readiness
+
+Before packaging for Claude/Codex handoff, run the dry-run checklist in [Marketplace Release Readiness](marketplace-release-readiness.md). It covers versioning, changelog, metadata scope, validation, package integrity, rollback, and support notes. This repository does not publish automatically.
+
 ## Compatibility gate
 
 Review [Compatibility Matrix](compatibility-matrix.md) before release. Do not claim support beyond tested environments.
+Review [Backward Compatibility Contract](backward-compatibility-contract.md) before release. Public command, ledger, generated-artifact, or schema changes require migration notes and deprecation messaging.
 
 Minimum release checklist:
 
@@ -23,6 +28,8 @@ Minimum release checklist:
 - `node .agents/task.mjs doctor` reports PASS on a clean install.
 - The compatibility matrix matches `.github/workflows/test.yml`.
 - README and docs do not claim broader support than the matrix.
+- Legacy ledger migration still preserves user task state.
+- Deprecation messages include migration path and timeline.
 
 ## Package contents
 
