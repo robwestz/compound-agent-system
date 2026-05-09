@@ -6,11 +6,11 @@
     },
     {
       "path": ".agents/DOD.md",
-      "bytes": 4328
+      "bytes": 4320
     },
     {
       "path": ".agents/PLAN_MARKERS.md",
-      "bytes": 4797
+      "bytes": 4798
     },
     {
       "path": ".agents/PROTOCOL.md",
@@ -22,7 +22,7 @@
     },
     {
       "path": ".agents/TASKS.json",
-      "bytes": 28073
+      "bytes": 154
     },
     {
       "path": ".agents/activate.mjs",
@@ -69,12 +69,8 @@
       "bytes": 21061
     },
     {
-      "path": ".agents/skills/SkiLLBuilDr/SKILL.md",
-      "bytes": 3651
-    },
-    {
-      "path": ".agents/skills/SkiLLBuilDr/agents/openai.yaml",
-      "bytes": 277
+      "path": ".agents/skills/compound-agent-system/SKILL.md",
+      "bytes": 1931
     },
     {
       "path": ".agents/support-bundle.mjs",
@@ -113,36 +109,16 @@
       "bytes": 467
     },
     {
-      "path": ".claude/commands/add-new-workspace-or-prototype.md",
-      "bytes": 1558
-    },
-    {
-      "path": ".claude/commands/release-version-bump-and-changelog.md",
-      "bytes": 1107
-    },
-    {
-      "path": ".claude/ecc-tools.json",
-      "bytes": 6775
-    },
-    {
-      "path": ".claude/homunculus/instincts/inherited/SkiLLBuilDr-instincts.yaml",
-      "bytes": 8941
-    },
-    {
-      "path": ".claude/identity.json",
-      "bytes": 286
-    },
-    {
       "path": ".claude/settings.json",
       "bytes": 752
     },
     {
-      "path": ".claude/skills/SkiLLBuilDr/SKILL.md",
-      "bytes": 3651
+      "path": ".claude/skills/agent-onboarding/SKILL.md",
+      "bytes": 1479
     },
     {
-      "path": ".claude/skills/agent-onboarding/SKILL.md",
-      "bytes": 4111
+      "path": ".claude/skills/compound-agent-system/SKILL.md",
+      "bytes": 1931
     },
     {
       "path": ".claude/skills/skill-development/SKILL.md",
@@ -150,7 +126,7 @@
     },
     {
       "path": ".codex/AGENTS.md",
-      "bytes": 955
+      "bytes": 924
     },
     {
       "path": ".codex/agents/docs-researcher.toml",
@@ -166,7 +142,7 @@
     },
     {
       "path": ".codex/config.toml",
-      "bytes": 1247
+      "bytes": 836
     },
     {
       "path": ".github/CODEOWNERS",
@@ -174,7 +150,7 @@
     },
     {
       "path": ".github/pull_request_template.md",
-      "bytes": 831
+      "bytes": 643
     },
     {
       "path": ".github/workflows/claude-code-review.yml",
@@ -189,132 +165,20 @@
       "bytes": 1027
     },
     {
-      "path": ".github/workflows/pages.yml",
-      "bytes": 1543
-    },
-    {
-      "path": ".github/workflows/test.yml",
-      "bytes": 4285
-    },
-    {
-      "path": ".omc/project-memory.json",
-      "bytes": 11104
-    },
-    {
-      "path": ".omc/sessions/be1ac5a5-6727-4659-b949-8fd698201a07.json",
-      "bytes": 190
-    },
-    {
-      "path": ".omc/sessions/c30c523b-ad22-46fa-9972-de1af8cef839.json",
-      "bytes": 190
-    },
-    {
-      "path": ".omc/sessions/d3e2e60b-a203-4b7c-bb2c-c0e3b0e2452d.json",
-      "bytes": 190
-    },
-    {
-      "path": ".omc/state/agent-replay-c732aa52-9f4d-4034-bbe9-5d4e8aa7c29f.jsonl",
-      "bytes": 85
-    },
-    {
-      "path": ".omc/state/agent-replay-d3e2e60b-a203-4b7c-bb2c-c0e3b0e2452d.jsonl",
-      "bytes": 3348
-    },
-    {
-      "path": ".omc/state/checkpoints/checkpoint-2026-04-25T13-41-29-346Z.json",
-      "bytes": 285
-    },
-    {
-      "path": ".omc/state/checkpoints/checkpoint-2026-04-26T20-55-20-139Z.json",
-      "bytes": 285
-    },
-    {
-      "path": ".omc/state/checkpoints/checkpoint-2026-04-28T18-31-03-138Z.json",
-      "bytes": 285
-    },
-    {
-      "path": ".omc/state/checkpoints/claude-to-codex-roundtrip-proof.RESUME.md",
-      "bytes": 3140
-    },
-    {
-      "path": ".omc/state/checkpoints/claude-to-codex-roundtrip-proof.handoff.json",
-      "bytes": 4316
-    },
-    {
-      "path": ".omc/state/checkpoints/codex-ack-claude-roundtrip-v2.RESUME.md",
-      "bytes": 2251
-    },
-    {
-      "path": ".omc/state/checkpoints/codex-ack-claude-roundtrip-v2.handoff.json",
-      "bytes": 3754
-    },
-    {
-      "path": ".omc/state/checkpoints/codex-ack-claude-roundtrip.handoff.json",
-      "bytes": 3566
-    },
-    {
-      "path": ".omc/state/checkpoints/codex-bridge-cleanup-v3.RESUME.md",
-      "bytes": 2014
-    },
-    {
-      "path": ".omc/state/checkpoints/codex-bridge-cleanup-v3.handoff.json",
-      "bytes": 3556
-    },
-    {
-      "path": ".omc/state/checkpoints/codex-phase6-manual-gates-v4.RESUME.md",
-      "bytes": 1853
-    },
-    {
-      "path": ".omc/state/checkpoints/codex-phase6-manual-gates-v4.handoff.json",
-      "bytes": 3112
-    },
-    {
-      "path": ".omc/state/checkpoints/codex-to-claude-live-v2.RESUME.md",
-      "bytes": 1841
-    },
-    {
-      "path": ".omc/state/checkpoints/codex-to-claude-live-v2.handoff.json",
-      "bytes": 3023
-    },
-    {
-      "path": ".omc/state/checkpoints/codex-to-claude-live.RESUME.md",
-      "bytes": 1444
-    },
-    {
-      "path": ".omc/state/checkpoints/codex-to-claude-live.handoff.json",
-      "bytes": 2561
-    },
-    {
-      "path": ".omc/state/last-tool-error.json",
-      "bytes": 507
-    },
-    {
-      "path": ".omc/state/mission-state.json",
-      "bytes": 12347
-    },
-    {
-      "path": ".omc/state/subagent-tracking.json",
-      "bytes": 952
-    },
-    {
       "path": "AGENT_ONBOARDING.md",
-      "bytes": 10102
+      "bytes": 2305
     },
     {
       "path": "CLAUDE.md",
-      "bytes": 4840
+      "bytes": 3574
     },
     {
       "path": "FUTURE_WORK.md",
-      "bytes": 12306
-    },
-    {
-      "path": "HANDOFF.md",
-      "bytes": 20394
+      "bytes": 1119
     },
     {
       "path": "README.md",
-      "bytes": 21300
+      "bytes": 4327
     },
     {
       "path": "assemble.mjs",
@@ -330,7 +194,7 @@
     },
     {
       "path": "docs/compatibility-matrix.md",
-      "bytes": 6044
+      "bytes": 6077
     },
     {
       "path": "docs/concepts.md",
@@ -374,11 +238,11 @@
     },
     {
       "path": "docs/plugin-size-budget.md",
-      "bytes": 2639
+      "bytes": 2625
     },
     {
       "path": "docs/release.md",
-      "bytes": 2243
+      "bytes": 2286
     },
     {
       "path": "docs/secrets-and-ai-policy.md",
@@ -506,7 +370,7 @@
     },
     {
       "path": "frameworks/FRAMEWORKS.md",
-      "bytes": 65
+      "bytes": 806
     },
     {
       "path": "frameworks/PROTOCOL.md",
@@ -535,14 +399,6 @@
     {
       "path": "llm-client.mjs",
       "bytes": 244
-    },
-    {
-      "path": "package-lock.json",
-      "bytes": 2371
-    },
-    {
-      "path": "package.json",
-      "bytes": 1395
     },
     {
       "path": "schemas/event-log.v1.json",
@@ -586,11 +442,11 @@
     },
     {
       "path": "tests/compatibility-matrix.test.mjs",
-      "bytes": 5817
+      "bytes": 5170
     },
     {
       "path": "tests/docs-ia.test.mjs",
-      "bytes": 5068
+      "bytes": 7082
     },
     {
       "path": "tests/doctor-recovery.test.mjs",
@@ -642,7 +498,7 @@
     },
     {
       "path": "tests/package-integrity.test.mjs",
-      "bytes": 5859
+      "bytes": 6673
     },
     {
       "path": "tests/performance-scale.test.mjs",

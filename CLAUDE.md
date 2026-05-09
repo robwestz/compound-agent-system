@@ -21,7 +21,6 @@ repo root/
       ├─ .agents/
       ├─ .claude/
       ├─ .codex/
-      ├─ .omc/
       ├─ fixtures/
       └─ tests/
 ```

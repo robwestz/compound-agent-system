@@ -1,100 +1,105 @@
-# CLAUDE.md — session entrypoint
+# CLAUDE.md — Compound Agent System session entrypoint
 
-> Claude Code reads this file at the start of every session in this repo.
-> Read it fully before any work.
-
----
-
-## STOP — onboarding required
-
-**You may not write code, run tests, commit, or push until you have completed
-[`AGENT_ONBOARDING.md`](./AGENT_ONBOARDING.md) and signed Gate 8.**
-
-The 8 onboarding gates take ~5 minutes. The cost of skipping them is much
-higher than the time saved. New sessions that ignore this routinely repeat
-mistakes that earlier sessions already paid for.
-
-**Compound Protocol is active in this repo.** Read [`.agents/PROTOCOL.md`](./.agents/PROTOCOL.md)
-before any work. Every unit of work is a tracked task with a verified Definition of Done;
-the harness lives in `.agents/` and is portable to other projects.
+> Claude Code reads this file at the start of every session in this repository.
+> Read it before making changes.
 
 ---
 
-## What this project is
+## What this repository has installed
 
-Local browser, CLI, and assembly toolchain for Claude Code skills/commands
-across all installed plugins (749 items today). Two surfaces:
+This repository uses the **Compound Agent System** workspace harness. The harness is local-only and zero-runtime-dependency: it adds a task ledger, Definition of Done checks, GAP SCAN / CONTEXT REFRESH / COMPOUND REGISTER routines, handoff checkpoints, readiness checks, and Claude/Codex hook configuration.
 
-- **`assembler.html`** — browser UI for assembling workspace packages
-- **`assemble.mjs`** — headless CLI equivalent (the `skill-browser-assemble` npm bin)
-
-Both produce ZIP packages whose `KICKOFF.md` is an executable contract — not
-a checklist — with mandatory Phase 0 Preflight (per `frameworks/COMPOUND.md`),
-Compound Mechanisms, Quality Gate, and skill-first fallback baked in.
-
-The bigger goal: **autonomous multi-hour agent execution without human in the
-loop.** Most of the infrastructure is in place. What's left is documented in
-[`FUTURE_WORK.md`](./FUTURE_WORK.md).
+The harness lives in `.agents/` and is operated from the target repository root.
 
 ---
 
-## The non-negotiable contracts (read these in order)
+## Start-of-session checklist
 
-1. [`.agents/PROTOCOL.md`](./.agents/PROTOCOL.md) — Compound Protocol activation: task ledger, DoD verification, skill-select, plan-markers (governs ALL agents in this repo)
-2. [`AGENT_ONBOARDING.md`](./AGENT_ONBOARDING.md) — your session-level contract (8 gates, push/commit routine, hard constraints)
-3. [`.agents/COMPOUND.md`](./.agents/COMPOUND.md) — the 3-mechanism overlay (REGISTER / GAP SCAN / CONTEXT REFRESH) referenced by Protocol
-4. [`frameworks/QUALITY_GATE.md`](./frameworks/QUALITY_GATE.md) — your per-deliverable review (5 dimensions, cross-model adversarial)
-5. [`.claude/skills/skill-development/SKILL.md`](./.claude/skills/skill-development/SKILL.md) — how to handle a no-fit (the only sanctioned escape valve)
+Before editing files or running non-trivial shell commands:
+
+1. Read `.agents/PROTOCOL.md`.
+2. Read `AGENT_ONBOARDING.md`.
+3. Check local health:
+
+   ```bash
+   node --version
+   node .agents/task.mjs status
+   node .agents/task.mjs doctor
+   git status --short --branch
+   ```
+
+4. Sign in to the ledger:
+
+   ```bash
+   node .agents/agent-activate.mjs --id <agent-id> --role <role>
+   ```
+
+5. Work only from an explicit ledger task:
+
+   ```bash
+   node .agents/task.mjs open "<goal>" --dod "manual:<acceptance gate>" --skill compound-agent-system
+   ```
+
+If the user is only asking a read-only question, answer it without opening a task. If the question becomes implementation work, open a task first.
 
 ---
 
-## Project map
+## Core commands
 
-| What | Where |
+| Intent | Command |
 |---|---|
-| CLI entrypoints | `assemble.mjs`, `cli.mjs`, `intent.mjs`, `query.mjs`, `mcp-server.mjs`, `launch.mjs` |
-| Browser UIs | `index.html`, `assembler.html`, `playground.html`, `landing.html` |
-| Catalog build | `build.mjs` → `data.json` (gitignored) or `data.public.js` (committed snapshot) |
-| Bundling | `bundle.mjs` → `dist/*.html` (gitignored) |
-| Reusable lib | `kickoff-template.mjs`, `zip-builder.mjs`, `llm-client.mjs`, `hash-router.js` |
-| Tests | `tests/*.test.mjs` (158 tests, run via `node --test tests/*.test.mjs`) |
-| E2E | `tests/e2e/*.spec.js` (Playwright, run via `npx playwright test`) |
-| Frameworks | `frameworks/` (7 imported reference specs + index) |
-| Roadmap | `FUTURE_WORK.md` (8 deferred components) |
-| Scenario factory | `factory/v1/` (Codex-built blind-eval gate, 4 scenarios + twins + leak-scan) |
-| Project memory | `.omc/project-memory.json`, `memory/` |
+| Show current task state | `node .agents/task.mjs status` |
+| Open a tracked task | `node .agents/task.mjs open "<goal>" --dod "test:<command>"` |
+| Verify DoD checks | `node .agents/task.mjs verify <task-id>` |
+| Mark task done | `node .agents/task.mjs done <task-id>` |
+| Generate diagnostics | `node .agents/task.mjs doctor` |
+| Export support bundle | `node .agents/support-bundle.mjs` |
+| Check unattended readiness | `node .agents/session-readiness.mjs` |
+| Create checkpoint | `node handoff-bridge.mjs checkpoint --task <id> --from-agent <agent> --summary "<summary>" --pending "<next>"` |
+
+PowerShell forms use backslashes, for example `node .agents\task.mjs status`.
 
 ---
 
-## Conventions worth knowing
+## Non-negotiable rules
 
-- **Zero runtime dependencies.** Dev deps only. Adding to `dependencies` requires operator approval.
-- **Tier system:** `mvp` / `production` / `cutting-edge` controls Quality Gate threshold. Default for `assemble.mjs` is `production`.
-- **Shared LLM key:** `assembler-llm-config-v1` localStorage entry — set once, used by Assembler, Browser, and Playground.
-- **CLI ranking:** local IDF always; `--ai` opt-in for Groq/OpenRouter causal rerank when `GROQ_API_KEY` (or `OPENROUTER_API_KEY`) is set.
-- **No commits without tests green.** No exceptions without operator approval.
-- **No push to origin/main without operator approval.** Commit locally, surface unpushed commits in your status report.
+- Do not skip `.agents/PROTOCOL.md` or `AGENT_ONBOARDING.md`.
+- Do not edit without an in-progress task unless the work is strictly read-only.
+- Do not mark work done until every DoD item is actively verified.
+- Do not hide blockers; every blocker needs an unlock path.
+- Do not add runtime dependencies to the harness without explicit approval.
+- Do not commit secrets, generated event logs, local settings, support bundles, or machine-local paths.
 
 ---
 
-## How to confirm you're ready
+## What this is not
+
+This installed workspace is not the package repository that builds or publishes the Compound Agent System plugin. Package-maintenance commands such as:
 
 ```bash
-node --version              # ≥ 18
-node --test tests/*.test.mjs # fail 0
-git status                  # clean or known-dirty
-ls data.json data.public.js # at least one
+node plugins/compound-agent-system/scripts/validate-package.mjs
+node --test plugins/compound-agent-system/assets/system-files/tests/*.test.mjs
 ```
 
-Then read `AGENT_ONBOARDING.md`, sign Gate 8, and proceed to your task's
-KICKOFF.md (Phase 0 lives there).
+belong in the package repository, not in a normal target repository after installation.
+
+Do not build the API Alchemy Engine. It appears only as sanitized fixture material in the package repository.
 
 ---
 
-## Communication norms with the operator (Robin)
+## First useful flow
 
-- Be concise. Surface decisions, not deliberation.
-- Ask for confirmation on irreversible actions (push, delete, force).
-- Report unexpected state (unfamiliar files, branches, dirty trees) before acting on it.
-- When you discover a bug in earlier work, name it and propose the fix — do not silently work around it.
-- When tired or near context-limit, say so explicitly so the operator can restart you fresh rather than getting degraded output.
+```bash
+node .agents/agent-activate.mjs --id <agent-id> --role planner
+printf '%s\n' "<raw project idea>" > idea.md
+node .agents/idea-intake.mjs --input idea.md --apply
+node .agents/check-planning-quality.mjs phase-0/PHASE_PLAN.md phase-0/GAP_SCAN.md
+node .agents/task.mjs import phase-0/PHASE_PLAN.md --apply
+node .agents/session-readiness.mjs
+```
+
+Switch to enforce mode only after a first smoke test passes:
+
+```bash
+export COMPOUND_MODE=enforce
+```

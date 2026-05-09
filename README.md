@@ -481,12 +481,12 @@ The generated resume prompt points the next agent to exact files, the ledger pat
 
 ## Curation Notes
 
-The bundle includes `.agents`, `.codex`, `.github`, curated `.claude`, curated `.omc`, handoff bridge files, token-budget adapter, schemas, and focused tests.
+The bundle includes `.agents`, `.codex`, `.github`, curated `.claude`, handoff bridge files, token-budget adapter, schemas, fixtures, docs, and focused tests.
 
 Excluded on purpose:
 
 - `.claude/worktrees/`
 - `.claude/settings.local.json`
-- generated `.omc` ZIP artifacts
+- historical `.omc` session memory/checkpoints
 - `node_modules/`
 - browser build data files

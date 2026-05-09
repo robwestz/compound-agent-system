@@ -86,6 +86,22 @@ test("package validator fails on stale manifest byte metadata", () => {
   }
 });
 
+test("package validator fails when manifest omits bundled payload files", () => {
+  const dir = cloneRepo();
+  try {
+    const manifestPath = join(dir, "manifest.json");
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf-8"));
+    manifest.system_files = manifest.system_files.filter((item) => item.path !== ".agents/task.mjs");
+    writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n");
+    const r = spawnSync(process.execPath, [join(dir, "plugins", "compound-agent-system", "scripts", "validate-package.mjs")], { cwd: dir, encoding: "utf-8" });
+    assert.notEqual(r.status, 0);
+    assert.match(r.stderr, /manifest\.json is missing system_files entries/);
+    assert.match(r.stderr, /\.agents\/task\.mjs/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("package validator rejects generated event logs in bundled payload", () => {
   const dir = cloneRepo();
   try {

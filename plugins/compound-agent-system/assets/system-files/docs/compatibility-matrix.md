@@ -98,7 +98,7 @@ Before any release, verify:
 - [ ] CI passes on Node 18, 20, and 22.
 - [ ] `node .agents/task.mjs doctor` reports PASS on a clean install.
 - [ ] `node plugins/compound-agent-system/scripts/validate-package.mjs` passes.
-- [ ] The compatibility matrix doc matches the actual CI matrix in `.github/workflows/test.yml`.
+- [ ] The compatibility matrix doc matches the actual CI matrix in the package repository and documented supported Node versions.
 - [ ] No docs or README claim support for environments not listed as "Supported" in this matrix.
 - [ ] `doctor` correctly reports unsupported Node versions (test with `COMPOUND_DOCTOR_NODE_VERSION=v16.20.0`).
 - [ ] Path assumptions are validated by the `compatibility-matrix.test.mjs` test suite.
