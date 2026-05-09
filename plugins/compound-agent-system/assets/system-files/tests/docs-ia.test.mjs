@@ -16,6 +16,9 @@ const intentDocs = [
   "docs/troubleshooting.md",
   "docs/development.md",
   "docs/release.md",
+  "docs/performance-and-scale-limits.md",
+  "docs/marketplace-release-readiness.md",
+  "docs/backward-compatibility-contract.md",
 ];
 
 function read(rel) {
@@ -52,6 +55,9 @@ test("root and bundled intent docs stay mirrored", () => {
     "docs/concepts.md",
     "docs/operations.md",
     "docs/release.md",
+    "docs/performance-and-scale-limits.md",
+    "docs/marketplace-release-readiness.md",
+    "docs/backward-compatibility-contract.md",
     "docs/troubleshooting.md",
     "docs/plugin-size-budget.md",
     "docs/secrets-and-ai-policy.md",
