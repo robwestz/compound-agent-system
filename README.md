@@ -24,6 +24,7 @@ Release-candidate evidence:
 |---|---|---|
 | Install the harness into a repo | [`docs/install.md`](docs/install.md) | [`docs/first-run.md`](docs/first-run.md) |
 | Run the package for the first time | [`docs/first-run.md`](docs/first-run.md) | [`docs/troubleshooting.md`](docs/troubleshooting.md) |
+| Adopt the repo after many premium PRs | [`docs/ADOPTION_MAP.md`](docs/ADOPTION_MAP.md) | [`docs/premium-production/TASK_EVIDENCE_MATRIX.md`](docs/premium-production/TASK_EVIDENCE_MATRIX.md) |
 | Understand the mental model | [`docs/concepts.md`](docs/concepts.md) | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
 | Operate an installed workspace | [`docs/operations.md`](docs/operations.md) | [`docs/troubleshooting.md`](docs/troubleshooting.md) |
 | Debug a failure | [`docs/troubleshooting.md`](docs/troubleshooting.md) | [`docs/operations.md`](docs/operations.md) |
@@ -43,6 +44,7 @@ Release-candidate evidence:
 | Troubleshooting | [`docs/troubleshooting.md`](docs/troubleshooting.md) | Error-to-command recovery table using doctor/readiness/support-bundle. |
 | Development | [`docs/development.md`](docs/development.md) | Local verification, docs mirroring, manifest maintenance, no-runtime-deps rule. |
 | Release | [`docs/release.md`](docs/release.md) | Release gates, compatibility, package validation, marketplace handoff. |
+| Adoption map | [`docs/ADOPTION_MAP.md`](docs/ADOPTION_MAP.md) | Canonical first-use path, Devin/operator guidance, and branch disposition. |
 | Performance limits | [`docs/performance-and-scale-limits.md`](docs/performance-and-scale-limits.md) | Large-ledger benchmarks, thresholds, and known limits. |
 | Marketplace readiness | [`docs/marketplace-release-readiness.md`](docs/marketplace-release-readiness.md) | Dry-run checklist, metadata review, rollback, and support notes. |
 | Backward compatibility | [`docs/backward-compatibility-contract.md`](docs/backward-compatibility-contract.md) | Stable, deprecated, and internal surfaces plus upgrade rules. |
